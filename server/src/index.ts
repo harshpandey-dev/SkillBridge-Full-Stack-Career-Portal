@@ -13,6 +13,7 @@ import applicationRouter from './routes/application.routes';
 import savedJobRouter from './routes/savedJob.routes';
 import studentProfileRouter from './routes/studentProfile.routes';
 import recruiterProfileRouter from './routes/recruiterProfile.routes';
+import profileRouter from './routes/profile.routes';
 import skillRouter from './routes/skill.routes';
 import learningResourceRouter from './routes/learningResource.routes';
 import adminResourceRouter from './routes/adminResource.routes';
@@ -70,6 +71,10 @@ app.use('/api/student', studentProfileRouter);
 // Recruiter profile and dashboard routes
 app.use('/api/v1/recruiter', recruiterProfileRouter);
 app.use('/api/recruiter', recruiterProfileRouter);
+
+// User profile image routes
+app.use('/api/v1/profile', profileRouter);
+app.use('/api/profile', profileRouter);
 
 // Global skills suggestion and search routes
 app.use('/api/v1/skills', skillRouter);
