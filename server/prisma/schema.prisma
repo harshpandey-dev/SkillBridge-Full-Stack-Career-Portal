@@ -294,5 +294,7 @@ model Notification {
 
   @@index([userId])
   @@index([isRead])
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
   @@map("notifications")
 }

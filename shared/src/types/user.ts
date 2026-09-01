@@ -83,6 +83,12 @@ export interface Company {
   updatedAt: string | Date;
 }
 
+export type NotificationType =
+  | 'NEW_APPLICATION'
+  | 'APPLICATION_STATUS_UPDATE'
+  | 'JOB_STATUS_UPDATE'
+  | 'SYSTEM';
+
 export interface Notification {
   id: string;
   userId: string;
@@ -91,4 +97,19 @@ export interface Notification {
   type: string;
   isRead: boolean;
   createdAt: string | Date;
+}
+
+export interface NotificationQuery {
+  page?: number;
+  limit?: number;
+  isRead?: boolean;
+}
+
+export interface NotificationListResponse {
+  items: Notification[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  unreadCount: number;
 }
