@@ -1,5 +1,3 @@
-// Prisma schema for SkillBridge
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,9 +8,15 @@ datasource db {
 }
 
 enum Role {
-  JOB_SEEKER
-  EMPLOYER
+  STUDENT
+  RECRUITER
   ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING
 }
 
 enum JobType {
@@ -23,82 +27,256 @@ enum JobType {
   REMOTE
 }
 
+enum ExperienceLevel {
+  ENTRY_LEVEL
+  MID_LEVEL
+  SENIOR_LEVEL
+  DIRECTOR
+  EXECUTIVE
+}
+
 enum JobStatus {
   OPEN
   CLOSED
   DRAFT
 }
 
-model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  name         String
-  role         Role     @default(JOB_SEEKER)
-  bio          String?
-  avatarUrl    String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+enum ApplicationStatus {
+  APPLIED
+  UNDER_REVIEW
+  SHORTLISTED
+  SELECTED
+  REJECTED
+}
 
-  postedJobs    Job[]
-  applications  Application[]
-  profile       Profile?
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  password     String
+  role         Role       @default(STUDENT)
+  status       UserStatus @default(PENDING)
+  profileImage String?
+  phone        String?
+  location     String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  studentProfile   StudentProfile?
+  recruiterProfile RecruiterProfile?
+  notifications    Notification[]
 
   @@map("users")
 }
 
-model Profile {
-  id         String   @id @default(cuid())
-  userId     String   @unique
-  headline   String?
-  location   String?
-  website    String?
-  resumeUrl  String?
-  skills     String[]
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+model StudentProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  university     String
+  major          String
+  graduationYear Int
+  gpa            Float?
+  bio            String?  @db.Text
+  resumeUrl      String?
+  resumePublicId String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("profiles")
-}
-
-model Job {
-  id          String    @id @default(cuid())
-  title       String
-  company     String
-  location    String
-  type        JobType   @default(FULL_TIME)
-  status      JobStatus @default(DRAFT)
-  description String    @db.Text
-  requirements String[]
-  salaryMin   Int?
-  salaryMax   Int?
-  postedById  String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  postedBy     User          @relation(fields: [postedById], references: [id])
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   applications Application[]
+  savedJobs    SavedJob[]
+  skills       StudentSkill[]
 
-  @@index([status])
-  @@index([postedById])
-  @@map("jobs")
+  @@map("student_profiles")
 }
 
-model Application {
+model RecruiterProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  companyId String?
+  position  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  jobs    Job[]
+
+  @@index([companyId])
+  @@map("recruiter_profiles")
+}
+
+model Company {
   id          String   @id @default(cuid())
-  jobId       String
-  applicantId String
-  coverLetter String?  @db.Text
-  status      String   @default("pending")
+  name        String
+  website     String?
+  description String?  @db.Text
+  size        String?
+  logo        String?
+  location    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  job       Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  applicant User @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  recruiters RecruiterProfile[]
+  jobs       Job[]
 
-  @@unique([jobId, applicantId])
-  @@index([applicantId])
+  @@map("companies")
+}
+
+model Job {
+  id                  String          @id @default(cuid())
+  recruiterId         String
+  companyId           String
+  title               String
+  department          String?
+  description         String          @db.Text
+  responsibilities    String[]
+  requirements        String[]
+  benefits            String[]
+  jobType             JobType         @default(FULL_TIME)
+  experienceLevel     ExperienceLevel @default(ENTRY_LEVEL)
+  location            String
+  isRemote            Boolean         @default(false)
+  salaryMin           Int?
+  salaryMax           Int?
+  applicationDeadline DateTime?
+  status              JobStatus       @default(DRAFT)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  recruiter    RecruiterProfile @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  company      Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  applications Application[]
+  savedJobs    SavedJob[]
+  skills       JobSkill[]
+
+  @@index([recruiterId])
+  @@index([companyId])
+  @@index([status])
+  @@index([jobType])
+  @@index([experienceLevel])
+  @@index([location])
+  @@map("jobs")
+}
+
+model Skill {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  students StudentSkill[]
+  jobs     JobSkill[]
+
+  @@map("skills")
+}
+
+model StudentSkill {
+  id        String   @id @default(cuid())
+  studentId String
+  skillId   String
+  createdAt DateTime @default(now())
+
+  student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  skill   Skill          @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, skillId])
+  @@index([studentId])
+  @@index([skillId])
+  @@map("student_skills")
+}
+
+model JobSkill {
+  id        String   @id @default(cuid())
+  jobId     String
+  skillId   String
+  createdAt DateTime @default(now())
+
+  job   Job   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, skillId])
+  @@index([jobId])
+  @@index([skillId])
+  @@map("job_skills")
+}
+
+model Application {
+  id             String            @id @default(cuid())
+  studentId      String
+  jobId          String
+  coverLetter    String?           @db.Text
+  resumeUrl      String?
+  resumePublicId String?
+  status         ApplicationStatus @default(APPLIED)
+  appliedAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  job     Job            @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, jobId])
+  @@index([studentId])
+  @@index([jobId])
+  @@index([status])
   @@map("applications")
+}
+
+model SavedJob {
+  id        String   @id @default(cuid())
+  studentId String
+  jobId     String
+  createdAt DateTime @default(now())
+
+  student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  job     Job            @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, jobId])
+  @@index([studentId])
+  @@index([jobId])
+  @@map("saved_jobs")
+}
+
+model LearningResource {
+  id          String     @id @default(cuid())
+  title       String
+  provider    String
+  description String?    @db.Text
+  category    String
+  type        String
+  difficulty  Difficulty @default(BEGINNER)
+  duration    String?
+  resourceUrl String
+  thumbnail   String?
+  tags        String[]
+  rating      Float?
+  featured    Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([category])
+  @@index([difficulty])
+  @@index([featured])
+  @@map("learning_resources")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("notifications")
 }
