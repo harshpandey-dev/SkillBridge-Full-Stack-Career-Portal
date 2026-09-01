@@ -117,6 +117,38 @@ export class ApplicationService {
       },
     });
 
+    // Check recruiter notification preference & create notification
+    try {
+      const recruiter = await prisma.recruiterProfile.findUnique({
+        where: { id: job.recruiterId },
+        select: {
+          userId: true,
+          notificationPreferences: {
+            select: {
+              newApplications: true,
+            },
+          },
+        },
+      });
+
+      if (
+        recruiter &&
+        (!recruiter.notificationPreferences ||
+          recruiter.notificationPreferences.newApplications !== false)
+      ) {
+        await prisma.notification.create({
+          data: {
+            userId: recruiter.userId,
+            title: 'New application received',
+            message: `${user.name} applied for ${job.title}.`,
+            type: 'NEW_APPLICATION',
+          },
+        });
+      }
+    } catch (e) {
+      // Don't fail application creation if notification creation fails
+    }
+
     return application;
   }
 
@@ -419,6 +451,7 @@ export class ApplicationService {
         student: {
           select: {
             id: true,
+            userId: true,
             user: {
               select: {
                 id: true,
@@ -430,6 +463,46 @@ export class ApplicationService {
         },
       },
     });
+
+    // Create status update notification for student
+    try {
+      const statusMessages: Record<ApplicationStatus, { title: string; message: string }> = {
+        [ApplicationStatus.UNDER_REVIEW]: {
+          title: 'Application Under Review',
+          message: `Your application for ${application.job.title} is now under review.`,
+        },
+        [ApplicationStatus.SHORTLISTED]: {
+          title: 'Application Shortlisted',
+          message: `Good news! You have been shortlisted for ${application.job.title}.`,
+        },
+        [ApplicationStatus.SELECTED]: {
+          title: 'Application Selected',
+          message: `Congratulations! You have been selected for ${application.job.title}.`,
+        },
+        [ApplicationStatus.REJECTED]: {
+          title: 'Application Update',
+          message: `Your application for ${application.job.title} was not selected.`,
+        },
+        [ApplicationStatus.APPLIED]: {
+          title: 'Application Update',
+          message: `Your application status for ${application.job.title} has been updated.`,
+        },
+      };
+
+      const info = statusMessages[nextStatus];
+      if (info && application.student.userId) {
+        await prisma.notification.create({
+          data: {
+            userId: application.student.userId,
+            title: info.title,
+            message: info.message,
+            type: 'APPLICATION_STATUS_UPDATE',
+          },
+        });
+      }
+    } catch (e) {
+      // Don't fail status update if notification fails
+    }
 
     return updated;
   }

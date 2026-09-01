@@ -16,6 +16,7 @@ import recruiterProfileRouter from './routes/recruiterProfile.routes';
 import skillRouter from './routes/skill.routes';
 import learningResourceRouter from './routes/learningResource.routes';
 import adminResourceRouter from './routes/adminResource.routes';
+import notificationRouter from './routes/notification.routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { logger } from './lib/logger';
 
@@ -72,6 +73,10 @@ app.use('/api/recruiter', recruiterProfileRouter);
 // Global skills suggestion and search routes
 app.use('/api/v1/skills', skillRouter);
 app.use('/api/skills', skillRouter);
+
+// Notification routes
+app.use('/api/v1/notifications', notificationRouter);
+app.use('/api/notifications', notificationRouter);
 
 // Learning Resources routes (Public & Admin)
 app.use('/api/v1/resources', learningResourceRouter);
