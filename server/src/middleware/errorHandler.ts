@@ -1,33 +1,56 @@
 import { Request, Response, NextFunction } from 'express';
+import { ZodError } from 'zod';
+import { AppError } from '../lib/errors';
 import { logger } from '../lib/logger';
 
-export interface AppError extends Error {
-  statusCode?: number;
-  isOperational?: boolean;
-}
-
-// Central error handler — placed last in the middleware chain
+// Central error handler
 export function errorHandler(
-  err: AppError,
+  err: Error | AppError | ZodError,
   _req: Request,
   res: Response,
   _next: NextFunction
 ): void {
-  const statusCode = err.statusCode ?? 500;
-  const message = err.isOperational ? err.message : 'Internal server error';
+  // Handle Zod validation errors
+  if (err instanceof ZodError) {
+    const formattedErrors = err.issues.map(issue => ({
+      field: issue.path.join('.'),
+      message: issue.message,
+    }));
 
-  if (statusCode >= 500) {
-    logger.error(err.stack ?? err.message);
+    res.status(400).json({
+      success: false,
+      error: 'Validation failed',
+      errors: formattedErrors,
+      statusCode: 400,
+    });
+    return;
   }
 
-  res.status(statusCode).json({
+  // Handle known AppErrors
+  if (err instanceof AppError) {
+    if (err.statusCode >= 500) {
+      logger.error(err.stack ?? err.message);
+    }
+
+    res.status(err.statusCode).json({
+      success: false,
+      error: err.message,
+      ...(err.errors ? { errors: err.errors } : {}),
+      statusCode: err.statusCode,
+    });
+    return;
+  }
+
+  // Unhandled / unexpected errors
+  logger.error(err.stack ?? err.message);
+  res.status(500).json({
     success: false,
-    error: message,
-    statusCode,
+    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
+    statusCode: 500,
   });
 }
 
-// Wraps 404s for unknown routes
+// 404 handler for unknown routes
 export function notFoundHandler(req: Request, res: Response): void {
   res.status(404).json({
     success: false,
