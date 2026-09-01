@@ -9,6 +9,7 @@ import 'dotenv/config';
 
 import authRouter from './routes/auth.routes';
 import jobRouter from './routes/job.routes';
+import applicationRouter from './routes/application.routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { logger } from './lib/logger';
 
@@ -54,9 +55,13 @@ app.get('/health', (_req, res) => {
 app.use('/api/v1/auth', authRouter);
 app.use('/api/auth', authRouter);
 
-// Job management and browsing routes
+// Job routes
 app.use('/api/v1/jobs', jobRouter);
 app.use('/api/jobs', jobRouter);
+
+// Application routes
+app.use('/api/v1/applications', applicationRouter);
+app.use('/api/applications', applicationRouter);
 
 // 404 and central error handling
 app.use(notFoundHandler);

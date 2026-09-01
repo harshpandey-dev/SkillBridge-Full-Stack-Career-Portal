@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { Role } from '@prisma/client';
 import { JobController } from '../controllers/job.controller';
+import { ApplicationController } from '../controllers/application.controller';
 import { authenticate, optionalAuthenticate, authorize } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -16,5 +17,19 @@ router.patch('/:jobId', authenticate, authorize(Role.RECRUITER, Role.ADMIN), Job
 router.patch('/:jobId/close', authenticate, authorize(Role.RECRUITER, Role.ADMIN), JobController.closeJob);
 router.patch('/:jobId/reopen', authenticate, authorize(Role.RECRUITER, Role.ADMIN), JobController.reopenJob);
 router.delete('/:jobId', authenticate, authorize(Role.RECRUITER, Role.ADMIN), JobController.deleteJob);
+
+// Job Application subroutes
+router.post(
+  '/:jobId/applications',
+  authenticate,
+  authorize(Role.STUDENT),
+  ApplicationController.applyForJob
+);
+router.get(
+  '/:jobId/applications',
+  authenticate,
+  authorize(Role.RECRUITER, Role.ADMIN),
+  ApplicationController.getJobApplicants
+);
 
 export default router;
