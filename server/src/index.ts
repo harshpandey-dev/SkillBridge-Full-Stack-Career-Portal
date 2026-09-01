@@ -8,6 +8,7 @@ import 'express-async-errors';
 import 'dotenv/config';
 
 import authRouter from './routes/auth.routes';
+import jobRouter from './routes/job.routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { logger } from './lib/logger';
 
@@ -49,9 +50,13 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Authentication routes (mounted on /api/v1/auth and /api/auth for flexibility)
+// Authentication routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/auth', authRouter);
+
+// Job management and browsing routes
+app.use('/api/v1/jobs', jobRouter);
+app.use('/api/jobs', jobRouter);
 
 // 404 and central error handling
 app.use(notFoundHandler);

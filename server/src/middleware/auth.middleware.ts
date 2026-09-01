@@ -82,6 +82,77 @@ export async function authenticate(
   next();
 }
 
+// Optional authentication middleware — attaches user if valid token exists, proceeds as guest otherwise
+export async function optionalAuthenticate(
+  req: Request,
+  _res: Response,
+  next: NextFunction
+): Promise<void> {
+  let token: string | undefined;
+
+  if (req.cookies && req.cookies[AUTH_COOKIE_NAME]) {
+    token = req.cookies[AUTH_COOKIE_NAME];
+  } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    token = req.headers.authorization.substring(7);
+  }
+
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const payload = verifyToken(token);
+    const user = await prisma.user.findUnique({
+      where: { id: payload.userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        status: true,
+        profileImage: true,
+        phone: true,
+        location: true,
+        studentProfile: {
+          select: {
+            id: true,
+            university: true,
+            major: true,
+            graduationYear: true,
+            gpa: true,
+            bio: true,
+            resumeUrl: true,
+            resumePublicId: true,
+          },
+        },
+        recruiterProfile: {
+          select: {
+            id: true,
+            companyId: true,
+            position: true,
+            company: {
+              select: {
+                id: true,
+                name: true,
+                website: true,
+                logo: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (user && user.status !== UserStatus.SUSPENDED) {
+      req.user = user;
+    }
+  } catch {
+    // If token invalid, proceed as guest
+  }
+
+  next();
+}
+
 // Role-based authorization middleware
 export function authorize(...roles: Role[]) {
   return (req: Request, _res: Response, next: NextFunction): void => {
