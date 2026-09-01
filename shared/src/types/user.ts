@@ -8,6 +8,7 @@ export interface User {
   role: UserRole;
   status: UserStatus;
   profileImage?: string | null;
+  profileImagePublicId?: string | null;
   phone?: string | null;
   location?: string | null;
   createdAt: string | Date;
@@ -78,6 +79,7 @@ export interface Company {
   description?: string | null;
   size?: string | null;
   logo?: string | null;
+  logoPublicId?: string | null;
   location?: string | null;
   createdAt: string | Date;
   updatedAt: string | Date;
@@ -112,4 +114,19 @@ export interface NotificationListResponse {
   pageSize: number;
   totalPages: number;
   unreadCount: number;
+}
+
+export interface ResumeUploadResponse {
+  resumeUrl: string;
+  resumePublicId: string;
+}
+
+export interface ProfileImageUploadResponse {
+  profileImage: string;
+  profileImagePublicId: string;
+}
+
+export interface CompanyLogoUploadResponse {
+  logo: string;
+  logoPublicId: string;
 }

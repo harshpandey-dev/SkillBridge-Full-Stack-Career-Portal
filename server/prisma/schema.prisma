@@ -56,17 +56,18 @@ enum Difficulty {
 }
 
 model User {
-  id           String     @id @default(cuid())
-  name         String
-  email        String     @unique
-  password     String
-  role         Role       @default(STUDENT)
-  status       UserStatus @default(PENDING)
-  profileImage String?
-  phone        String?
-  location     String?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id                   String     @id @default(cuid())
+  name                 String
+  email                String     @unique
+  password             String
+  role                 Role       @default(STUDENT)
+  status               UserStatus @default(PENDING)
+  profileImage         String?
+  profileImagePublicId String?
+  phone                String?
+  location             String?
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
 
   studentProfile   StudentProfile?
   recruiterProfile RecruiterProfile?
@@ -129,15 +130,16 @@ model RecruiterNotificationPreference {
 }
 
 model Company {
-  id          String   @id @default(cuid())
-  name        String
-  website     String?
-  description String?  @db.Text
-  size        String?
-  logo        String?
-  location    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  name         String
+  website      String?
+  description  String?  @db.Text
+  size         String?
+  logo         String?
+  logoPublicId String?
+  location     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   recruiters RecruiterProfile[]
   jobs       Job[]
