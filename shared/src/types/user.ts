@@ -45,6 +45,32 @@ export interface RecruiterProfile {
   updatedAt: string | Date;
 }
 
+export interface RecruiterNotificationPreference {
+  id: string;
+  recruiterId: string;
+  newApplications: boolean;
+  applicationUpdates: boolean;
+  jobPerformanceUpdates: boolean;
+  platformAnnouncements: boolean;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+}
+
+export interface RecruiterStats {
+  activeJobs: number;
+  totalApplicants: number;
+  shortlistedCandidates: number;
+  selectedCandidates: number;
+}
+
+export interface RecruiterJobSummary {
+  openJobs: number;
+  closedJobs: number;
+  draftJobs: number;
+  totalJobs: number;
+  totalApplications: number;
+}
+
 export interface Company {
   id: string;
   name: string;
