@@ -17,6 +17,7 @@ import skillRouter from './routes/skill.routes';
 import learningResourceRouter from './routes/learningResource.routes';
 import adminResourceRouter from './routes/adminResource.routes';
 import notificationRouter from './routes/notification.routes';
+import adminRouter from './routes/admin.routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { logger } from './lib/logger';
 
@@ -83,6 +84,10 @@ app.use('/api/v1/resources', learningResourceRouter);
 app.use('/api/resources', learningResourceRouter);
 app.use('/api/v1/admin/resources', adminResourceRouter);
 app.use('/api/admin/resources', adminResourceRouter);
+
+// Admin Management and Platform Dashboard routes
+app.use('/api/v1/admin', adminRouter);
+app.use('/api/admin', adminRouter);
 
 // Job routes
 app.use('/api/v1/jobs', jobRouter);
