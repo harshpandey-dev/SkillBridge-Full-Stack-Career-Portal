@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { Role } from '@prisma/client';
 import { JobController } from '../controllers/job.controller';
 import { ApplicationController } from '../controllers/application.controller';
+import { SavedJobController } from '../controllers/savedJob.controller';
 import { authenticate, optionalAuthenticate, authorize } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -30,6 +31,26 @@ router.get(
   authenticate,
   authorize(Role.RECRUITER, Role.ADMIN),
   ApplicationController.getJobApplicants
+);
+
+// Saved Job subroutes (Student only)
+router.post(
+  '/:jobId/save',
+  authenticate,
+  authorize(Role.STUDENT),
+  SavedJobController.saveJob
+);
+router.delete(
+  '/:jobId/save',
+  authenticate,
+  authorize(Role.STUDENT),
+  SavedJobController.removeSavedJob
+);
+router.get(
+  '/:jobId/save-status',
+  authenticate,
+  authorize(Role.STUDENT),
+  SavedJobController.checkSaveStatus
 );
 
 export default router;

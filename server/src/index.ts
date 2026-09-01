@@ -10,6 +10,7 @@ import 'dotenv/config';
 import authRouter from './routes/auth.routes';
 import jobRouter from './routes/job.routes';
 import applicationRouter from './routes/application.routes';
+import savedJobRouter from './routes/savedJob.routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { logger } from './lib/logger';
 
@@ -62,6 +63,10 @@ app.use('/api/jobs', jobRouter);
 // Application routes
 app.use('/api/v1/applications', applicationRouter);
 app.use('/api/applications', applicationRouter);
+
+// Saved jobs routes
+app.use('/api/v1/saved-jobs', savedJobRouter);
+app.use('/api/saved-jobs', savedJobRouter);
 
 // 404 and central error handling
 app.use(notFoundHandler);
