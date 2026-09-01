@@ -11,6 +11,8 @@ import authRouter from './routes/auth.routes';
 import jobRouter from './routes/job.routes';
 import applicationRouter from './routes/application.routes';
 import savedJobRouter from './routes/savedJob.routes';
+import studentProfileRouter from './routes/studentProfile.routes';
+import skillRouter from './routes/skill.routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { logger } from './lib/logger';
 
@@ -55,6 +57,14 @@ app.get('/health', (_req, res) => {
 // Authentication routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/auth', authRouter);
+
+// Student profile and skills routes
+app.use('/api/v1/student', studentProfileRouter);
+app.use('/api/student', studentProfileRouter);
+
+// Global skills suggestion and search routes
+app.use('/api/v1/skills', skillRouter);
+app.use('/api/skills', skillRouter);
 
 // Job routes
 app.use('/api/v1/jobs', jobRouter);
