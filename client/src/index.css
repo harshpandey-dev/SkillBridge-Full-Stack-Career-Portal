@@ -1,3 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --color-navy: #163A5F;
+  --color-navy-dark: #0F2A45;
+  --color-navy-light: #1E4A75;
+  --color-brand: #2563EB;
+  --color-brand-dark: #1D4ED8;
+  --color-brand-light: #EFF6FF;
+  --color-brand-border: #BFDBFE;
+  --color-teal: #0F9D8A;
+  --color-teal-dark: #0B7A6E;
+  --color-teal-light: #E6F7F5;
+  --color-page: #F7F8FA;
+  --color-white: #FFFFFF;
+  --color-ink: #172033;
+  --color-dim: #667085;
+  --color-line: #E4E7EC;
+  --color-subtle: #F2F4F7;
+  --color-error: #DC2626;
+  --color-error-light: #FEF2F2;
+  --color-warning: #D97706;
+  --color-warning-light: #FFFBEB;
+  --color-success: #059669;
+  --color-success-light: #ECFDF5;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-page);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #E4E7EC transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #E4E7EC;
+  border-radius: 3px;
+}

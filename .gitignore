@@ -40,3 +40,11 @@ Thumbs.db
 # Prisma local database
 prisma/*.db
 prisma/*.db-journal
+
+# MCP Configuration & Secrets
+mcp_config.json
+.agents/**/mcp_config.json
+
+# Local Design / Raw Exports
+SkillBridge UI_UX Design/
+

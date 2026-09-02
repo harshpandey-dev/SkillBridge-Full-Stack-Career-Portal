@@ -1,0 +1,222 @@
+import { MY_APPLICATIONS, JOBS, CHART_DATA } from '../../mockData'
+import type { NavUser } from '../../types'
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+} from 'recharts'
+import { BriefcaseIcon, CheckIcon, TrendingUpIcon, EyeIcon, ChevronRightIcon } from '../../components/icons'
+
+const TrendingUpIconLocal = TrendingUpIcon
+
+const STATUS_COLORS: Record<string, string> = {
+  Applied: 'bg-[#EFF6FF] text-[#2563EB]',
+  'Under Review': 'bg-[#FFFBEB] text-[#D97706]',
+  Shortlisted: 'bg-[#E6F7F5] text-[#0F9D8A]',
+  Rejected: 'bg-[#FEF2F2] text-[#DC2626]',
+  Selected: 'bg-[#ECFDF5] text-[#059669]',
+}
+
+interface Props {
+  user: NavUser
+  navigate: (page: string, jobId?: string) => void
+}
+
+export default function StudentDashboard({ user, navigate }: Props) {
+  const recent = MY_APPLICATIONS.slice(0, 4)
+  const latestJobs = JOBS.slice(0, 4)
+  const stats = {
+    total: MY_APPLICATIONS.length,
+    shortlisted: MY_APPLICATIONS.filter(a => a.status === 'Shortlisted').length,
+    selected: MY_APPLICATIONS.filter(a => a.status === 'Selected').length,
+    saved: 4,
+  }
+
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+
+  return (
+    <div className="space-y-6 max-w-[1200px]">
+      {/* Welcome */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[#172033]">Good morning, {user.name.split(' ')[0]} 👋</h1>
+          <p className="text-sm text-[#667085] mt-0.5">{today}</p>
+        </div>
+        <button
+          onClick={() => navigate('opportunities')}
+          className="bg-[#2563EB] text-white px-4 py-2 rounded text-sm font-semibold hover:bg-[#1D4ED8] transition-colors shrink-0"
+        >
+          Browse jobs
+        </button>
+      </div>
+
+      {/* Profile completion */}
+      <div className="bg-[#EFF6FF] border border-[#BFDBFE] rounded-lg p-4 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-[#163A5F] flex items-center justify-center text-white font-bold text-sm">{user.name.split(' ').map(n => n[0]).join('')}</div>
+          <div>
+            <p className="text-sm font-semibold text-[#172033]">Complete your profile to increase visibility</p>
+            <p className="text-xs text-[#667085] mt-0.5">Recruiters with complete profiles get 3× more views</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="flex flex-col items-end">
+            <span className="text-sm font-bold text-[#2563EB]">78%</span>
+            <div className="w-28 h-1.5 bg-[#BFDBFE] rounded-full mt-1">
+              <div className="h-1.5 bg-[#2563EB] rounded-full" style={{ width: '78%' }} />
+            </div>
+          </div>
+          <button
+            onClick={() => navigate('student-profile')}
+            className="text-xs font-medium text-[#2563EB] border border-[#2563EB] px-3 py-1.5 rounded hover:bg-[#2563EB] hover:text-white transition-colors"
+          >
+            Complete profile
+          </button>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: 'Total applications', value: stats.total, icon: BriefcaseIcon, color: 'bg-[#EFF6FF] text-[#2563EB]', trend: '+3 this week' },
+          { label: 'Shortlisted', value: stats.shortlisted, icon: CheckIcon, color: 'bg-[#E6F7F5] text-[#0F9D8A]', trend: 'Active' },
+          { label: 'Offers received', value: stats.selected, icon: TrendingUpIconLocal, color: 'bg-[#ECFDF5] text-[#059669]', trend: 'Congratulations!' },
+          { label: 'Saved jobs', value: stats.saved, icon: EyeIcon, color: 'bg-[#F2F4F7] text-[#667085]', trend: 'View saved' },
+        ].map(({ label, value, icon: Icon, color, trend }) => (
+          <div key={label} className="bg-white border border-[#E4E7EC] rounded-lg p-5">
+            <div className={`w-9 h-9 rounded flex items-center justify-center mb-3 ${color}`}>
+              <Icon size={17} />
+            </div>
+            <div className="text-2xl font-bold text-[#172033]">{value}</div>
+            <div className="text-sm text-[#667085] mt-0.5">{label}</div>
+            <div className="text-xs text-[#94A3B8] mt-2">{trend}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Chart */}
+        <div className="lg:col-span-2 bg-white border border-[#E4E7EC] rounded-lg p-5">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="text-base font-semibold text-[#172033]">Application activity</h2>
+              <p className="text-xs text-[#667085] mt-0.5">Last 6 months</p>
+            </div>
+            <select className="text-xs text-[#667085] border border-[#E4E7EC] rounded px-2 py-1 bg-white outline-none">
+              <option>Last 6 months</option>
+              <option>Last 3 months</option>
+            </select>
+          </div>
+          <ResponsiveContainer width="100%" height={200}>
+            <AreaChart data={CHART_DATA.applicationTrend} margin={{ top: 0, right: 4, bottom: 0, left: -20 }}>
+              <defs>
+                <linearGradient id="colorApplied" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#2563EB" stopOpacity={0.12} />
+                  <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="colorReviews" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#0F9D8A" stopOpacity={0.12} />
+                  <stop offset="95%" stopColor="#0F9D8A" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#F2F4F7" />
+              <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#667085' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: '#667085' }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ border: '1px solid #E4E7EC', borderRadius: '6px', fontSize: '12px' }} />
+              <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px', paddingTop: '8px' }} />
+              <Area type="monotone" dataKey="applied" name="Applied" stroke="#2563EB" strokeWidth={2} fill="url(#colorApplied)" dot={false} />
+              <Area type="monotone" dataKey="reviews" name="In review" stroke="#0F9D8A" strokeWidth={2} fill="url(#colorReviews)" dot={false} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Quick stats */}
+        <div className="bg-white border border-[#E4E7EC] rounded-lg p-5">
+          <h2 className="text-base font-semibold text-[#172033] mb-4">Application breakdown</h2>
+          {[
+            { label: 'Applied', count: 3, pct: 50, color: '#2563EB' },
+            { label: 'Under Review', count: 1, pct: 16, color: '#D97706' },
+            { label: 'Shortlisted', count: 1, pct: 17, color: '#0F9D8A' },
+            { label: 'Rejected', count: 1, pct: 17, color: '#DC2626' },
+          ].map(({ label, count, pct, color }) => (
+            <div key={label} className="mb-3">
+              <div className="flex items-center justify-between text-sm mb-1">
+                <span className="text-[#667085]">{label}</span>
+                <span className="font-semibold text-[#172033]">{count}</span>
+              </div>
+              <div className="h-1.5 bg-[#F2F4F7] rounded-full">
+                <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: color }} />
+              </div>
+            </div>
+          ))}
+          <div className="border-t border-[#F2F4F7] pt-3 mt-4">
+            <p className="text-xs text-[#667085]">Response rate</p>
+            <p className="text-xl font-bold text-[#172033] mt-0.5">66.7%</p>
+            <p className="text-xs text-[#0F9D8A]">↑ Above average for your field</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Recent applications */}
+        <div className="bg-white border border-[#E4E7EC] rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[#F2F4F7]">
+            <h2 className="text-base font-semibold text-[#172033]">Recent applications</h2>
+            <button onClick={() => navigate('applications')} className="text-xs text-[#2563EB] hover:underline flex items-center gap-1">
+              View all <ChevronRightIcon size={13} />
+            </button>
+          </div>
+          <div>
+            {recent.map((app, i) => (
+              <div key={app.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < recent.length - 1 ? 'border-b border-[#F2F4F7]' : ''}`}>
+                <div
+                  className="w-9 h-9 rounded flex items-center justify-center text-white font-bold text-sm shrink-0"
+                  style={{ backgroundColor: app.companyColor }}
+                >
+                  {app.company[0]}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-[#172033] truncate">{app.jobTitle}</p>
+                  <p className="text-xs text-[#667085]">{app.company} · {app.appliedDate}</p>
+                </div>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${STATUS_COLORS[app.status]}`}>
+                  {app.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Latest jobs */}
+        <div className="bg-white border border-[#E4E7EC] rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[#F2F4F7]">
+            <h2 className="text-base font-semibold text-[#172033]">Jobs for you</h2>
+            <button onClick={() => navigate('opportunities')} className="text-xs text-[#2563EB] hover:underline flex items-center gap-1">
+              View all <ChevronRightIcon size={13} />
+            </button>
+          </div>
+          <div>
+            {latestJobs.map((job, i) => (
+              <div key={job.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < latestJobs.length - 1 ? 'border-b border-[#F2F4F7]' : ''}`}>
+                <div
+                  className="w-9 h-9 rounded flex items-center justify-center text-white font-bold text-sm shrink-0"
+                  style={{ backgroundColor: job.companyColor }}
+                >
+                  {job.company[0]}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-[#172033] truncate">{job.title}</p>
+                  <p className="text-xs text-[#667085]">{job.company} · {job.salary}</p>
+                </div>
+                <button
+                  onClick={() => navigate('job-details', job.id)}
+                  className="text-xs font-medium text-[#2563EB] hover:text-[#1D4ED8] shrink-0 transition-colors"
+                >
+                  View →
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
