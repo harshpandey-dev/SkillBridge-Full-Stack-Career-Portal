@@ -6,6 +6,7 @@ import {
 } from '../../components/icons'
 import { jobService } from '../../services/job.service'
 import { applicationService } from '../../services/application.service'
+import { savedJobService } from '../../services/savedJob.service'
 import { useAuth } from '../../context/AuthContext'
 import { getApiErrorMessage } from '../../lib/api'
 
@@ -57,12 +58,16 @@ export default function JobDetails({ jobId, navigate }: Props) {
         setJob(fetchedJob)
         setOtherJobs(listResult.jobs.filter(j => j.id !== jobId).slice(0, 3))
 
-        // Check if current student user already applied for this job
+        // Check if current student user already applied or saved this job
         if (user && role === 'student') {
           try {
-            const myApps = await applicationService.getMyApplications({ limit: 50 })
+            const [myApps, isSaved] = await Promise.all([
+              applicationService.getMyApplications({ limit: 50 }).catch(() => ({ items: [] })),
+              savedJobService.checkSaveStatus(jobId).catch(() => false),
+            ])
             const alreadyApplied = myApps.items.some(a => a.jobId === jobId)
             if (alreadyApplied) setApplied(true)
+            setSaved(isSaved)
           } catch {
             // Ignore error checking status
           }
@@ -77,6 +82,31 @@ export default function JobDetails({ jobId, navigate }: Props) {
 
     loadJobDetails()
   }, [jobId, user, role])
+
+  const handleToggleSave = async () => {
+    if (!job) return
+    if (!user) {
+      navigate('login')
+      return
+    }
+    if (role !== 'student') {
+      alert('Only student accounts can save jobs.')
+      return
+    }
+
+    const previousState = saved
+    setSaved(!previousState)
+    try {
+      if (previousState) {
+        await savedJobService.removeSavedJob(job.id)
+      } else {
+        await savedJobService.saveJob(job.id)
+      }
+    } catch {
+      // Rollback on failure
+      setSaved(previousState)
+    }
+  }
 
   const handleOpenApplyModal = () => {
     if (!user) {
@@ -222,7 +252,7 @@ export default function JobDetails({ jobId, navigate }: Props) {
                   </button>
                 )}
                 <button
-                  onClick={() => setSaved(!saved)}
+                  onClick={handleToggleSave}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded text-sm font-medium border transition-colors ${
                     saved
                       ? 'bg-[#EFF6FF] text-[#2563EB] border-[#2563EB]'

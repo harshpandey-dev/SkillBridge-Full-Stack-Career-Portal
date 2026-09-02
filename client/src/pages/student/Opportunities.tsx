@@ -3,6 +3,7 @@ import type { Job } from '../../types'
 import { SearchIcon, MapPinIcon, BookmarkIcon, BookmarkFilledIcon } from '../../components/icons'
 import { jobService, formatUIToBackendJobType } from '../../services/job.service'
 import { applicationService } from '../../services/application.service'
+import { savedJobService } from '../../services/savedJob.service'
 import { useAuth } from '../../context/AuthContext'
 import { getApiErrorMessage } from '../../lib/api'
 
@@ -70,20 +71,55 @@ export default function Opportunities({ navigate }: Props) {
     fetchJobs()
   }, [fetchJobs])
 
-  // Load existing student applications to reflect applied states
+  // Load existing student applications and saved jobs
   useEffect(() => {
-    async function loadAppliedJobs() {
+    async function loadStudentJobStates() {
       if (user && role === 'student') {
         try {
-          const res = await applicationService.getMyApplications({ limit: 50 })
-          setApplied(res.items.map(a => a.jobId))
+          const [appsRes, savedRes] = await Promise.all([
+            applicationService.getMyApplications({ limit: 50 }).catch(() => ({ items: [] })),
+            savedJobService.getMySavedJobs({ limit: 100 }).catch(() => ({ jobs: [] })),
+          ])
+          setApplied(appsRes.items.map(a => a.jobId))
+          setSaved(savedRes.jobs.map(j => j.id))
         } catch {
           // Ignore
         }
+      } else {
+        setSaved([])
+        setApplied([])
       }
     }
-    loadAppliedJobs()
+    loadStudentJobStates()
   }, [user, role])
+
+  const handleToggleSave = async (jobId: string) => {
+    if (!user) {
+      navigate('login')
+      return
+    }
+    if (role !== 'student') {
+      alert('Only students can bookmark jobs.')
+      return
+    }
+
+    const isCurrentlySaved = saved.includes(jobId)
+    if (isCurrentlySaved) {
+      setSaved(prev => prev.filter(id => id !== jobId))
+      try {
+        await savedJobService.removeSavedJob(jobId)
+      } catch {
+        setSaved(prev => [...prev, jobId])
+      }
+    } else {
+      setSaved(prev => [...prev, jobId])
+      try {
+        await savedJobService.saveJob(jobId)
+      } catch {
+        setSaved(prev => prev.filter(id => id !== jobId))
+      }
+    }
+  }
 
   const handleApply = async (jobId: string) => {
     if (!user) {
@@ -247,8 +283,9 @@ export default function Opportunities({ navigate }: Props) {
                           <p className="text-sm text-[#667085] mt-0.5">{job.company} · {job.department}</p>
                         </div>
                         <button
-                          onClick={() => setSaved(prev => prev.includes(job.id) ? prev.filter(id => id !== job.id) : [...prev, job.id])}
+                          onClick={() => handleToggleSave(job.id)}
                           className={`p-1.5 rounded shrink-0 transition-colors ${saved.includes(job.id) ? 'text-[#2563EB]' : 'text-[#94A3B8] hover:text-[#667085]'}`}
+                          title={saved.includes(job.id) ? 'Remove bookmark' : 'Bookmark job'}
                         >
                           {saved.includes(job.id) ? <BookmarkFilledIcon size={16} /> : <BookmarkIcon size={16} />}
                         </button>

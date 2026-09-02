@@ -1,36 +1,127 @@
-import { useState } from 'react'
-import { SAVED_JOBS } from '../../mockData'
+import { useState, useEffect, useCallback } from 'react'
+import type { Job } from '../../types'
 import { MapPinIcon, XIcon } from '../../components/icons'
+import { savedJobService } from '../../services/savedJob.service'
+import { applicationService } from '../../services/application.service'
+import { getApiErrorMessage } from '../../lib/api'
 
 interface Props {
   navigate: (page: string, jobId?: string) => void
 }
 
 export default function SavedJobs({ navigate }: Props) {
-  const [saved, setSaved] = useState(SAVED_JOBS.map(j => j.id))
+  const [jobs, setJobs] = useState<Job[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [applied, setApplied] = useState<string[]>([])
+  const [removingId, setRemovingId] = useState<string | null>(null)
+  const [applyingId, setApplyingId] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
 
-  const visibleJobs = SAVED_JOBS.filter(j => saved.includes(j.id))
+  const loadSavedJobs = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const [savedRes, appsRes] = await Promise.all([
+        savedJobService.getMySavedJobs({ limit: 50 }),
+        applicationService.getMyApplications({ limit: 50 }).catch(() => ({ items: [] })),
+      ])
+      setJobs(savedRes.jobs)
+      setApplied(appsRes.items.map(a => a.jobId))
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Failed to load saved jobs.'))
+      setJobs([])
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadSavedJobs()
+  }, [loadSavedJobs])
+
+  const handleRemove = async (jobId: string) => {
+    const originalJobs = [...jobs]
+    try {
+      setRemovingId(jobId)
+      setActionError(null)
+      // Optimistic update
+      setJobs(prev => prev.filter(j => j.id !== jobId))
+      await savedJobService.removeSavedJob(jobId)
+    } catch (err: unknown) {
+      // Rollback on failure
+      setJobs(originalJobs)
+      setActionError(getApiErrorMessage(err, 'Failed to remove saved job.'))
+    } finally {
+      setRemovingId(null)
+    }
+  }
+
+  const handleApply = async (jobId: string) => {
+    try {
+      setApplyingId(jobId)
+      setActionError(null)
+      await applicationService.applyForJob(jobId)
+      setApplied(prev => (prev.includes(jobId) ? prev : [...prev, jobId]))
+    } catch (err: unknown) {
+      setActionError(getApiErrorMessage(err, 'Failed to apply for job.'))
+    } finally {
+      setApplyingId(null)
+    }
+  }
 
   return (
     <div className="space-y-5 max-w-[1200px]">
       <div>
         <h1 className="text-2xl font-bold text-[#172033]">Saved Jobs</h1>
-        <p className="text-sm text-[#667085] mt-0.5">{visibleJobs.length} jobs saved · review and apply when ready</p>
+        <p className="text-sm text-[#667085] mt-0.5">
+          {jobs.length} {jobs.length === 1 ? 'job' : 'jobs'} saved · review and apply when ready
+        </p>
       </div>
 
-      {visibleJobs.length === 0 ? (
+      {actionError && (
+        <div className="bg-[#FEF2F2] border border-[#FECACA] rounded p-3 text-sm text-[#DC2626] flex justify-between items-center">
+          <span>{actionError}</span>
+          <button onClick={() => setActionError(null)} className="text-xs text-[#DC2626] underline">Dismiss</button>
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-[#FEF2F2] border border-[#FECACA] rounded p-4 text-sm text-[#DC2626]">
+          {error}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map(n => (
+            <div key={n} className="bg-white border border-[#E4E7EC] rounded-lg p-5 animate-pulse">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-[#F2F4F7] rounded shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-[#F2F4F7] rounded w-1/3" />
+                  <div className="h-3 bg-[#F2F4F7] rounded w-1/4" />
+                  <div className="h-3 bg-[#F2F4F7] rounded w-1/2 mt-2" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : jobs.length === 0 ? (
         <div className="bg-white border border-[#E4E7EC] rounded-lg p-16 text-center">
           <div className="text-4xl mb-4">🔖</div>
           <h3 className="text-base font-semibold text-[#172033] mb-1">No saved jobs yet</h3>
           <p className="text-sm text-[#667085] mb-4">Save jobs while browsing to review them later.</p>
-          <button onClick={() => navigate('opportunities')} className="bg-[#2563EB] text-white px-5 py-2.5 rounded text-sm font-semibold hover:bg-[#1D4ED8] transition-colors">
+          <button
+            onClick={() => navigate('opportunities')}
+            className="bg-[#2563EB] text-white px-5 py-2.5 rounded text-sm font-semibold hover:bg-[#1D4ED8] transition-colors"
+          >
             Browse opportunities
           </button>
         </div>
       ) : (
         <div className="space-y-3">
-          {visibleJobs.map(job => (
+          {jobs.map(job => (
             <div key={job.id} className="bg-white border border-[#E4E7EC] rounded-lg p-5 flex items-start gap-4">
               <div
                 className="w-12 h-12 rounded flex items-center justify-center text-white font-bold text-base shrink-0"
@@ -43,15 +134,16 @@ export default function SavedJobs({ navigate }: Props) {
                   <div>
                     <button
                       onClick={() => navigate('job-details', job.id)}
-                      className="font-semibold text-[#172033] hover:text-[#2563EB] transition-colors text-[15px]"
+                      className="font-semibold text-[#172033] hover:text-[#2563EB] transition-colors text-[15px] text-left"
                     >
                       {job.title}
                     </button>
                     <p className="text-sm text-[#667085] mt-0.5">{job.company} · {job.department}</p>
                   </div>
                   <button
-                    onClick={() => setSaved(prev => prev.filter(id => id !== job.id))}
-                    className="text-[#667085] hover:text-[#DC2626] transition-colors p-1 shrink-0"
+                    disabled={removingId === job.id}
+                    onClick={() => handleRemove(job.id)}
+                    className="text-[#667085] hover:text-[#DC2626] transition-colors p-1 shrink-0 disabled:opacity-40"
                     title="Remove from saved"
                   >
                     <XIcon size={15} />
@@ -80,10 +172,11 @@ export default function SavedJobs({ navigate }: Props) {
                       <span className="text-xs font-medium bg-[#E6F7F5] text-[#0F9D8A] px-3 py-1.5 rounded">Applied ✓</span>
                     ) : (
                       <button
-                        onClick={() => setApplied(prev => [...prev, job.id])}
-                        className="text-xs font-semibold bg-[#2563EB] text-white px-4 py-1.5 rounded hover:bg-[#1D4ED8] transition-colors"
+                        disabled={applyingId === job.id}
+                        onClick={() => handleApply(job.id)}
+                        className="text-xs font-semibold bg-[#2563EB] text-white px-4 py-1.5 rounded hover:bg-[#1D4ED8] disabled:opacity-60 transition-colors"
                       >
-                        Apply now
+                        {applyingId === job.id ? 'Applying…' : 'Apply now'}
                       </button>
                     )}
                     <button

@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Job } from '../../types'
-import { SearchIcon, MapPinIcon, ChevronLeftIcon, ChevronRightIcon, BookmarkIcon } from '../../components/icons'
+import { SearchIcon, MapPinIcon, ChevronLeftIcon, ChevronRightIcon, BookmarkIcon, BookmarkFilledIcon } from '../../components/icons'
 import { jobService, formatUIToBackendJobType } from '../../services/job.service'
+import { savedJobService } from '../../services/savedJob.service'
+import { useAuth } from '../../context/AuthContext'
 import { getApiErrorMessage } from '../../lib/api'
 
 const JOB_TYPES = ['Full-time', 'Part-time', 'Internship', 'Contract']
@@ -12,7 +14,9 @@ interface Props {
 }
 
 export default function Jobs({ navigate }: Props) {
+  const { user, role } = useAuth()
   const [jobs, setJobs] = useState<Job[]>([])
+  const [savedJobIds, setSavedJobIds] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [total, setTotal] = useState(0)
@@ -53,7 +57,6 @@ export default function Jobs({ navigate }: Props) {
         limit: PER_PAGE,
       })
 
-      // If client selected multiple types or locations not fully matched by single parameter, apply client refine
       let clientRefined = result.jobs
       if (selectedTypes.length > 1) {
         clientRefined = clientRefined.filter(j => selectedTypes.includes(j.type))
@@ -76,6 +79,50 @@ export default function Jobs({ navigate }: Props) {
   useEffect(() => {
     fetchJobs()
   }, [fetchJobs])
+
+  useEffect(() => {
+    async function loadSavedList() {
+      if (user && role === 'student') {
+        try {
+          const res = await savedJobService.getMySavedJobs({ limit: 100 })
+          setSavedJobIds(res.jobs.map(j => j.id))
+        } catch {
+          // Ignore
+        }
+      } else {
+        setSavedJobIds([])
+      }
+    }
+    loadSavedList()
+  }, [user, role])
+
+  const handleToggleSave = async (jobId: string) => {
+    if (!user) {
+      navigate('login')
+      return
+    }
+    if (role !== 'student') {
+      alert('Only students can bookmark jobs.')
+      return
+    }
+
+    const isCurrentlySaved = savedJobIds.includes(jobId)
+    if (isCurrentlySaved) {
+      setSavedJobIds(prev => prev.filter(id => id !== jobId))
+      try {
+        await savedJobService.removeSavedJob(jobId)
+      } catch {
+        setSavedJobIds(prev => [...prev, jobId])
+      }
+    } else {
+      setSavedJobIds(prev => [...prev, jobId])
+      try {
+        await savedJobService.saveJob(jobId)
+      } catch {
+        setSavedJobIds(prev => prev.filter(id => id !== jobId))
+      }
+    }
+  }
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -100,11 +147,11 @@ export default function Jobs({ navigate }: Props) {
                 className="flex-1 text-sm text-[#172033] placeholder-[#667085] outline-none"
               />
             </div>
-            <div className="flex items-center gap-2 bg-white rounded px-3 py-2.5 w-56">
+            <div className="flex items-center gap-2 bg-white rounded px-3 py-2.5 flex-1">
               <MapPinIcon size={16} className="text-[#667085]" />
               <input
                 type="text"
-                placeholder="Location"
+                placeholder="City, state, or 'Remote'"
                 value={locationInput}
                 onChange={e => { setLocationInput(e.target.value); setPage(1) }}
                 className="flex-1 text-sm text-[#172033] placeholder-[#667085] outline-none"
@@ -112,7 +159,7 @@ export default function Jobs({ navigate }: Props) {
             </div>
             <button
               type="submit"
-              className="bg-[#2563EB] text-white px-6 py-2.5 rounded text-sm font-semibold hover:bg-[#1D4ED8] transition-colors shrink-0"
+              className="bg-[#2563EB] text-white px-6 py-2.5 rounded text-sm font-semibold hover:bg-[#1D4ED8] transition-colors"
             >
               Search
             </button>
@@ -121,102 +168,110 @@ export default function Jobs({ navigate }: Props) {
       </div>
 
       <div className="max-w-[1280px] mx-auto px-6 py-8">
-        <div className="flex gap-6">
-          {/* Filters sidebar */}
-          <aside className="w-56 shrink-0 space-y-6">
-            <div>
-              <h3 className="text-sm font-semibold text-[#172033] mb-3">Job Type</h3>
-              <div className="space-y-2">
-                {JOB_TYPES.map(type => (
-                  <label key={type} className="flex items-center gap-2.5 cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={selectedTypes.includes(type)}
-                      onChange={() => { toggle(selectedTypes, setSelectedTypes, type); setPage(1) }}
-                      className="w-4 h-4 rounded border-[#E4E7EC] text-[#2563EB] accent-[#2563EB]"
-                    />
-                    <span className="text-sm text-[#667085] group-hover:text-[#172033] transition-colors">{type}</span>
-                  </label>
-                ))}
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Filters Sidebar */}
+          <aside className="w-full lg:w-64 shrink-0 space-y-6">
+            <div className="bg-white border border-[#E4E7EC] rounded-lg p-5 space-y-6">
+              <div className="flex items-center justify-between pb-3 border-b border-[#F2F4F7]">
+                <h2 className="font-semibold text-[#172033] text-sm">Filters</h2>
+                {(selectedTypes.length > 0 || selectedLocations.length > 0 || remoteOnly || search || locationInput) && (
+                  <button
+                    onClick={() => {
+                      setSelectedTypes([])
+                      setSelectedLocations([])
+                      setRemoteOnly(false)
+                      setSearch('')
+                      setLocationInput('')
+                      setPage(1)
+                    }}
+                    className="text-xs text-[#2563EB] hover:text-[#1D4ED8] font-medium"
+                  >
+                    Reset all
+                  </button>
+                )}
+              </div>
+
+              {/* Remote toggle */}
+              <div>
+                <label className="flex items-center gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={remoteOnly}
+                    onChange={e => { setRemoteOnly(e.target.checked); setPage(1) }}
+                    className="w-4 h-4 rounded border-[#E4E7EC] text-[#2563EB] focus:ring-[#2563EB] accent-[#2563EB]"
+                  />
+                  <span className="text-sm font-medium text-[#172033]">Remote only</span>
+                </label>
+              </div>
+
+              {/* Job Type */}
+              <div>
+                <h3 className="text-xs font-semibold text-[#667085] uppercase tracking-wide mb-3">Job Type</h3>
+                <div className="space-y-2">
+                  {JOB_TYPES.map(t => (
+                    <label key={t} className="flex items-center gap-2.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedTypes.includes(t)}
+                        onChange={() => { toggle(selectedTypes, setSelectedTypes, t); setPage(1) }}
+                        className="w-4 h-4 rounded border-[#E4E7EC] text-[#2563EB] accent-[#2563EB]"
+                      />
+                      <span className="text-sm text-[#667085] hover:text-[#172033] transition-colors">{t}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Location */}
+              <div>
+                <h3 className="text-xs font-semibold text-[#667085] uppercase tracking-wide mb-3">Popular Locations</h3>
+                <div className="space-y-2">
+                  {LOCATIONS.map(loc => (
+                    <label key={loc} className="flex items-center gap-2.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedLocations.includes(loc)}
+                        onChange={() => { toggle(selectedLocations, setSelectedLocations, loc); setPage(1) }}
+                        className="w-4 h-4 rounded border-[#E4E7EC] text-[#2563EB] accent-[#2563EB]"
+                      />
+                      <span className="text-sm text-[#667085] hover:text-[#172033] transition-colors">{loc}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
-
-            <div className="border-t border-[#E4E7EC] pt-4">
-              <h3 className="text-sm font-semibold text-[#172033] mb-3">Location</h3>
-              <div className="space-y-2">
-                {LOCATIONS.map(loc => (
-                  <label key={loc} className="flex items-center gap-2.5 cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={selectedLocations.includes(loc)}
-                      onChange={() => { toggle(selectedLocations, setSelectedLocations, loc); setPage(1) }}
-                      className="w-4 h-4 rounded border-[#E4E7EC] accent-[#2563EB]"
-                    />
-                    <span className="text-sm text-[#667085] group-hover:text-[#172033] transition-colors">{loc}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="border-t border-[#E4E7EC] pt-4">
-              <label className="flex items-center gap-2.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={remoteOnly}
-                  onChange={() => { setRemoteOnly(!remoteOnly); setPage(1) }}
-                  className="w-4 h-4 rounded accent-[#2563EB]"
-                />
-                <span className="text-sm font-medium text-[#172033]">Remote only</span>
-              </label>
-            </div>
-
-            {(selectedTypes.length > 0 || selectedLocations.length > 0 || remoteOnly || search || locationInput) && (
-              <button
-                onClick={() => {
-                  setSelectedTypes([])
-                  setSelectedLocations([])
-                  setRemoteOnly(false)
-                  setSearch('')
-                  setLocationInput('')
-                  setPage(1)
-                }}
-                className="text-xs text-[#2563EB] hover:text-[#1D4ED8] font-medium"
-              >
-                Clear all filters
-              </button>
-            )}
           </aside>
 
-          {/* Job list */}
+          {/* Job Listings Main */}
           <div className="flex-1 min-w-0">
+            {/* Sort & Count Header */}
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-[#667085]">
-                Showing <span className="font-semibold text-[#172033]">{total}</span> jobs
+                Showing <span className="font-semibold text-[#172033]">{jobs.length}</span> of <span className="font-semibold text-[#172033]">{total}</span> roles
               </p>
-              <select
-                value={sort}
-                onChange={e => {
-                  const val = e.target.value as 'newest' | 'salary_desc' | 'oldest'
-                  setSort(val)
-                  setPage(1)
-                }}
-                className="text-sm text-[#667085] border border-[#E4E7EC] rounded px-2 py-1.5 bg-white outline-none"
-              >
-                <option value="newest">Most recent</option>
-                <option value="salary_desc">Salary: High to low</option>
-                <option value="oldest">Oldest</option>
-              </select>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-[#667085]">Sort by:</span>
+                <select
+                  value={sort}
+                  onChange={e => { setSort(e.target.value as 'newest' | 'salary_desc' | 'oldest'); setPage(1) }}
+                  className="text-xs font-medium text-[#172033] bg-white border border-[#E4E7EC] rounded px-2.5 py-1.5 outline-none focus:border-[#2563EB]"
+                >
+                  <option value="newest">Newest first</option>
+                  <option value="salary_desc">Highest salary</option>
+                  <option value="oldest">Oldest first</option>
+                </select>
+              </div>
             </div>
 
             {error && (
-              <div className="bg-[#FEF2F2] border border-[#FECACA] rounded p-4 text-sm text-[#DC2626] mb-4">
+              <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-lg p-4 text-sm text-[#DC2626] mb-4">
                 {error}
               </div>
             )}
 
             {loading ? (
               <div className="space-y-3">
-                {[1, 2, 3].map(n => (
+                {[1, 2, 3, 4].map(n => (
                   <div key={n} className="bg-white border border-[#E4E7EC] rounded-lg p-5 animate-pulse">
                     <div className="flex items-start gap-4">
                       <div className="w-11 h-11 bg-[#F2F4F7] rounded shrink-0" />
@@ -232,11 +287,20 @@ export default function Jobs({ navigate }: Props) {
             ) : (
               <div className="space-y-3">
                 {jobs.map(job => (
-                  <JobCard key={job.id} job={job} onClick={() => navigate('job-details', job.id)} />
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    isSaved={savedJobIds.includes(job.id)}
+                    onToggleSave={() => handleToggleSave(job.id)}
+                    onClick={() => navigate('job-details', job.id)}
+                  />
                 ))}
+
                 {jobs.length === 0 && (
                   <div className="bg-white border border-[#E4E7EC] rounded-lg p-12 text-center">
-                    <p className="text-[#667085] text-sm">No jobs match your criteria.</p>
+                    <div className="text-3xl mb-3">🔍</div>
+                    <h3 className="font-semibold text-[#172033] text-base mb-1">No roles matched your search</h3>
+                    <p className="text-sm text-[#667085] mb-4">Try broadening your search terms or clearing active filters.</p>
                     <button
                       onClick={() => {
                         setSelectedTypes([])
@@ -246,7 +310,7 @@ export default function Jobs({ navigate }: Props) {
                         setLocationInput('')
                         setPage(1)
                       }}
-                      className="mt-2 text-sm text-[#2563EB] hover:underline"
+                      className="text-xs font-semibold bg-[#2563EB] text-white px-4 py-2 rounded hover:bg-[#1D4ED8] transition-colors"
                     >
                       Clear filters
                     </button>
@@ -298,9 +362,17 @@ export default function Jobs({ navigate }: Props) {
   )
 }
 
-function JobCard({ job, onClick }: { job: Job; onClick: () => void }) {
-  const [saved, setSaved] = useState(false)
-
+function JobCard({
+  job,
+  isSaved,
+  onToggleSave,
+  onClick,
+}: {
+  job: Job;
+  isSaved: boolean;
+  onToggleSave: () => void;
+  onClick: () => void;
+}) {
   return (
     <div className="bg-white border border-[#E4E7EC] rounded-lg p-5 hover:border-[#2563EB] hover:shadow-sm transition-all group">
       <div className="flex items-start gap-4">
@@ -319,10 +391,11 @@ function JobCard({ job, onClick }: { job: Job; onClick: () => void }) {
               <p className="text-sm text-[#667085] mt-0.5">{job.company} · {job.department}</p>
             </div>
             <button
-              onClick={e => { e.stopPropagation(); setSaved(!saved) }}
-              className={`shrink-0 p-1.5 rounded hover:bg-[#F7F8FA] transition-colors ${saved ? 'text-[#2563EB]' : 'text-[#94A3B8]'}`}
+              onClick={e => { e.stopPropagation(); onToggleSave() }}
+              className={`shrink-0 p-1.5 rounded hover:bg-[#F7F8FA] transition-colors ${isSaved ? 'text-[#2563EB]' : 'text-[#94A3B8]'}`}
+              title={isSaved ? 'Remove bookmark' : 'Bookmark job'}
             >
-              <BookmarkIcon size={16} />
+              {isSaved ? <BookmarkFilledIcon size={16} /> : <BookmarkIcon size={16} />}
             </button>
           </div>
 

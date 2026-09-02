@@ -7,6 +7,7 @@ import {
 import { BriefcaseIcon, CheckIcon, TrendingUpIcon, EyeIcon, ChevronRightIcon } from '../../components/icons'
 import { applicationService } from '../../services/application.service'
 import { jobService } from '../../services/job.service'
+import { savedJobService } from '../../services/savedJob.service'
 
 const TrendingUpIconLocal = TrendingUpIcon
 
@@ -26,16 +27,19 @@ interface Props {
 export default function StudentDashboard({ user, navigate }: Props) {
   const [applications, setApplications] = useState<Application[]>([])
   const [jobs, setJobs] = useState<Job[]>([])
+  const [savedCount, setSavedCount] = useState(0)
 
   useEffect(() => {
     async function loadDashboardData() {
       try {
-        const [appResult, jobResult] = await Promise.all([
+        const [appResult, jobResult, savedResult] = await Promise.all([
           applicationService.getMyApplications({ limit: 20 }),
           jobService.getJobs({ limit: 4 }),
+          savedJobService.getMySavedJobs({ limit: 1 }).catch(() => ({ total: 0 })),
         ])
         setApplications(appResult.items)
         setJobs(jobResult.jobs)
+        setSavedCount(savedResult.total)
       } catch {
         // Fallback gracefully
       }
@@ -53,7 +57,7 @@ export default function StudentDashboard({ user, navigate }: Props) {
     underReview: applications.filter(a => a.status === 'Under Review').length,
     rejected: applications.filter(a => a.status === 'Rejected').length,
     applied: applications.filter(a => a.status === 'Applied').length,
-    saved: 4,
+    saved: savedCount,
   }
 
   const breakdown = [
@@ -113,19 +117,23 @@ export default function StudentDashboard({ user, navigate }: Props) {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total applications', value: stats.total, icon: BriefcaseIcon, color: 'bg-[#EFF6FF] text-[#2563EB]', trend: '+3 this week' },
-          { label: 'Shortlisted', value: stats.shortlisted, icon: CheckIcon, color: 'bg-[#E6F7F5] text-[#0F9D8A]', trend: 'Active' },
-          { label: 'Offers received', value: stats.selected, icon: TrendingUpIconLocal, color: 'bg-[#ECFDF5] text-[#059669]', trend: 'Congratulations!' },
-          { label: 'Saved jobs', value: stats.saved, icon: EyeIcon, color: 'bg-[#F2F4F7] text-[#667085]', trend: 'View saved' },
-        ].map(({ label, value, icon: Icon, color, trend }) => (
-          <div key={label} className="bg-white border border-[#E4E7EC] rounded-lg p-5">
+          { label: 'Total applications', value: stats.total, icon: BriefcaseIcon, color: 'bg-[#EFF6FF] text-[#2563EB]', trend: '+3 this week', action: () => navigate('applications') },
+          { label: 'Shortlisted', value: stats.shortlisted, icon: CheckIcon, color: 'bg-[#E6F7F5] text-[#0F9D8A]', trend: 'Active', action: () => navigate('applications') },
+          { label: 'Offers received', value: stats.selected, icon: TrendingUpIconLocal, color: 'bg-[#ECFDF5] text-[#059669]', trend: 'Congratulations!', action: () => navigate('applications') },
+          { label: 'Saved jobs', value: stats.saved, icon: EyeIcon, color: 'bg-[#F2F4F7] text-[#667085]', trend: 'View saved', action: () => navigate('saved-jobs') },
+        ].map(({ label, value, icon: Icon, color, trend, action }) => (
+          <button
+            key={label}
+            onClick={action}
+            className="bg-white border border-[#E4E7EC] rounded-lg p-5 text-left hover:border-[#2563EB] hover:shadow-sm transition-all"
+          >
             <div className={`w-9 h-9 rounded flex items-center justify-center mb-3 ${color}`}>
               <Icon size={17} />
             </div>
             <div className="text-2xl font-bold text-[#172033]">{value}</div>
             <div className="text-sm text-[#667085] mt-0.5">{label}</div>
             <div className="text-xs text-[#94A3B8] mt-2">{trend}</div>
-          </div>
+          </button>
         ))}
       </div>
 
