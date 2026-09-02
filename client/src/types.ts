@@ -7,9 +7,35 @@ export type ResourceType = 'Course' | 'Tutorial' | 'Workshop' | 'Certification'
 export type Difficulty = 'Beginner' | 'Intermediate' | 'Advanced'
 
 export interface NavUser {
+  id?: string
   name: string
   email: string
   role: UserRole
+  status?: UserStatus | 'ACTIVE' | 'SUSPENDED' | 'PENDING'
+  rawRole?: 'STUDENT' | 'RECRUITER' | 'ADMIN'
+  profileImage?: string | null
+  phone?: string | null
+  location?: string | null
+  studentProfile?: {
+    id: string
+    university: string
+    major: string
+    graduationYear: number
+    gpa?: number | null
+    bio?: string | null
+    resumeUrl?: string | null
+  } | null
+  recruiterProfile?: {
+    id: string
+    companyId?: string | null
+    position?: string | null
+    company?: {
+      id: string
+      name: string
+      website?: string | null
+      logo?: string | null
+    } | null
+  } | null
 }
 
 export interface Job {

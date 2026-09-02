@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import type { UserRole } from '../../types'
 import { ShieldIcon } from '../../components/icons'
+import { useAuth } from '../../context/AuthContext'
+import { getApiErrorMessage } from '../../lib/api'
 
 interface Props {
   onLogin: (email: string, role: UserRole) => void
@@ -14,34 +16,36 @@ const DEMO_ACCOUNTS: { label: string; email: string; role: UserRole; description
 ]
 
 export default function Login({ onLogin, navigate }: Props) {
+  const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    if (!email || !password) {
+    if (!email.trim() || !password) {
       setError('Please enter your email and password.')
       return
     }
-    setLoading(true)
-    setTimeout(() => {
-      const demo = DEMO_ACCOUNTS.find(d => d.email === email)
-      if (demo && password === 'demo') {
-        onLogin(email, demo.role)
-      } else {
-        setError('Invalid email or password. Use a demo account below.')
-        setLoading(false)
-      }
-    }, 600)
+
+    try {
+      setLoading(true)
+      const user = await login({ email: email.trim(), password })
+      onLogin(user.email, user.role)
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Invalid email or password. Please try again.'))
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleDemoLogin = (account: typeof DEMO_ACCOUNTS[0]) => {
-    setLoading(true)
-    setTimeout(() => onLogin(account.email, account.role), 400)
+  const handleDemoSelect = (account: typeof DEMO_ACCOUNTS[0]) => {
+    setEmail(account.email)
+    setPassword('Password123')
+    setError('')
   }
 
   return (
@@ -84,13 +88,14 @@ export default function Login({ onLogin, navigate }: Props) {
           {/* Demo accounts */}
           <div className="bg-[#EFF6FF] border border-[#BFDBFE] rounded-lg p-4 mb-6">
             <p className="text-xs font-semibold text-[#2563EB] mb-3 flex items-center gap-1.5">
-              <ShieldIcon size={13} /> Demo accounts — click to sign in instantly
+              <ShieldIcon size={13} /> Demo accounts — click to pre-fill credentials
             </p>
             <div className="space-y-2">
               {DEMO_ACCOUNTS.map(acc => (
                 <button
                   key={acc.role}
-                  onClick={() => handleDemoLogin(acc)}
+                  type="button"
+                  onClick={() => handleDemoSelect(acc)}
                   className="w-full flex items-start gap-3 text-left bg-white border border-[#BFDBFE] rounded p-3 hover:border-[#2563EB] hover:shadow-sm transition-all"
                 >
                   <div className="w-7 h-7 rounded bg-[#163A5F] flex items-center justify-center text-white text-xs font-bold shrink-0">
@@ -125,6 +130,7 @@ export default function Login({ onLogin, navigate }: Props) {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="you@university.edu"
+                required
                 className="w-full border border-[#E4E7EC] rounded px-3 py-2.5 text-sm text-[#172033] placeholder-[#94A3B8] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10 transition-shadow"
               />
             </div>
@@ -139,6 +145,7 @@ export default function Login({ onLogin, navigate }: Props) {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="Enter your password"
+                required
                 className="w-full border border-[#E4E7EC] rounded px-3 py-2.5 text-sm text-[#172033] placeholder-[#94A3B8] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10 transition-shadow"
               />
             </div>
