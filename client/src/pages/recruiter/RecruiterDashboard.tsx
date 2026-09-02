@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { CHART_DATA } from '../../mockData'
 import type { NavUser, Job, Applicant } from '../../types'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -82,6 +81,16 @@ export default function RecruiterDashboard({ user, navigate }: Props) {
     { label: 'Hires made', value: pipelineCounts.selected, icon: TrendingUpIcon2, color: 'bg-[#ECFDF5] text-[#059669]', change: 'Selected candidates' },
   ]
 
+  const jobChartData = recruiterJobs.slice(0, 5).map(job => {
+    const jobApps = applicants.filter(a => a.jobId === job.id)
+    return {
+      name: job.title.length > 14 ? `${job.title.slice(0, 12)}…` : job.title,
+      applications: jobApps.length || job.applicants || 0,
+      interviews: jobApps.filter(a => a.status === 'Shortlisted' || a.status === 'Under Review').length,
+      hires: jobApps.filter(a => a.status === 'Selected').length,
+    }
+  })
+
   return (
     <div className="space-y-6 max-w-[1200px]">
       <div className="flex items-start justify-between">
@@ -121,7 +130,10 @@ export default function RecruiterDashboard({ user, navigate }: Props) {
             </div>
           </div>
           <ResponsiveContainer width="100%" height={210}>
-            <BarChart data={CHART_DATA.recruiterApplications} margin={{ top: 0, right: 4, bottom: 0, left: -20 }}>
+            <BarChart
+              data={jobChartData.length > 0 ? jobChartData : [{ name: 'No jobs yet', applications: 0, interviews: 0, hires: 0 }]}
+              margin={{ top: 0, right: 4, bottom: 0, left: -20 }}
+            >
               <CartesianGrid strokeDasharray="3 3" stroke="#F2F4F7" />
               <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#667085' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: '#667085' }} axisLine={false} tickLine={false} />

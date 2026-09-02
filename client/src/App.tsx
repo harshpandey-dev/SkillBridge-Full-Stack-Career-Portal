@@ -98,7 +98,7 @@ export default function App() {
     )
   }
 
-  const isPublic = !user || PUBLIC_PAGES.has(page)
+  const isPublic = !user || (PUBLIC_PAGES.has(page) && page !== 'job-details')
 
   if (isPublic) {
     return (

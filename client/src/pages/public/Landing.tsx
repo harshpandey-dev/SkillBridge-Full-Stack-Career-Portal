@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import { LEARNING_RESOURCES } from '../../mockData'
 import type { Job } from '../../types'
 import {
   SearchIcon, MapPinIcon, ChevronRightIcon, StarIcon, ClockIcon,
 } from '../../components/icons'
 import { jobService } from '../../services/job.service'
+import { learningResourceService, type LearningResourceItem } from '../../services/learningResource.service'
 
 const ArrowRightIcon = ({ size = 18, className = '' }: { size?: number; className?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -47,22 +47,26 @@ export default function Landing({ navigate }: Props) {
   const [search, setSearch] = useState('')
   const [location, setLocation] = useState('')
   const [jobs, setJobs] = useState<Job[]>([])
+  const [featuredResources, setFeaturedResources] = useState<LearningResourceItem[]>([])
 
   useEffect(() => {
-    async function loadLandingJobs() {
+    async function loadLandingData() {
       try {
-        const result = await jobService.getJobs({ limit: 12, sort: 'newest' })
-        setJobs(result.jobs)
+        const [jobsResult, resourcesResult] = await Promise.all([
+          jobService.getJobs({ limit: 12, sort: 'newest' }).catch(() => ({ jobs: [], total: 0 })),
+          learningResourceService.getFeaturedResources().catch(() => ({ items: [], total: 0 })),
+        ])
+        setJobs(jobsResult.jobs)
+        setFeaturedResources(resourcesResult.items ? resourcesResult.items.slice(0, 3) : [])
       } catch {
         // Fallback silently if offline
       }
     }
-    loadLandingJobs()
+    loadLandingData()
   }, [])
 
   const featuredJobs = jobs.slice(0, 6)
   const internships = jobs.filter(j => j.type === 'Internship')
-  const featuredResources = LEARNING_RESOURCES.filter(r => r.featured).slice(0, 3)
 
   const handleSearch = () => {
     navigate('jobs')
@@ -295,17 +299,17 @@ export default function Landing({ navigate }: Props) {
               <div key={r.id} className="bg-white border border-[#E4E7EC] rounded-lg overflow-hidden hover:shadow-sm transition-shadow">
                 <div className="h-36 bg-[#163A5F] relative overflow-hidden">
                   <img
-                    src={`https://images.unsplash.com/${r.image}?w=400&h=144&fit=crop&auto=format`}
+                    src={r.imageUrl?.startsWith('http') ? r.imageUrl : r.thumbnail?.startsWith('http') ? r.thumbnail : `https://images.unsplash.com/${r.imageUrl || r.thumbnail || 'photo-1516321318423-f06f85e504b3'}?w=400&h=144&fit=crop&auto=format`}
                     alt={r.title}
                     className="w-full h-full object-cover opacity-80"
                   />
                   <div className="absolute top-3 left-3">
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                      r.difficulty === 'Beginner' ? 'bg-[#E6F7F5] text-[#0F9D8A]' :
-                      r.difficulty === 'Advanced' ? 'bg-[#FEF2F2] text-[#DC2626]' :
+                      r.difficulty.toLowerCase().includes('begin') ? 'bg-[#E6F7F5] text-[#0F9D8A]' :
+                      r.difficulty.toLowerCase().includes('adv') ? 'bg-[#FEF2F2] text-[#DC2626]' :
                       'bg-[#FFFBEB] text-[#D97706]'
                     }`}>
-                      {r.difficulty}
+                      {r.difficulty.charAt(0).toUpperCase() + r.difficulty.slice(1).toLowerCase()}
                     </span>
                   </div>
                 </div>
@@ -319,11 +323,11 @@ export default function Landing({ navigate }: Props) {
                   <div className="flex items-center justify-between text-xs text-[#667085]">
                     <div className="flex items-center gap-1">
                       <ClockIcon size={12} />
-                      {r.duration}
+                      {r.duration || 'Self-paced'}
                     </div>
                     <div className="flex items-center gap-1">
                       <StarIcon size={12} className="text-[#D97706]" />
-                      {r.rating} · {(r.enrolled / 1000).toFixed(0)}k enrolled
+                      {r.rating || '4.8'} · 120k enrolled
                     </div>
                   </div>
                 </div>

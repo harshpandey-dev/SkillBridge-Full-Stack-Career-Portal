@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { CHART_DATA } from '../../mockData'
 import type { NavUser, Application, Job } from '../../types'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -70,6 +69,22 @@ export default function StudentDashboard({ user, navigate }: Props) {
     { label: 'Shortlisted', count: stats.shortlisted, pct: stats.total ? Math.round((stats.shortlisted / stats.total) * 100) : 0, color: '#0F9D8A' },
     { label: 'Rejected', count: stats.rejected, pct: stats.total ? Math.round((stats.rejected / stats.total) * 100) : 0, color: '#DC2626' },
   ]
+
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const now = new Date()
+  const trendData = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)
+    const mName = monthNames[d.getMonth()]
+    const monthApps = applications.filter(a => {
+      const appDate = new Date(a.appliedDate || Date.now())
+      return appDate.getFullYear() === d.getFullYear() && appDate.getMonth() === d.getMonth()
+    })
+    return {
+      month: mName,
+      applied: monthApps.length,
+      reviews: monthApps.filter(a => a.status === 'Under Review' || a.status === 'Shortlisted' || a.status === 'Selected').length,
+    }
+  })
 
   const responseRate = stats.total > 0
     ? (((stats.shortlisted + stats.selected + stats.underReview + stats.rejected) / stats.total) * 100).toFixed(1)
@@ -171,7 +186,7 @@ export default function StudentDashboard({ user, navigate }: Props) {
             </select>
           </div>
           <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={CHART_DATA.applicationTrend} margin={{ top: 0, right: 4, bottom: 0, left: -20 }}>
+            <AreaChart data={trendData} margin={{ top: 0, right: 4, bottom: 0, left: -20 }}>
               <defs>
                 <linearGradient id="colorApplied" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#2563EB" stopOpacity={0.12} />
