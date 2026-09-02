@@ -25,13 +25,36 @@ import { logger } from './lib/logger';
 const app = express();
 const PORT = process.env.PORT ?? 3000;
 
+// Enable reverse proxy trust (e.g. Render, Railway, Heroku, AWS, Cloudflare)
+// Required for accurate client IP in rate limiting and secure cookie headers
+app.set('trust proxy', 1);
+
 // Security headers
 app.use(helmet());
 
-// CORS configuration with credentials support for HTTP-only cookies
+// Dynamic CORS configuration supporting comma-separated origins and trailing-slash normalization
+const rawOrigins = process.env.CLIENT_ORIGIN ?? 'http://localhost:5173';
+const allowedOrigins = rawOrigins
+  .split(',')
+  .map((origin) => origin.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
+
+if (process.env.NODE_ENV !== 'production' && !allowedOrigins.includes('http://localhost:5173')) {
+  allowedOrigins.push('http://localhost:5173');
+}
+
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN ?? 'http://localhost:5173',
+    origin: (origin, callback) => {
+      // Allow requests without Origin header (like server-to-server, curl, Postman)
+      if (!origin) return callback(null, true);
+
+      const normalizedOrigin = origin.replace(/\/+$/, '');
+      if (allowedOrigins.includes(normalizedOrigin) || allowedOrigins.includes('*')) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
     credentials: true,
   })
 );
