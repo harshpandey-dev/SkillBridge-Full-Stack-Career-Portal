@@ -1,15 +1,27 @@
-import { ALL_USERS, JOBS, MY_APPLICATIONS, CHART_DATA } from '../../mockData'
+import { useState, useEffect, useCallback } from 'react'
 import type { NavUser } from '../../types'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
-import { UsersIcon, BriefcaseIcon, TrendingUpIcon, ChevronRightIcon, AlertCircleIcon } from '../../components/icons'
+import {
+  UsersIcon, BriefcaseIcon, TrendingUpIcon, ChevronRightIcon, AlertCircleIcon,
+} from '../../components/icons'
+import {
+  adminService,
+  type AdminDashboardStats,
+  type PlatformAnalytics,
+  type GrowthDataPoint,
+} from '../../services/admin.service'
+import { getApiErrorMessage } from '../../lib/api'
 
 const TrendingIcon = TrendingUpIcon
 
 const STATUS_CONFIG: Record<string, string> = {
+  ACTIVE: 'bg-[#E6F7F5] text-[#0F9D8A]',
   Active: 'bg-[#E6F7F5] text-[#0F9D8A]',
+  SUSPENDED: 'bg-[#FEF2F2] text-[#DC2626]',
   Suspended: 'bg-[#FEF2F2] text-[#DC2626]',
+  PENDING: 'bg-[#FFFBEB] text-[#D97706]',
   Pending: 'bg-[#FFFBEB] text-[#D97706]',
 }
 
@@ -18,29 +30,171 @@ interface Props {
   navigate: (page: string) => void
 }
 
+function formatRelativeTime(dateString: string): string {
+  try {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffSec = Math.floor((now.getTime() - date.getTime()) / 1000)
+
+    if (diffSec < 60) return 'Just now'
+    const diffMin = Math.floor(diffSec / 60)
+    if (diffMin < 60) return `${diffMin}m ago`
+    const diffHours = Math.floor(diffMin / 60)
+    if (diffHours < 24) return `${diffHours}h ago`
+    const diffDays = Math.floor(diffHours / 24)
+    if (diffDays === 1) return 'Yesterday'
+    if (diffDays < 7) return `${diffDays}d ago`
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+  } catch {
+    return 'Recently'
+  }
+}
+
 export default function AdminDashboard({ user: _user, navigate }: Props) {
-  const students = ALL_USERS.filter(u => u.role === 'student')
-  const recruiters = ALL_USERS.filter(u => u.role === 'recruiter')
-  const activeJobs = JOBS.filter(j => j.status === 'Open')
-  const totalApplications = MY_APPLICATIONS.length + 285
+  const [dashboard, setDashboard] = useState<AdminDashboardStats | null>(null)
+  const [analytics, setAnalytics] = useState<PlatformAnalytics | null>(null)
+  const [growthData, setGrowthData] = useState<GrowthDataPoint[]>([])
+  const [growthDays, setGrowthDays] = useState<number>(30)
+
+  const [loading, setLoading] = useState(true)
+  const [chartLoading, setChartLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const loadDashboardData = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const [statsRes, analyticsRes] = await Promise.all([
+        adminService.getDashboard(),
+        adminService.getAnalytics().catch(() => null),
+      ])
+      setDashboard(statsRes)
+      setAnalytics(analyticsRes)
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Unable to load dashboard data.'))
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const loadGrowth = useCallback(async (days: number) => {
+    try {
+      setChartLoading(true)
+      const res = await adminService.getGrowthAnalytics(days)
+      setGrowthData(res.data)
+    } catch {
+      // Keep previous data on transient error
+    } finally {
+      setChartLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadDashboardData()
+  }, [loadDashboardData])
+
+  useEffect(() => {
+    loadGrowth(growthDays)
+  }, [growthDays, loadGrowth])
+
+  if (loading) {
+    return (
+      <div className="space-y-6 max-w-[1200px] animate-pulse">
+        <div className="h-8 bg-[#E4E7EC] rounded w-52" />
+        <div className="h-14 bg-[#E4E7EC] rounded-lg" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map(n => (
+            <div key={n} className="bg-white border border-[#E4E7EC] rounded-lg p-5 h-32" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div className="lg:col-span-2 bg-white border border-[#E4E7EC] rounded-lg h-72" />
+          <div className="bg-white border border-[#E4E7EC] rounded-lg h-72" />
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !dashboard) {
+    return (
+      <div className="space-y-6 max-w-[1200px]">
+        <div>
+          <h1 className="text-2xl font-bold text-[#172033]">Admin Dashboard</h1>
+          <p className="text-sm text-[#667085] mt-0.5">Platform overview and management</p>
+        </div>
+        <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-lg p-6 text-center">
+          <p className="text-sm text-[#DC2626] font-medium">{error || 'Failed to load dashboard metrics.'}</p>
+          <button
+            onClick={loadDashboardData}
+            className="mt-4 bg-[#2563EB] text-white px-4 py-2 rounded text-sm font-semibold hover:bg-[#1D4ED8]"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const { users, jobs, applications } = dashboard
 
   const stats = [
-    { label: 'Total students', value: students.length.toLocaleString(), icon: UsersIcon, color: 'bg-[#EFF6FF] text-[#2563EB]', change: '+128 this month' },
-    { label: 'Active recruiters', value: recruiters.length.toLocaleString(), icon: BriefcaseIcon, color: 'bg-[#E6F7F5] text-[#0F9D8A]', change: '+8 this month' },
-    { label: 'Open jobs', value: activeJobs.length.toLocaleString(), icon: BriefcaseIcon, color: 'bg-[#FFFBEB] text-[#D97706]', change: '4 added today' },
-    { label: 'Total applications', value: totalApplications.toLocaleString(), icon: TrendingIcon, color: 'bg-[#ECFDF5] text-[#059669]', change: '+491 this week' },
+    {
+      label: 'Total students',
+      value: users.students.toLocaleString(),
+      icon: UsersIcon,
+      color: 'bg-[#EFF6FF] text-[#2563EB]',
+      change: `${users.active} active platform users`,
+    },
+    {
+      label: 'Active recruiters',
+      value: users.recruiters.toLocaleString(),
+      icon: BriefcaseIcon,
+      color: 'bg-[#E6F7F5] text-[#0F9D8A]',
+      change: `${users.pending} pending verification`,
+    },
+    {
+      label: 'Open jobs',
+      value: jobs.open.toLocaleString(),
+      icon: BriefcaseIcon,
+      color: 'bg-[#FFFBEB] text-[#D97706]',
+      change: `${jobs.total} total listings`,
+    },
+    {
+      label: 'Total applications',
+      value: applications.total.toLocaleString(),
+      icon: TrendingIcon,
+      color: 'bg-[#ECFDF5] text-[#059669]',
+      change: `${applications.underReview + applications.shortlisted} under review / shortlisted`,
+    },
   ]
 
-  const recentUsers = ALL_USERS.slice(0, 5)
+  const recentUsers = analytics?.recentActivity?.recentUsers || []
+  const recentApplications = analytics?.recentActivity?.recentApplications || []
+  const recentJobs = analytics?.recentActivity?.recentJobs || []
 
-  const ACTIVITY = [
-    { time: '2 min ago', event: 'Sarah Johnson applied to Product Designer at Figma', type: 'application' },
-    { time: '8 min ago', event: 'Riley Brown (Microsoft) posted a new internship listing', type: 'job' },
-    { time: '15 min ago', event: 'New recruiter registered: Casey Taylor from Google', type: 'user' },
-    { time: '24 min ago', event: 'Emma Davis profile marked complete (85%)', type: 'profile' },
-    { time: '1 hr ago', event: 'Priya Patel shortlisted for ML Engineer at OpenAI', type: 'status' },
-    { time: '2 hrs ago', event: 'Learning resource "Deep Learning Specialization" reached 400k enrollees', type: 'resource' },
+  // Combine real recent events for activity feed
+  const combinedActivity = [
+    ...recentApplications.map(a => ({
+      time: formatRelativeTime(a.appliedAt),
+      event: `${a.student.user.name} applied to ${a.job.title} at ${a.job.company.name}`,
+      type: 'application',
+      timestamp: new Date(a.appliedAt).getTime(),
+    })),
+    ...recentJobs.map(j => ({
+      time: formatRelativeTime(j.createdAt),
+      event: `New job posted: ${j.title} (${j.jobType}) at ${j.company.name}`,
+      type: 'job',
+      timestamp: new Date(j.createdAt).getTime(),
+    })),
+    ...recentUsers.map(u => ({
+      time: formatRelativeTime(u.createdAt),
+      event: `New ${u.role.toLowerCase()} registered: ${u.name}`,
+      type: 'user',
+      timestamp: new Date(u.createdAt).getTime(),
+    })),
   ]
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .slice(0, 6)
 
   return (
     <div className="space-y-6 max-w-[1200px]">
@@ -50,15 +204,17 @@ export default function AdminDashboard({ user: _user, navigate }: Props) {
       </div>
 
       {/* Alert */}
-      <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-lg p-3 flex items-center gap-3">
-        <AlertCircleIcon size={16} className="text-[#D97706] shrink-0" />
-        <p className="text-sm text-[#D97706]">
-          <span className="font-semibold">4 users pending review</span> — new recruiter accounts awaiting verification.{' '}
-          <button onClick={() => navigate('user-management')} className="underline font-medium">Review now</button>
-        </p>
-      </div>
+      {users.pending > 0 && (
+        <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-lg p-3 flex items-center gap-3">
+          <AlertCircleIcon size={16} className="text-[#D97706] shrink-0" />
+          <p className="text-sm text-[#D97706]">
+            <span className="font-semibold">{users.pending} users pending review</span> — recruiter accounts awaiting verification.{' '}
+            <button onClick={() => navigate('user-management')} className="underline font-medium">Review now</button>
+          </p>
+        </div>
+      )}
 
-      {/* Stats */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map(({ label, value, icon: Icon, color, change }) => (
           <div key={label} className="bg-white border border-[#E4E7EC] rounded-lg p-5">
@@ -74,34 +230,62 @@ export default function AdminDashboard({ user: _user, navigate }: Props) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Growth chart */}
-        <div className="lg:col-span-2 bg-white border border-[#E4E7EC] rounded-lg p-5">
+        <div className="lg:col-span-2 bg-white border border-[#E4E7EC] rounded-lg p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-5">
             <div>
               <h2 className="text-base font-semibold text-[#172033]">Platform growth</h2>
-              <p className="text-xs text-[#667085] mt-0.5">Student and recruiter registrations, last 6 months</p>
+              <p className="text-xs text-[#667085] mt-0.5">Daily activity and onboarding registrations</p>
+            </div>
+            <div className="flex items-center gap-1 bg-[#F7F8FA] p-1 rounded border border-[#E4E7EC]">
+              {[7, 30, 90].map(days => (
+                <button
+                  key={days}
+                  onClick={() => setGrowthDays(days)}
+                  className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors ${
+                    growthDays === days
+                      ? 'bg-white text-[#2563EB] shadow-xs'
+                      : 'text-[#667085] hover:text-[#172033]'
+                  }`}
+                >
+                  {days}d
+                </button>
+              ))}
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={CHART_DATA.adminGrowth} margin={{ top: 0, right: 4, bottom: 0, left: -10 }}>
-              <defs>
-                <linearGradient id="colorStudents" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#2563EB" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="colorRecruiters" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#0F9D8A" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#0F9D8A" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F2F4F7" />
-              <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#667085' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#667085' }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ border: '1px solid #E4E7EC', borderRadius: '6px', fontSize: '12px' }} />
-              <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px', paddingTop: '8px' }} />
-              <Area type="monotone" dataKey="students" name="Students" stroke="#2563EB" strokeWidth={2} fill="url(#colorStudents)" dot={false} />
-              <Area type="monotone" dataKey="recruiters" name="Recruiters" stroke="#0F9D8A" strokeWidth={2} fill="url(#colorRecruiters)" dot={false} />
-            </AreaChart>
-          </ResponsiveContainer>
+
+          <div className="h-56 relative">
+            {chartLoading && (
+              <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10 text-xs text-[#667085]">
+                Updating chart…
+              </div>
+            )}
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={growthData} margin={{ top: 0, right: 4, bottom: 0, left: -10 }}>
+                <defs>
+                  <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563EB" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorApplications" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#0F9D8A" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#0F9D8A" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorJobs" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#D97706" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#D97706" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F2F4F7" />
+                <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#667085' }} axisLine={false} tickLine={false} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: '#667085' }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ border: '1px solid #E4E7EC', borderRadius: '6px', fontSize: '12px' }} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px', paddingTop: '8px' }} />
+                <Area type="monotone" dataKey="newUsers" name="New Users" stroke="#2563EB" strokeWidth={2} fill="url(#colorUsers)" dot={false} />
+                <Area type="monotone" dataKey="newApplications" name="Applications" stroke="#0F9D8A" strokeWidth={2} fill="url(#colorApplications)" dot={false} />
+                <Area type="monotone" dataKey="newJobs" name="Jobs" stroke="#D97706" strokeWidth={2} fill="url(#colorJobs)" dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Quick actions */}
@@ -109,11 +293,11 @@ export default function AdminDashboard({ user: _user, navigate }: Props) {
           <h2 className="text-base font-semibold text-[#172033] mb-4">Quick actions</h2>
           <div className="space-y-2">
             {[
-              { label: 'Review pending users', count: 4, page: 'user-management', urgent: true },
-              { label: 'Moderate flagged jobs', count: 2, page: 'job-management', urgent: true },
-              { label: 'Add learning resource', count: null, page: 'admin-learning', urgent: false },
-              { label: 'View all students', count: students.length, page: 'user-management', urgent: false },
-              { label: 'View all recruiters', count: recruiters.length, page: 'user-management', urgent: false },
+              { label: 'Review pending users', count: users.pending, page: 'user-management', urgent: users.pending > 0 },
+              { label: 'Moderate draft jobs', count: jobs.draft, page: 'job-management', urgent: jobs.draft > 0 },
+              { label: 'Manage learning catalog', count: dashboard.resources.total, page: 'admin-learning', urgent: false },
+              { label: 'View all students', count: users.students, page: 'user-management', urgent: false },
+              { label: 'View all recruiters', count: users.recruiters, page: 'user-management', urgent: false },
             ].map(({ label, count, page, urgent }) => (
               <button
                 key={label}
@@ -142,21 +326,29 @@ export default function AdminDashboard({ user: _user, navigate }: Props) {
             </button>
           </div>
           <div>
-            {recentUsers.map((u, i) => (
-              <div key={u.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < recentUsers.length - 1 ? 'border-b border-[#F2F4F7]' : ''}`}>
-                <div className="w-8 h-8 rounded-full bg-[#163A5F] flex items-center justify-center text-white text-xs font-semibold shrink-0">
-                  {u.name.split(' ').map(n => n[0]).join('')}
+            {recentUsers.length === 0 ? (
+              <div className="p-8 text-center text-xs text-[#667085]">No users registered yet</div>
+            ) : (
+              recentUsers.slice(0, 5).map((u, i) => (
+                <div key={u.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < Math.min(recentUsers.length, 5) - 1 ? 'border-b border-[#F2F4F7]' : ''}`}>
+                  <div className="w-8 h-8 rounded-full bg-[#163A5F] flex items-center justify-center text-white text-xs font-semibold shrink-0">
+                    {u.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-[#172033] truncate">{u.name}</p>
+                    <p className="text-xs text-[#667085]">{u.email} · {formatRelativeTime(u.createdAt)}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#F2F4F7] text-[#667085] lowercase">
+                      {u.role}
+                    </span>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_CONFIG[u.status] || STATUS_CONFIG.Active}`}>
+                      {u.status}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[#172033] truncate">{u.name}</p>
-                  <p className="text-xs text-[#667085]">{u.university ?? u.company ?? 'SkillBridge'} · {u.joined}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#F2F4F7] text-[#667085] capitalize">{u.role}</span>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_CONFIG[u.status]}`}>{u.status}</span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -164,15 +356,19 @@ export default function AdminDashboard({ user: _user, navigate }: Props) {
         <div className="bg-white border border-[#E4E7EC] rounded-lg p-5">
           <h2 className="text-base font-semibold text-[#172033] mb-4">Recent activity</h2>
           <div className="space-y-3">
-            {ACTIVITY.map((a, i) => (
-              <div key={i} className="flex items-start gap-3">
-                <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${a.type === 'application' ? 'bg-[#2563EB]' : a.type === 'job' ? 'bg-[#0F9D8A]' : a.type === 'user' ? 'bg-[#D97706]' : 'bg-[#94A3B8]'}`} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-[#172033] leading-snug">{a.event}</p>
-                  <p className="text-xs text-[#94A3B8] mt-0.5">{a.time}</p>
+            {combinedActivity.length === 0 ? (
+              <p className="text-xs text-[#667085] py-4 text-center">No recent platform activity recorded</p>
+            ) : (
+              combinedActivity.map((a, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${a.type === 'application' ? 'bg-[#2563EB]' : a.type === 'job' ? 'bg-[#0F9D8A]' : a.type === 'user' ? 'bg-[#D97706]' : 'bg-[#94A3B8]'}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-[#172033] leading-snug">{a.event}</p>
+                    <p className="text-xs text-[#94A3B8] mt-0.5">{a.time}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

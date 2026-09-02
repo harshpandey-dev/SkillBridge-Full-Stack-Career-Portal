@@ -1,11 +1,18 @@
-import { useState } from 'react'
-import { ALL_USERS } from '../../mockData'
-import type { UserRole, UserStatus } from '../../types'
-import { SearchIcon, TrashIcon } from '../../components/icons'
+import { useState, useEffect, useCallback } from 'react'
+import { SearchIcon, TrashIcon, ChevronLeftIcon, ChevronRightIcon } from '../../components/icons'
+import {
+  adminService,
+  type AdminUserItem,
+  type AdminDashboardStats,
+} from '../../services/admin.service'
+import { getApiErrorMessage } from '../../lib/api'
 
-const STATUS_STYLES: Record<UserStatus, string> = {
+const STATUS_STYLES: Record<string, string> = {
+  ACTIVE: 'bg-[#E6F7F5] text-[#0F9D8A]',
   Active: 'bg-[#E6F7F5] text-[#0F9D8A]',
+  SUSPENDED: 'bg-[#FEF2F2] text-[#DC2626]',
   Suspended: 'bg-[#FEF2F2] text-[#DC2626]',
+  PENDING: 'bg-[#FFFBEB] text-[#D97706]',
   Pending: 'bg-[#FFFBEB] text-[#D97706]',
 }
 
@@ -14,49 +21,146 @@ interface Props {
 }
 
 export default function UserManagement({ navigate: _navigate }: Props) {
-  const [users, setUsers] = useState(ALL_USERS)
+  const [users, setUsers] = useState<AdminUserItem[]>([])
+  const [stats, setStats] = useState<AdminDashboardStats | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [successBanner, setSuccessBanner] = useState<string | null>(null)
+
+  // Filters & Pagination
   const [search, setSearch] = useState('')
-  const [roleFilter, setRoleFilter] = useState<UserRole | 'All'>('All')
-  const [statusFilter, setStatusFilter] = useState<UserStatus | 'All'>('All')
+  const [roleFilter, setRoleFilter] = useState<'All' | 'STUDENT' | 'RECRUITER' | 'ADMIN'>('All')
+  const [statusFilter, setStatusFilter] = useState<'All' | 'ACTIVE' | 'SUSPENDED' | 'PENDING'>('All')
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const LIMIT = 10
 
-  const filtered = users.filter(u => {
-    const matchSearch = !search || u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())
-    const matchRole = roleFilter === 'All' || u.role === roleFilter
-    const matchStatus = statusFilter === 'All' || u.status === statusFilter
-    return matchSearch && matchRole && matchStatus
-  })
-
-  const updateStatus = (id: string, status: UserStatus) => {
-    setUsers(prev => prev.map(u => u.id === id ? { ...u, status } : u))
+  const showSuccess = (msg: string) => {
+    setSuccessBanner(msg)
+    setTimeout(() => setSuccessBanner(null), 3000)
   }
 
-  const deleteUser = (id: string) => {
-    setUsers(prev => prev.filter(u => u.id !== id))
-    setDeleteConfirm(null)
+  // Load overview stats
+  const loadStats = useCallback(async () => {
+    try {
+      const res = await adminService.getDashboard()
+      setStats(res)
+    } catch {
+      // Fallback
+    }
+  }, [])
+
+  // Load paginated users
+  const loadUsers = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const res = await adminService.getUsers({
+        search: search.trim() || undefined,
+        role: roleFilter !== 'All' ? roleFilter : undefined,
+        status: statusFilter !== 'All' ? statusFilter : undefined,
+        page,
+        limit: LIMIT,
+      })
+      setUsers(res.items)
+      setTotal(res.total)
+      setTotalPages(Math.max(1, res.totalPages))
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Failed to load users.'))
+      setUsers([])
+    } finally {
+      setLoading(false)
+    }
+  }, [search, roleFilter, statusFilter, page])
+
+  useEffect(() => {
+    loadStats()
+  }, [loadStats])
+
+  useEffect(() => {
+    loadUsers()
+  }, [loadUsers])
+
+  const handleUpdateStatus = async (userId: string, newStatus: 'ACTIVE' | 'SUSPENDED' | 'PENDING') => {
+    try {
+      setActionLoadingId(userId)
+      setActionError(null)
+
+      // Optimistic update
+      setUsers(prev =>
+        prev.map(u => (u.id === userId ? { ...u, status: newStatus } : u))
+      )
+
+      await adminService.updateUserStatus(userId, newStatus)
+      showSuccess(`User status updated to ${newStatus}`)
+      loadStats()
+    } catch (err: unknown) {
+      // Rollback on failure
+      loadUsers()
+      setActionError(getApiErrorMessage(err, 'Unable to update user status.'))
+    } finally {
+      setActionLoadingId(null)
+    }
+  }
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      setActionLoadingId(userId)
+      setActionError(null)
+      await adminService.deleteUser(userId)
+      setDeleteConfirm(null)
+      showSuccess('User deleted successfully')
+      loadUsers()
+      loadStats()
+    } catch (err: unknown) {
+      setActionError(getApiErrorMessage(err, 'Unable to delete user.'))
+    } finally {
+      setActionLoadingId(null)
+    }
   }
 
   const counts = {
-    All: users.length,
-    student: users.filter(u => u.role === 'student').length,
-    recruiter: users.filter(u => u.role === 'recruiter').length,
-    admin: users.filter(u => u.role === 'admin').length,
+    All: stats?.users.total ?? total,
+    student: stats?.users.students ?? 0,
+    recruiter: stats?.users.recruiters ?? 0,
+    admin: stats?.users.admins ?? 0,
+    pending: stats?.users.pending ?? 0,
   }
 
   return (
     <div className="space-y-5 max-w-[1200px]">
       <div>
         <h1 className="text-2xl font-bold text-[#172033]">User Management</h1>
-        <p className="text-sm text-[#667085] mt-0.5">{users.length} total users · manage accounts and permissions</p>
+        <p className="text-sm text-[#667085] mt-0.5">
+          {total} total users · manage accounts, statuses, and permissions
+        </p>
       </div>
 
+      {successBanner && (
+        <div className="bg-[#E6F7F5] border border-[#BFDBFE] text-[#0F9D8A] rounded-lg p-3 text-sm flex items-center justify-between">
+          <span>{successBanner}</span>
+          <button onClick={() => setSuccessBanner(null)} className="text-xs underline">Dismiss</button>
+        </div>
+      )}
+
+      {actionError && (
+        <div className="bg-[#FEF2F2] border border-[#FECACA] text-[#DC2626] rounded-lg p-3 text-sm flex items-center justify-between">
+          <span>{actionError}</span>
+          <button onClick={() => setActionError(null)} className="text-xs underline">Dismiss</button>
+        </div>
+      )}
+
       {/* Stats bar */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: 'Students', count: counts.student, color: 'text-[#2563EB]' },
           { label: 'Recruiters', count: counts.recruiter, color: 'text-[#0F9D8A]' },
           { label: 'Admins', count: counts.admin, color: 'text-[#163A5F]' },
-          { label: 'Pending review', count: users.filter(u => u.status === 'Pending').length, color: 'text-[#D97706]' },
+          { label: 'Pending review', count: counts.pending, color: 'text-[#D97706]' },
         ].map(({ label, count, color }) => (
           <div key={label} className="bg-white border border-[#E4E7EC] rounded-lg p-4">
             <div className={`text-2xl font-bold ${color}`}>{count}</div>
@@ -71,139 +175,242 @@ export default function UserManagement({ navigate: _navigate }: Props) {
           <SearchIcon size={15} className="text-[#667085]" />
           <input
             type="text"
-            placeholder="Search by name or email..."
+            placeholder="Search by name, email, or phone..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => {
+              setSearch(e.target.value)
+              setPage(1)
+            }}
             className="flex-1 text-sm text-[#172033] placeholder-[#94A3B8] outline-none"
           />
         </div>
 
-        <div className="flex gap-1">
-          {(['All', 'student', 'recruiter', 'admin'] as const).map(r => (
+        <div className="flex flex-wrap gap-1">
+          {[
+            { label: `All (${counts.All})`, val: 'All' as const },
+            { label: 'Students', val: 'STUDENT' as const },
+            { label: 'Recruiters', val: 'RECRUITER' as const },
+            { label: 'Admins', val: 'ADMIN' as const },
+          ].map(r => (
             <button
-              key={r}
-              onClick={() => setRoleFilter(r)}
-              className={`px-3 py-2 text-sm font-medium rounded transition-colors capitalize ${
-                roleFilter === r ? 'bg-[#163A5F] text-white' : 'bg-white border border-[#E4E7EC] text-[#667085] hover:border-[#94A3B8]'
+              key={r.val}
+              onClick={() => {
+                setRoleFilter(r.val)
+                setPage(1)
+              }}
+              className={`px-3 py-2 text-xs font-medium rounded transition-colors ${
+                roleFilter === r.val
+                  ? 'bg-[#163A5F] text-white'
+                  : 'bg-white border border-[#E4E7EC] text-[#667085] hover:border-[#94A3B8]'
               }`}
             >
-              {r === 'All' ? `All (${counts.All})` : r}
+              {r.label}
             </button>
           ))}
         </div>
 
         <select
           value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value as UserStatus | 'All')}
-          className="border border-[#E4E7EC] rounded px-3 py-2.5 text-sm text-[#172033] bg-white outline-none"
+          onChange={e => {
+            setStatusFilter(e.target.value as typeof statusFilter)
+            setPage(1)
+          }}
+          className="border border-[#E4E7EC] rounded px-3 py-2 text-xs text-[#172033] bg-white outline-none"
         >
           <option value="All">All statuses</option>
-          <option value="Active">Active</option>
-          <option value="Suspended">Suspended</option>
-          <option value="Pending">Pending</option>
+          <option value="ACTIVE">Active</option>
+          <option value="SUSPENDED">Suspended</option>
+          <option value="PENDING">Pending</option>
         </select>
       </div>
 
+      {error && (
+        <div className="bg-[#FEF2F2] border border-[#FECACA] text-[#DC2626] rounded-lg p-4 text-sm">
+          {error}
+        </div>
+      )}
+
       {/* Table */}
       <div className="bg-white border border-[#E4E7EC] rounded-lg overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-[#F2F4F7] bg-[#F7F8FA]">
-              <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">User</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Role</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Institution</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Joined</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Status</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(user => (
-              <tr key={user.id} className={`border-b border-[#F2F4F7] hover:bg-[#FAFBFC] transition-colors ${deleteConfirm === user.id ? 'bg-[#FEF2F2]' : ''}`}>
-                <td className="px-5 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#163A5F] flex items-center justify-center text-white text-xs font-semibold shrink-0">
-                      {user.name.split(' ').map(n => n[0]).join('')}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-[#172033]">{user.name}</p>
-                      <p className="text-xs text-[#667085]">{user.email}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-5 py-4">
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${
-                    user.role === 'admin' ? 'bg-[#163A5F] text-white' :
-                    user.role === 'recruiter' ? 'bg-[#E6F7F5] text-[#0F9D8A]' :
-                    'bg-[#EFF6FF] text-[#2563EB]'
-                  }`}>
-                    {user.role}
-                  </span>
-                </td>
-                <td className="px-5 py-4 text-sm text-[#667085]">{user.university ?? user.company ?? '—'}</td>
-                <td className="px-5 py-4 text-sm text-[#667085]">{user.joined}</td>
-                <td className="px-5 py-4">
-                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_STYLES[user.status]}`}>
-                    {user.status}
-                  </span>
-                </td>
-                <td className="px-5 py-4">
-                  {deleteConfirm === user.id ? (
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-[#DC2626]">Delete?</span>
-                      <button onClick={() => deleteUser(user.id)} className="text-xs font-medium text-[#DC2626] hover:underline">Yes</button>
-                      <button onClick={() => setDeleteConfirm(null)} className="text-xs text-[#667085] hover:underline">No</button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      {user.status === 'Active' ? (
-                        <button
-                          onClick={() => updateStatus(user.id, 'Suspended')}
-                          title="Suspend user"
-                          className="text-xs px-2 py-1 border border-[#E4E7EC] rounded text-[#667085] hover:border-[#DC2626] hover:text-[#DC2626] transition-colors"
+        {loading ? (
+          <div className="p-8 text-center text-sm text-[#667085]">Loading users…</div>
+        ) : users.length === 0 ? (
+          <div className="p-12 text-center text-sm text-[#667085]">No users match your filters.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-[#F2F4F7] bg-[#F7F8FA]">
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">User</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Role</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Institution / Org</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Joined</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Status</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map(u => {
+                  const institution =
+                    u.studentProfile?.university ||
+                    u.recruiterProfile?.company?.name ||
+                    '—'
+                  const joinedDate = new Date(u.createdAt).toLocaleDateString(undefined, {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })
+                  const isProcessing = actionLoadingId === u.id
+
+                  return (
+                    <tr
+                      key={u.id}
+                      className={`border-b border-[#F2F4F7] hover:bg-[#FAFBFC] transition-colors ${
+                        deleteConfirm === u.id ? 'bg-[#FEF2F2]' : ''
+                      }`}
+                    >
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-[#163A5F] flex items-center justify-center text-white text-xs font-semibold shrink-0">
+                            {u.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-[#172033]">{u.name}</p>
+                            <p className="text-xs text-[#667085]">{u.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span
+                          className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${
+                            u.role === 'ADMIN'
+                              ? 'bg-[#163A5F] text-white'
+                              : u.role === 'RECRUITER'
+                              ? 'bg-[#E6F7F5] text-[#0F9D8A]'
+                              : 'bg-[#EFF6FF] text-[#2563EB]'
+                          }`}
                         >
-                          Suspend
-                        </button>
-                      ) : user.status === 'Suspended' ? (
-                        <button
-                          onClick={() => updateStatus(user.id, 'Active')}
-                          title="Restore user"
-                          className="text-xs px-2 py-1 border border-[#E4E7EC] rounded text-[#0F9D8A] hover:bg-[#E6F7F5] transition-colors"
+                          {u.role.toLowerCase()}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-sm text-[#667085]">{institution}</td>
+                      <td className="px-5 py-4 text-sm text-[#667085]">{joinedDate}</td>
+                      <td className="px-5 py-4">
+                        <span
+                          className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                            STATUS_STYLES[u.status] || STATUS_STYLES.ACTIVE
+                          }`}
                         >
-                          Restore
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => updateStatus(user.id, 'Active')}
-                          title="Approve user"
-                          className="text-xs px-2 py-1 bg-[#E6F7F5] border border-[#99E6DD] rounded text-[#0F9D8A] hover:bg-[#0F9D8A] hover:text-white transition-colors"
-                        >
-                          Approve
-                        </button>
-                      )}
-                      {user.role !== 'admin' && (
-                        <button
-                          onClick={() => setDeleteConfirm(user.id)}
-                          className="p-1.5 rounded hover:bg-[#FEF2F2] text-[#94A3B8] hover:text-[#DC2626] transition-colors"
-                        >
-                          <TrashIcon size={13} />
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {filtered.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-5 py-12 text-center text-sm text-[#667085]">No users match your filters.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                          {u.status}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        {deleteConfirm === u.id ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-[#DC2626] font-medium">Delete?</span>
+                            <button
+                              disabled={isProcessing}
+                              onClick={() => handleDeleteUser(u.id)}
+                              className="text-xs font-medium text-[#DC2626] hover:underline disabled:opacity-50"
+                            >
+                              Yes
+                            </button>
+                            <button
+                              onClick={() => setDeleteConfirm(null)}
+                              className="text-xs text-[#667085] hover:underline"
+                            >
+                              No
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5">
+                            {u.status === 'ACTIVE' ? (
+                              <button
+                                disabled={isProcessing}
+                                onClick={() => handleUpdateStatus(u.id, 'SUSPENDED')}
+                                title="Suspend user"
+                                className="text-xs px-2 py-1 border border-[#E4E7EC] rounded text-[#667085] hover:border-[#DC2626] hover:text-[#DC2626] transition-colors disabled:opacity-50"
+                              >
+                                Suspend
+                              </button>
+                            ) : u.status === 'SUSPENDED' ? (
+                              <button
+                                disabled={isProcessing}
+                                onClick={() => handleUpdateStatus(u.id, 'ACTIVE')}
+                                title="Restore user"
+                                className="text-xs px-2 py-1 border border-[#E4E7EC] rounded text-[#0F9D8A] hover:bg-[#E6F7F5] transition-colors disabled:opacity-50"
+                              >
+                                Restore
+                              </button>
+                            ) : (
+                              <button
+                                disabled={isProcessing}
+                                onClick={() => handleUpdateStatus(u.id, 'ACTIVE')}
+                                title="Approve user"
+                                className="text-xs px-2 py-1 bg-[#E6F7F5] border border-[#99E6DD] rounded text-[#0F9D8A] hover:bg-[#0F9D8A] hover:text-white transition-colors disabled:opacity-50"
+                              >
+                                Approve
+                              </button>
+                            )}
+
+                            {u.role !== 'ADMIN' && (
+                              <button
+                                onClick={() => setDeleteConfirm(u.id)}
+                                className="p-1.5 rounded hover:bg-[#FEF2F2] text-[#94A3B8] hover:text-[#DC2626] transition-colors"
+                                title="Delete user"
+                              >
+                                <TrashIcon size={13} />
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-      <p className="text-xs text-[#94A3B8]">Showing {filtered.length} of {users.length} users</p>
+      {/* Pagination Footer */}
+      <div className="flex items-center justify-between pt-2">
+        <p className="text-xs text-[#94A3B8]">
+          Showing {users.length} of {total} users
+        </p>
+        {totalPages > 1 && (
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="w-8 h-8 flex items-center justify-center rounded border border-[#E4E7EC] bg-white text-[#667085] hover:bg-[#F7F8FA] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeftIcon size={14} />
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => setPage(i + 1)}
+                className={`w-8 h-8 flex items-center justify-center rounded text-xs font-medium transition-colors ${
+                  page === i + 1
+                    ? 'bg-[#2563EB] text-white border border-[#2563EB]'
+                    : 'border border-[#E4E7EC] bg-white text-[#667085] hover:bg-[#F7F8FA]'
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="w-8 h-8 flex items-center justify-center rounded border border-[#E4E7EC] bg-white text-[#667085] hover:bg-[#F7F8FA] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronRightIcon size={14} />
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
