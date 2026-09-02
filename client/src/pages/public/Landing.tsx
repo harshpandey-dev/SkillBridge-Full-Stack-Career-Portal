@@ -1,8 +1,10 @@
-import { useState } from 'react'
-import { JOBS, LEARNING_RESOURCES } from '../../mockData'
+import { useState, useEffect } from 'react'
+import { LEARNING_RESOURCES } from '../../mockData'
+import type { Job } from '../../types'
 import {
   SearchIcon, MapPinIcon, ChevronRightIcon, StarIcon, ClockIcon,
 } from '../../components/icons'
+import { jobService } from '../../services/job.service'
 
 const ArrowRightIcon = ({ size = 18, className = '' }: { size?: number; className?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -44,9 +46,22 @@ interface Props {
 export default function Landing({ navigate }: Props) {
   const [search, setSearch] = useState('')
   const [location, setLocation] = useState('')
+  const [jobs, setJobs] = useState<Job[]>([])
 
-  const featuredJobs = JOBS.slice(0, 6)
-  const internships = JOBS.filter(j => j.type === 'Internship')
+  useEffect(() => {
+    async function loadLandingJobs() {
+      try {
+        const result = await jobService.getJobs({ limit: 12, sort: 'newest' })
+        setJobs(result.jobs)
+      } catch {
+        // Fallback silently if offline
+      }
+    }
+    loadLandingJobs()
+  }, [])
+
+  const featuredJobs = jobs.slice(0, 6)
+  const internships = jobs.filter(j => j.type === 'Internship')
   const featuredResources = LEARNING_RESOURCES.filter(r => r.featured).slice(0, 3)
 
   const handleSearch = () => {
@@ -142,63 +157,65 @@ export default function Landing({ navigate }: Props) {
       </section>
 
       {/* Featured Jobs */}
-      <section className="max-w-[1280px] mx-auto px-6 py-14">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-2xl font-bold text-[#172033]">Featured opportunities</h2>
-            <p className="text-sm text-[#667085] mt-1">Hand-picked roles from companies actively recruiting now</p>
-          </div>
-          <button
-            onClick={() => navigate('jobs')}
-            className="flex items-center gap-1.5 text-sm font-medium text-[#2563EB] hover:text-[#1D4ED8] transition-colors"
-          >
-            View all jobs <ChevronRightIcon size={16} />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {featuredJobs.map(job => (
+      {featuredJobs.length > 0 && (
+        <section className="max-w-[1280px] mx-auto px-6 py-14">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-bold text-[#172033]">Featured opportunities</h2>
+              <p className="text-sm text-[#667085] mt-1">Hand-picked roles from companies actively recruiting now</p>
+            </div>
             <button
-              key={job.id}
-              onClick={() => navigate('job-details', job.id)}
-              className="bg-white border border-[#E4E7EC] rounded-lg p-5 text-left hover:border-[#2563EB] hover:shadow-sm transition-all group"
+              onClick={() => navigate('jobs')}
+              className="flex items-center gap-1.5 text-sm font-medium text-[#2563EB] hover:text-[#1D4ED8] transition-colors"
             >
-              <div className="flex items-start justify-between mb-3">
-                <div
-                  className="w-10 h-10 rounded flex items-center justify-center text-white font-bold text-sm shrink-0"
-                  style={{ backgroundColor: job.companyColor }}
-                >
-                  {job.company[0]}
-                </div>
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                  job.type === 'Internship' ? 'bg-[#E6F7F5] text-[#0F9D8A]' :
-                  job.type === 'Full-time' ? 'bg-[#EFF6FF] text-[#2563EB]' :
-                  'bg-[#F2F4F7] text-[#667085]'
-                }`}>
-                  {job.type}
-                </span>
-              </div>
-              <h3 className="font-semibold text-[#172033] text-[15px] mb-1 group-hover:text-[#2563EB] transition-colors line-clamp-1">
-                {job.title}
-              </h3>
-              <p className="text-sm text-[#667085] mb-3">{job.company}</p>
-              <div className="flex items-center gap-3 text-xs text-[#667085] mb-4">
-                <span className="flex items-center gap-1">
-                  <MapPinIcon size={12} />
-                  {job.location}
-                </span>
-                {job.remote && (
-                  <span className="bg-[#F2F4F7] px-1.5 py-0.5 rounded text-[#667085]">Remote OK</span>
-                )}
-              </div>
-              <div className="flex items-center justify-between pt-3 border-t border-[#F2F4F7]">
-                <span className="text-sm font-semibold text-[#172033]">{job.salary}</span>
-                <span className="text-xs text-[#667085]">{job.applicants} applicants</span>
-              </div>
+              View all jobs <ChevronRightIcon size={16} />
             </button>
-          ))}
-        </div>
-      </section>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {featuredJobs.map(job => (
+              <button
+                key={job.id}
+                onClick={() => navigate('job-details', job.id)}
+                className="bg-white border border-[#E4E7EC] rounded-lg p-5 text-left hover:border-[#2563EB] hover:shadow-sm transition-all group"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div
+                    className="w-10 h-10 rounded flex items-center justify-center text-white font-bold text-sm shrink-0"
+                    style={{ backgroundColor: job.companyColor }}
+                  >
+                    {job.company[0]}
+                  </div>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                    job.type === 'Internship' ? 'bg-[#E6F7F5] text-[#0F9D8A]' :
+                    job.type === 'Full-time' ? 'bg-[#EFF6FF] text-[#2563EB]' :
+                    'bg-[#F2F4F7] text-[#667085]'
+                  }`}>
+                    {job.type}
+                  </span>
+                </div>
+                <h3 className="font-semibold text-[#172033] text-[15px] mb-1 group-hover:text-[#2563EB] transition-colors line-clamp-1">
+                  {job.title}
+                </h3>
+                <p className="text-sm text-[#667085] mb-3">{job.company}</p>
+                <div className="flex items-center gap-3 text-xs text-[#667085] mb-4">
+                  <span className="flex items-center gap-1">
+                    <MapPinIcon size={12} />
+                    {job.location}
+                  </span>
+                  {job.remote && (
+                    <span className="bg-[#F2F4F7] px-1.5 py-0.5 rounded text-[#667085]">Remote OK</span>
+                  )}
+                </div>
+                <div className="flex items-center justify-between pt-3 border-t border-[#F2F4F7]">
+                  <span className="text-sm font-semibold text-[#172033]">{job.salary}</span>
+                  <span className="text-xs text-[#667085]">{job.applicants} applicants</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* How it works */}
       <section className="bg-white border-y border-[#E4E7EC]">
@@ -222,42 +239,44 @@ export default function Landing({ navigate }: Props) {
       </section>
 
       {/* Internships */}
-      <section className="max-w-[1280px] mx-auto px-6 py-14">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-2xl font-bold text-[#172033]">Internship programs</h2>
-            <p className="text-sm text-[#667085] mt-1">Summer and co-op opportunities at top companies</p>
-          </div>
-          <button onClick={() => navigate('jobs')} className="text-sm font-medium text-[#2563EB] hover:text-[#1D4ED8] flex items-center gap-1.5 transition-colors">
-            View all <ChevronRightIcon size={16} />
-          </button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {internships.map(job => (
-            <button
-              key={job.id}
-              onClick={() => navigate('job-details', job.id)}
-              className="bg-white border border-[#E4E7EC] rounded-lg p-5 flex items-start gap-4 text-left hover:border-[#2563EB] hover:shadow-sm transition-all group"
-            >
-              <div
-                className="w-10 h-10 rounded flex items-center justify-center text-white font-bold text-sm shrink-0"
-                style={{ backgroundColor: job.companyColor }}
-              >
-                {job.company[0]}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-[#172033] group-hover:text-[#2563EB] transition-colors">{job.title}</h3>
-                <p className="text-sm text-[#667085] mb-2">{job.company} · {job.location}</p>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-[#172033]">{job.salary}</span>
-                  <span className="text-xs text-[#667085]">Deadline: {job.deadline}</span>
-                </div>
-              </div>
-              <span className="text-xs bg-[#E6F7F5] text-[#0F9D8A] font-medium px-2 py-0.5 rounded-full shrink-0">Internship</span>
+      {internships.length > 0 && (
+        <section className="max-w-[1280px] mx-auto px-6 py-14">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-bold text-[#172033]">Internship programs</h2>
+              <p className="text-sm text-[#667085] mt-1">Summer and co-op opportunities at top companies</p>
+            </div>
+            <button onClick={() => navigate('jobs')} className="text-sm font-medium text-[#2563EB] hover:text-[#1D4ED8] flex items-center gap-1.5 transition-colors">
+              View all <ChevronRightIcon size={16} />
             </button>
-          ))}
-        </div>
-      </section>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {internships.map(job => (
+              <button
+                key={job.id}
+                onClick={() => navigate('job-details', job.id)}
+                className="bg-white border border-[#E4E7EC] rounded-lg p-5 flex items-start gap-4 text-left hover:border-[#2563EB] hover:shadow-sm transition-all group"
+              >
+                <div
+                  className="w-10 h-10 rounded flex items-center justify-center text-white font-bold text-sm shrink-0"
+                  style={{ backgroundColor: job.companyColor }}
+                >
+                  {job.company[0]}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-[#172033] group-hover:text-[#2563EB] transition-colors">{job.title}</h3>
+                  <p className="text-sm text-[#667085] mb-2">{job.company} · {job.location}</p>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-[#172033]">{job.salary}</span>
+                    <span className="text-xs text-[#667085]">Deadline: {job.deadline}</span>
+                  </div>
+                </div>
+                <span className="text-xs bg-[#E6F7F5] text-[#0F9D8A] font-medium px-2 py-0.5 rounded-full shrink-0">Internship</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Learning Resources */}
       <section className="bg-[#F7F8FA] border-t border-[#E4E7EC]">

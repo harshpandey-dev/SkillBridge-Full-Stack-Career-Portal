@@ -126,7 +126,7 @@ export default function App() {
       {/* Recruiter Routes */}
       {role === 'recruiter' && page === 'recruiter-dashboard' && <RecruiterDashboard user={user} navigate={navigate} />}
       {role === 'recruiter' && page === 'my-jobs' && <MyJobs navigate={navigate} />}
-      {role === 'recruiter' && page === 'post-job' && <PostJob navigate={navigate} />}
+      {role === 'recruiter' && page === 'post-job' && <PostJob jobId={selectedJobId} navigate={navigate} />}
       {role === 'recruiter' && page === 'applicants' && <Applicants navigate={navigate} />}
       {role === 'recruiter' && page === 'recruiter-profile' && <RecruiterProfile navigate={navigate} />}
 

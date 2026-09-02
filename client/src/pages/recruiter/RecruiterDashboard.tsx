@@ -1,10 +1,12 @@
-import { JOBS, APPLICANTS, CHART_DATA, CURRENT_RECRUITER } from '../../mockData'
-import type { NavUser } from '../../types'
+import { useState, useEffect } from 'react'
+import { APPLICANTS, CHART_DATA } from '../../mockData'
+import type { NavUser, Job } from '../../types'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Legend,
 } from 'recharts'
 import { BriefcaseIcon, UsersIcon, ChevronRightIcon, PlusIcon, TrendingUpIcon } from '../../components/icons'
+import { jobService } from '../../services/job.service'
 
 const TrendingUpIcon2 = TrendingUpIcon
 
@@ -22,11 +24,28 @@ interface Props {
 }
 
 export default function RecruiterDashboard({ user, navigate }: Props) {
-  const recruiterJobs = JOBS.filter(j => j.recruiterId === 'r1').slice(0, 5)
+  const [recruiterJobs, setRecruiterJobs] = useState<Job[]>([])
+  const [activeJobsCount, setActiveJobsCount] = useState(0)
   const recentApplicants = APPLICANTS.slice(0, 5)
 
+  useEffect(() => {
+    async function loadDashboardJobs() {
+      try {
+        const result = await jobService.getMyJobs({ limit: 10 })
+        setRecruiterJobs(result.jobs.slice(0, 5))
+        setActiveJobsCount(result.jobs.filter(j => j.status === 'Open').length)
+      } catch {
+        // Fallback silently if offline or token refreshing
+      }
+    }
+    loadDashboardJobs()
+  }, [])
+
+  const companyName = user.recruiterProfile?.company?.name || 'Company'
+  const position = user.recruiterProfile?.position || 'Recruiter'
+
   const stats = [
-    { label: 'Active job postings', value: recruiterJobs.length, icon: BriefcaseIcon, color: 'bg-[#EFF6FF] text-[#2563EB]', change: '+2 this month' },
+    { label: 'Active job postings', value: activeJobsCount, icon: BriefcaseIcon, color: 'bg-[#EFF6FF] text-[#2563EB]', change: '+2 this month' },
     { label: 'Total applicants', value: APPLICANTS.length, icon: UsersIcon, color: 'bg-[#E6F7F5] text-[#0F9D8A]', change: '+34 this week' },
     { label: 'Interviews scheduled', value: 8, icon: TrendingUpIcon2, color: 'bg-[#FFFBEB] text-[#D97706]', change: '3 this week' },
     { label: 'Hires made', value: 2, icon: TrendingUpIcon2, color: 'bg-[#ECFDF5] text-[#059669]', change: 'This quarter' },
@@ -37,7 +56,7 @@ export default function RecruiterDashboard({ user, navigate }: Props) {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#172033]">Welcome back, {user.name.split(' ')[0]}</h1>
-          <p className="text-sm text-[#667085] mt-0.5">{CURRENT_RECRUITER.company} · {CURRENT_RECRUITER.position}</p>
+          <p className="text-sm text-[#667085] mt-0.5">{companyName} · {position}</p>
         </div>
         <button
           onClick={() => navigate('post-job')}
@@ -136,6 +155,12 @@ export default function RecruiterDashboard({ user, navigate }: Props) {
                 </button>
               </div>
             ))}
+            {recruiterJobs.length === 0 && (
+              <div className="p-6 text-center text-sm text-[#667085]">
+                No active jobs posted yet.{' '}
+                <button onClick={() => navigate('post-job')} className="text-[#2563EB] hover:underline">Post a job</button>
+              </div>
+            )}
           </div>
         </div>
 

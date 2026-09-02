@@ -1,16 +1,41 @@
-import { useState } from 'react'
-import { JOBS } from '../../mockData'
+import { useState, useEffect, useCallback } from 'react'
+import type { Job } from '../../types'
 import { PlusIcon, EditIcon, TrashIcon, EyeIcon, UsersIcon, SearchIcon } from '../../components/icons'
+import { jobService } from '../../services/job.service'
+import { getApiErrorMessage } from '../../lib/api'
 
 interface Props {
   navigate: (page: string, id?: string) => void
 }
 
 export default function MyJobs({ navigate }: Props) {
-  const [jobs, setJobs] = useState(JOBS.filter(j => j.recruiterId === 'r1'))
+  const [jobs, setJobs] = useState<Job[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<'All' | 'Open' | 'Closed' | 'Draft'>('All')
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
+
+  const fetchMyJobs = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const result = await jobService.getMyJobs({
+        search: search.trim() || undefined,
+        limit: 50,
+      })
+      setJobs(result.jobs)
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Failed to load your jobs.'))
+    } finally {
+      setLoading(false)
+    }
+  }, [search])
+
+  useEffect(() => {
+    fetchMyJobs()
+  }, [fetchMyJobs])
 
   const filtered = jobs.filter(j => {
     const matchSearch = !search || j.title.toLowerCase().includes(search.toLowerCase())
@@ -18,13 +43,41 @@ export default function MyJobs({ navigate }: Props) {
     return matchSearch && matchStatus
   })
 
-  const handleClose = (id: string) => {
-    setJobs(prev => prev.map(j => j.id === id ? { ...j, status: 'Closed' as const } : j))
+  const handleClose = async (id: string) => {
+    try {
+      setActionLoading(id)
+      const updated = await jobService.closeJob(id)
+      setJobs(prev => prev.map(j => j.id === id ? updated : j))
+    } catch (err: unknown) {
+      alert(getApiErrorMessage(err, 'Failed to close job.'))
+    } finally {
+      setActionLoading(null)
+    }
   }
 
-  const handleDelete = (id: string) => {
-    setJobs(prev => prev.filter(j => j.id !== id))
-    setDeleteConfirm(null)
+  const handleReopen = async (id: string) => {
+    try {
+      setActionLoading(id)
+      const updated = await jobService.reopenJob(id)
+      setJobs(prev => prev.map(j => j.id === id ? updated : j))
+    } catch (err: unknown) {
+      alert(getApiErrorMessage(err, 'Failed to reopen job.'))
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      setActionLoading(id)
+      await jobService.deleteJob(id)
+      setJobs(prev => prev.filter(j => j.id !== id))
+      setDeleteConfirm(null)
+    } catch (err: unknown) {
+      alert(getApiErrorMessage(err, 'Failed to delete job.'))
+    } finally {
+      setActionLoading(null)
+    }
   }
 
   const statusStyles = {
@@ -38,7 +91,9 @@ export default function MyJobs({ navigate }: Props) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#172033]">My Jobs</h1>
-          <p className="text-sm text-[#667085] mt-0.5">{jobs.filter(j => j.status === 'Open').length} active · {jobs.length} total</p>
+          <p className="text-sm text-[#667085] mt-0.5">
+            {jobs.filter(j => j.status === 'Open').length} active · {jobs.length} total
+          </p>
         </div>
         <button
           onClick={() => navigate('post-job')}
@@ -47,6 +102,12 @@ export default function MyJobs({ navigate }: Props) {
           <PlusIcon size={15} /> Post new job
         </button>
       </div>
+
+      {error && (
+        <div className="bg-[#FEF2F2] border border-[#FECACA] rounded p-4 text-sm text-[#DC2626]">
+          {error}
+        </div>
+      )}
 
       {/* Controls */}
       <div className="flex items-center gap-3 flex-wrap">
@@ -89,7 +150,16 @@ export default function MyJobs({ navigate }: Props) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map(job => (
+            {loading ? (
+              <tr>
+                <td colSpan={6} className="px-5 py-8 text-center text-sm text-[#667085]">
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-[#2563EB] border-t-transparent rounded-full animate-spin" />
+                    <span>Loading jobs...</span>
+                  </div>
+                </td>
+              </tr>
+            ) : filtered.map(job => (
               <tr key={job.id} className={`border-b border-[#F2F4F7] hover:bg-[#FAFBFC] transition-colors ${deleteConfirm === job.id ? 'bg-[#FEF2F2]' : ''}`}>
                 <td className="px-5 py-4">
                   <div>
@@ -118,20 +188,31 @@ export default function MyJobs({ navigate }: Props) {
                   {deleteConfirm === job.id ? (
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-[#DC2626]">Delete this job?</span>
-                      <button onClick={() => handleDelete(job.id)} className="text-xs font-medium text-[#DC2626] hover:underline">Yes</button>
-                      <button onClick={() => setDeleteConfirm(null)} className="text-xs text-[#667085] hover:underline">No</button>
+                      <button
+                        onClick={() => handleDelete(job.id)}
+                        disabled={actionLoading === job.id}
+                        className="text-xs font-medium text-[#DC2626] hover:underline"
+                      >
+                        Yes
+                      </button>
+                      <button
+                        onClick={() => setDeleteConfirm(null)}
+                        className="text-xs text-[#667085] hover:underline"
+                      >
+                        No
+                      </button>
                     </div>
                   ) : (
                     <div className="flex items-center gap-1">
                       <button
-                        onClick={() => navigate('applicants')}
-                        title="View applicants"
+                        onClick={() => navigate('job-details', job.id)}
+                        title="View job details"
                         className="p-1.5 rounded hover:bg-[#F2F4F7] text-[#667085] hover:text-[#172033] transition-colors"
                       >
                         <EyeIcon size={14} />
                       </button>
                       <button
-                        onClick={() => navigate('post-job')}
+                        onClick={() => navigate('post-job', job.id)}
                         title="Edit job"
                         className="p-1.5 rounded hover:bg-[#F2F4F7] text-[#667085] hover:text-[#172033] transition-colors"
                       >
@@ -140,10 +221,21 @@ export default function MyJobs({ navigate }: Props) {
                       {job.status === 'Open' && (
                         <button
                           onClick={() => handleClose(job.id)}
+                          disabled={actionLoading === job.id}
                           title="Close listing"
                           className="text-xs px-2 py-1 border border-[#E4E7EC] rounded text-[#667085] hover:bg-[#F7F8FA] transition-colors"
                         >
                           Close
+                        </button>
+                      )}
+                      {job.status === 'Closed' && (
+                        <button
+                          onClick={() => handleReopen(job.id)}
+                          disabled={actionLoading === job.id}
+                          title="Reopen listing"
+                          className="text-xs px-2 py-1 border border-[#BFDBFE] rounded text-[#2563EB] bg-[#EFF6FF] hover:bg-[#DBEAFE] transition-colors"
+                        >
+                          Reopen
                         </button>
                       )}
                       <button
@@ -158,7 +250,7 @@ export default function MyJobs({ navigate }: Props) {
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && (
+            {!loading && filtered.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-5 py-12 text-center text-sm text-[#667085]">
                   No jobs found.

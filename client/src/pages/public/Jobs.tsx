@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { JOBS } from '../../mockData'
+import { useState, useEffect, useCallback } from 'react'
 import type { Job } from '../../types'
 import { SearchIcon, MapPinIcon, ChevronLeftIcon, ChevronRightIcon, BookmarkIcon } from '../../components/icons'
+import { jobService, formatUIToBackendJobType } from '../../services/job.service'
+import { getApiErrorMessage } from '../../lib/api'
 
 const JOB_TYPES = ['Full-time', 'Part-time', 'Internship', 'Contract']
 const LOCATIONS = ['San Francisco, CA', 'New York, NY', 'Remote', 'Redmond, WA', 'Austin, TX', 'Cupertino, CA']
@@ -11,10 +12,18 @@ interface Props {
 }
 
 export default function Jobs({ navigate }: Props) {
+  const [jobs, setJobs] = useState<Job[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [total, setTotal] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
+
   const [search, setSearch] = useState('')
+  const [locationInput, setLocationInput] = useState('')
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const [selectedLocations, setSelectedLocations] = useState<string[]>([])
   const [remoteOnly, setRemoteOnly] = useState(false)
+  const [sort, setSort] = useState<'newest' | 'salary_desc' | 'oldest'>('newest')
   const [page, setPage] = useState(1)
   const PER_PAGE = 6
 
@@ -22,16 +31,57 @@ export default function Jobs({ navigate }: Props) {
     setArr(arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val])
   }
 
-  const filtered = JOBS.filter(j => {
-    const matchSearch = !search || j.title.toLowerCase().includes(search.toLowerCase()) || j.company.toLowerCase().includes(search.toLowerCase())
-    const matchType = selectedTypes.length === 0 || selectedTypes.includes(j.type)
-    const matchLoc = selectedLocations.length === 0 || selectedLocations.includes(j.location)
-    const matchRemote = !remoteOnly || j.remote
-    return matchSearch && matchType && matchLoc && matchRemote
-  })
+  const fetchJobs = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
 
-  const totalPages = Math.ceil(filtered.length / PER_PAGE)
-  const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+      let backendJobType: string | undefined = undefined
+      if (selectedTypes.length === 1) {
+        backendJobType = formatUIToBackendJobType(selectedTypes[0])
+      }
+
+      const activeLocation = locationInput || (selectedLocations.length === 1 ? selectedLocations[0] : undefined)
+
+      const result = await jobService.getJobs({
+        search: search.trim() || undefined,
+        location: activeLocation,
+        jobType: backendJobType,
+        isRemote: remoteOnly ? true : undefined,
+        sort,
+        page,
+        limit: PER_PAGE,
+      })
+
+      // If client selected multiple types or locations not fully matched by single parameter, apply client refine
+      let clientRefined = result.jobs
+      if (selectedTypes.length > 1) {
+        clientRefined = clientRefined.filter(j => selectedTypes.includes(j.type))
+      }
+      if (selectedLocations.length > 1) {
+        clientRefined = clientRefined.filter(j => selectedLocations.includes(j.location))
+      }
+
+      setJobs(clientRefined)
+      setTotal(result.total)
+      setTotalPages(Math.max(1, result.totalPages))
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Failed to load jobs. Please try again.'))
+      setJobs([])
+    } finally {
+      setLoading(false)
+    }
+  }, [search, locationInput, selectedTypes, selectedLocations, remoteOnly, sort, page])
+
+  useEffect(() => {
+    fetchJobs()
+  }, [fetchJobs])
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setPage(1)
+    fetchJobs()
+  }
 
   return (
     <div className="bg-[#F7F8FA] min-h-screen">
@@ -39,7 +89,7 @@ export default function Jobs({ navigate }: Props) {
       <div className="bg-[#163A5F] py-8">
         <div className="max-w-[1280px] mx-auto px-6">
           <h1 className="text-2xl font-bold text-white mb-4">Find your next opportunity</h1>
-          <div className="flex flex-col sm:flex-row gap-2">
+          <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row gap-2">
             <div className="flex items-center gap-2 bg-white rounded px-3 py-2.5 flex-1">
               <SearchIcon size={16} className="text-[#667085]" />
               <input
@@ -55,13 +105,18 @@ export default function Jobs({ navigate }: Props) {
               <input
                 type="text"
                 placeholder="Location"
+                value={locationInput}
+                onChange={e => { setLocationInput(e.target.value); setPage(1) }}
                 className="flex-1 text-sm text-[#172033] placeholder-[#667085] outline-none"
               />
             </div>
-            <button className="bg-[#2563EB] text-white px-6 py-2.5 rounded text-sm font-semibold hover:bg-[#1D4ED8] transition-colors shrink-0">
+            <button
+              type="submit"
+              className="bg-[#2563EB] text-white px-6 py-2.5 rounded text-sm font-semibold hover:bg-[#1D4ED8] transition-colors shrink-0"
+            >
               Search
             </button>
-          </div>
+          </form>
         </div>
       </div>
 
@@ -115,9 +170,16 @@ export default function Jobs({ navigate }: Props) {
               </label>
             </div>
 
-            {(selectedTypes.length > 0 || selectedLocations.length > 0 || remoteOnly) && (
+            {(selectedTypes.length > 0 || selectedLocations.length > 0 || remoteOnly || search || locationInput) && (
               <button
-                onClick={() => { setSelectedTypes([]); setSelectedLocations([]); setRemoteOnly(false); setPage(1) }}
+                onClick={() => {
+                  setSelectedTypes([])
+                  setSelectedLocations([])
+                  setRemoteOnly(false)
+                  setSearch('')
+                  setLocationInput('')
+                  setPage(1)
+                }}
                 className="text-xs text-[#2563EB] hover:text-[#1D4ED8] font-medium"
               >
                 Clear all filters
@@ -129,28 +191,71 @@ export default function Jobs({ navigate }: Props) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-[#667085]">
-                Showing <span className="font-semibold text-[#172033]">{filtered.length}</span> jobs
+                Showing <span className="font-semibold text-[#172033]">{total}</span> jobs
               </p>
-              <select className="text-sm text-[#667085] border border-[#E4E7EC] rounded px-2 py-1.5 bg-white outline-none">
-                <option>Most recent</option>
-                <option>Most relevant</option>
-                <option>Salary: High to low</option>
+              <select
+                value={sort}
+                onChange={e => {
+                  const val = e.target.value as 'newest' | 'salary_desc' | 'oldest'
+                  setSort(val)
+                  setPage(1)
+                }}
+                className="text-sm text-[#667085] border border-[#E4E7EC] rounded px-2 py-1.5 bg-white outline-none"
+              >
+                <option value="newest">Most recent</option>
+                <option value="salary_desc">Salary: High to low</option>
+                <option value="oldest">Oldest</option>
               </select>
             </div>
 
-            <div className="space-y-3">
-              {paginated.map(job => (
-                <JobCard key={job.id} job={job} onClick={() => navigate('job-details', job.id)} />
-              ))}
-              {paginated.length === 0 && (
-                <div className="bg-white border border-[#E4E7EC] rounded-lg p-12 text-center">
-                  <p className="text-[#667085] text-sm">No jobs match your filters.</p>
-                  <button onClick={() => { setSelectedTypes([]); setSelectedLocations([]); setRemoteOnly(false) }} className="mt-2 text-sm text-[#2563EB] hover:underline">Clear filters</button>
-                </div>
-              )}
-            </div>
+            {error && (
+              <div className="bg-[#FEF2F2] border border-[#FECACA] rounded p-4 text-sm text-[#DC2626] mb-4">
+                {error}
+              </div>
+            )}
 
-            {totalPages > 1 && (
+            {loading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map(n => (
+                  <div key={n} className="bg-white border border-[#E4E7EC] rounded-lg p-5 animate-pulse">
+                    <div className="flex items-start gap-4">
+                      <div className="w-11 h-11 bg-[#F2F4F7] rounded shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-[#F2F4F7] rounded w-1/3" />
+                        <div className="h-3 bg-[#F2F4F7] rounded w-1/4" />
+                        <div className="h-3 bg-[#F2F4F7] rounded w-1/2 mt-2" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {jobs.map(job => (
+                  <JobCard key={job.id} job={job} onClick={() => navigate('job-details', job.id)} />
+                ))}
+                {jobs.length === 0 && (
+                  <div className="bg-white border border-[#E4E7EC] rounded-lg p-12 text-center">
+                    <p className="text-[#667085] text-sm">No jobs match your criteria.</p>
+                    <button
+                      onClick={() => {
+                        setSelectedTypes([])
+                        setSelectedLocations([])
+                        setRemoteOnly(false)
+                        setSearch('')
+                        setLocationInput('')
+                        setPage(1)
+                      }}
+                      className="mt-2 text-sm text-[#2563EB] hover:underline"
+                    >
+                      Clear filters
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!loading && totalPages > 1 && (
               <div className="flex items-center justify-between mt-6">
                 <p className="text-sm text-[#667085]">
                   Page {page} of {totalPages}

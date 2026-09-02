@@ -1,9 +1,11 @@
-import { useState } from 'react'
-import { JOBS } from '../../mockData'
+import { useState, useEffect } from 'react'
+import type { Job } from '../../types'
 import {
   MapPinIcon, BriefcaseIcon, DollarSignIcon, ClockIcon, UsersIcon,
   BookmarkIcon, BookmarkFilledIcon, BuildingIcon, GlobeIcon, ChevronLeftIcon, CheckIcon,
 } from '../../components/icons'
+import { jobService } from '../../services/job.service'
+import { getApiErrorMessage } from '../../lib/api'
 
 interface Props {
   jobId: string | null
@@ -11,16 +13,111 @@ interface Props {
 }
 
 export default function JobDetails({ jobId, navigate }: Props) {
+  const [job, setJob] = useState<Job | null>(null)
+  const [otherJobs, setOtherJobs] = useState<Job[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [applied, setApplied] = useState(false)
   const [showApplyModal, setShowApplyModal] = useState(false)
 
-  const job = JOBS.find(j => j.id === jobId) ?? JOBS[0]
-  const otherJobs = JOBS.filter(j => j.id !== job.id && j.company !== job.company).slice(0, 3)
+  useEffect(() => {
+    async function loadJobDetails() {
+      if (!jobId) {
+        // If no jobId passed, load first available job
+        try {
+          setLoading(true)
+          const result = await jobService.getJobs({ limit: 4 })
+          if (result.jobs.length > 0) {
+            setJob(result.jobs[0])
+            setOtherJobs(result.jobs.slice(1))
+          } else {
+            setError('No job details found.')
+          }
+        } catch (err: unknown) {
+          setError(getApiErrorMessage(err, 'Failed to load job details.'))
+        } finally {
+          setLoading(false)
+        }
+        return
+      }
+
+      try {
+        setLoading(true)
+        setError(null)
+        const [fetchedJob, listResult] = await Promise.all([
+          jobService.getJobById(jobId),
+          jobService.getJobs({ limit: 4 }),
+        ])
+        setJob(fetchedJob)
+        setOtherJobs(listResult.jobs.filter(j => j.id !== jobId).slice(0, 3))
+      } catch (err: unknown) {
+        setError(getApiErrorMessage(err, 'Job not found or no longer available.'))
+        setJob(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadJobDetails()
+  }, [jobId])
 
   const handleApply = () => {
     setApplied(true)
     setShowApplyModal(false)
+  }
+
+  if (loading) {
+    return (
+      <div className="bg-[#F7F8FA] min-h-screen">
+        <div className="bg-white border-b border-[#E4E7EC]">
+          <div className="max-w-[1280px] mx-auto px-6 py-4">
+            <button
+              onClick={() => navigate('jobs')}
+              className="flex items-center gap-1.5 text-sm text-[#667085] hover:text-[#172033] transition-colors"
+            >
+              <ChevronLeftIcon size={16} /> Back to jobs
+            </button>
+          </div>
+        </div>
+        <div className="max-w-[1280px] mx-auto px-6 py-8">
+          <div className="bg-white border border-[#E4E7EC] rounded-lg p-8 animate-pulse space-y-4">
+            <div className="h-6 bg-[#F2F4F7] rounded w-1/3" />
+            <div className="h-4 bg-[#F2F4F7] rounded w-1/4" />
+            <div className="h-24 bg-[#F2F4F7] rounded mt-4" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !job) {
+    return (
+      <div className="bg-[#F7F8FA] min-h-screen">
+        <div className="bg-white border-b border-[#E4E7EC]">
+          <div className="max-w-[1280px] mx-auto px-6 py-4">
+            <button
+              onClick={() => navigate('jobs')}
+              className="flex items-center gap-1.5 text-sm text-[#667085] hover:text-[#172033] transition-colors"
+            >
+              <ChevronLeftIcon size={16} /> Back to jobs
+            </button>
+          </div>
+        </div>
+        <div className="max-w-[1280px] mx-auto px-6 py-16 text-center">
+          <div className="bg-white border border-[#E4E7EC] rounded-lg p-12 max-w-md mx-auto">
+            <h2 className="text-xl font-bold text-[#172033] mb-2">Job Not Found</h2>
+            <p className="text-sm text-[#667085] mb-6">{error || 'The job you are looking for is not available or has been removed.'}</p>
+            <button
+              onClick={() => navigate('jobs')}
+              className="bg-[#2563EB] text-white px-5 py-2.5 rounded text-sm font-semibold hover:bg-[#1D4ED8] transition-colors"
+            >
+              Browse All Jobs
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -118,44 +215,60 @@ export default function JobDetails({ jobId, navigate }: Props) {
             {/* Description */}
             <div className="bg-white border border-[#E4E7EC] rounded-lg p-6">
               <h2 className="text-lg font-semibold text-[#172033] mb-4">About this role</h2>
-              <p className="text-sm text-[#667085] leading-relaxed">{job.description}</p>
+              <p className="text-sm text-[#667085] leading-relaxed whitespace-pre-line">{job.description}</p>
 
-              <h3 className="text-base font-semibold text-[#172033] mt-6 mb-3">Responsibilities</h3>
-              <ul className="space-y-2">
-                {job.responsibilities.map((r, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-[#667085]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#2563EB] shrink-0 mt-2" />
-                    {r}
-                  </li>
-                ))}
-              </ul>
+              {job.responsibilities && job.responsibilities.length > 0 && (
+                <>
+                  <h3 className="text-base font-semibold text-[#172033] mt-6 mb-3">Responsibilities</h3>
+                  <ul className="space-y-2">
+                    {job.responsibilities.map((r, i) => (
+                      <li key={i} className="flex items-start gap-3 text-sm text-[#667085]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#2563EB] shrink-0 mt-2" />
+                        {r}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
 
-              <h3 className="text-base font-semibold text-[#172033] mt-6 mb-3">Requirements</h3>
-              <ul className="space-y-2">
-                {job.requirements.map((r, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-[#667085]">
-                    <CheckIcon size={14} className="text-[#0F9D8A] shrink-0 mt-0.5" />
-                    {r}
-                  </li>
-                ))}
-              </ul>
+              {job.requirements && job.requirements.length > 0 && (
+                <>
+                  <h3 className="text-base font-semibold text-[#172033] mt-6 mb-3">Requirements</h3>
+                  <ul className="space-y-2">
+                    {job.requirements.map((r, i) => (
+                      <li key={i} className="flex items-start gap-3 text-sm text-[#667085]">
+                        <CheckIcon size={14} className="text-[#0F9D8A] shrink-0 mt-0.5" />
+                        {r}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
 
-              <h3 className="text-base font-semibold text-[#172033] mt-6 mb-3">Skills required</h3>
-              <div className="flex flex-wrap gap-2">
-                {job.skills.map(s => (
-                  <span key={s} className="text-sm bg-[#EFF6FF] text-[#2563EB] px-3 py-1.5 rounded-full font-medium">{s}</span>
-                ))}
-              </div>
-
-              <h3 className="text-base font-semibold text-[#172033] mt-6 mb-3">Benefits</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {job.benefits.map(b => (
-                  <div key={b} className="flex items-center gap-2 text-sm text-[#667085]">
-                    <CheckIcon size={14} className="text-[#0F9D8A] shrink-0" />
-                    {b}
+              {job.skills && job.skills.length > 0 && (
+                <>
+                  <h3 className="text-base font-semibold text-[#172033] mt-6 mb-3">Skills required</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {job.skills.map(s => (
+                      <span key={s} className="text-sm bg-[#EFF6FF] text-[#2563EB] px-3 py-1.5 rounded-full font-medium">{s}</span>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </>
+              )}
+
+              {job.benefits && job.benefits.length > 0 && (
+                <>
+                  <h3 className="text-base font-semibold text-[#172033] mt-6 mb-3">Benefits</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {job.benefits.map(b => (
+                      <div key={b} className="flex items-center gap-2 text-sm text-[#667085]">
+                        <CheckIcon size={14} className="text-[#0F9D8A] shrink-0" />
+                        {b}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -171,14 +284,14 @@ export default function JobDetails({ jobId, navigate }: Props) {
                 {job.company[0]}
               </div>
               <h4 className="font-semibold text-[#172033]">{job.company}</h4>
-              <p className="text-sm text-[#667085] mb-4">Technology · 1,000–5,000 employees</p>
+              <p className="text-sm text-[#667085] mb-4">Leading Employer · Hiring on SkillBridge</p>
               <div className="space-y-2.5">
                 <div className="flex items-center gap-2 text-sm text-[#667085]">
                   <MapPinIcon size={14} className="shrink-0" /> {job.location}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-[#667085]">
                   <GlobeIcon size={14} className="shrink-0" />
-                  <a href="#" className="text-[#2563EB] hover:underline text-sm">{job.company.toLowerCase()}.com</a>
+                  <span className="text-[#2563EB] text-sm">{job.company.toLowerCase().replace(/[^a-z0-9]/g, '')}.com</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-[#667085]">
                   <BuildingIcon size={14} className="shrink-0" /> {job.department}
