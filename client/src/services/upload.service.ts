@@ -57,4 +57,30 @@ export const uploadService = {
     );
     return { message: response.data.message };
   },
+
+  // Upload Company Logo (Recruiter only, JPG, JPEG, PNG, WEBP, max 5MB)
+  async uploadCompanyLogo(file: File): Promise<{ logo: string; logoPublicId: string }> {
+    const formData = new FormData();
+    formData.append('logo', file);
+
+    const response = await api.post<{
+      success: boolean;
+      message: string;
+      data: { logo: string; logoPublicId: string };
+    }>('/recruiter/company/logo', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data.data;
+  },
+
+  // Delete Company Logo (Recruiter only)
+  async deleteCompanyLogo(): Promise<{ message: string }> {
+    const response = await api.delete<{ success: boolean; message: string }>(
+      '/recruiter/company/logo'
+    );
+    return { message: response.data.message };
+  },
 };

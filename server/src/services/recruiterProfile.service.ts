@@ -175,7 +175,7 @@ export class RecruiterProfileService {
           });
         }
       }
-    });
+    }, { maxWait: 15000, timeout: 30000 });
 
     return this.getRecruiterProfile(user);
   }
