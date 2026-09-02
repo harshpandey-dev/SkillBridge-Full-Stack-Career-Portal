@@ -8,6 +8,7 @@ import { BriefcaseIcon, CheckIcon, TrendingUpIcon, EyeIcon, ChevronRightIcon } f
 import { applicationService } from '../../services/application.service'
 import { jobService } from '../../services/job.service'
 import { savedJobService } from '../../services/savedJob.service'
+import { studentProfileService } from '../../services/studentProfile.service'
 
 const TrendingUpIconLocal = TrendingUpIcon
 
@@ -28,18 +29,21 @@ export default function StudentDashboard({ user, navigate }: Props) {
   const [applications, setApplications] = useState<Application[]>([])
   const [jobs, setJobs] = useState<Job[]>([])
   const [savedCount, setSavedCount] = useState(0)
+  const [completionPercentage, setCompletionPercentage] = useState(0)
 
   useEffect(() => {
     async function loadDashboardData() {
       try {
-        const [appResult, jobResult, savedResult] = await Promise.all([
+        const [appResult, jobResult, savedResult, compResult] = await Promise.all([
           applicationService.getMyApplications({ limit: 20 }),
           jobService.getJobs({ limit: 4 }),
           savedJobService.getMySavedJobs({ limit: 1 }).catch(() => ({ total: 0 })),
+          studentProfileService.getProfileCompletion().catch(() => ({ completionPercentage: 0 })),
         ])
         setApplications(appResult.items)
         setJobs(jobResult.jobs)
         setSavedCount(savedResult.total)
+        setCompletionPercentage(compResult.completionPercentage || 0)
       } catch {
         // Fallback gracefully
       }
@@ -73,6 +77,13 @@ export default function StudentDashboard({ user, navigate }: Props) {
 
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 
+  const initials = user.name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(n => n[0].toUpperCase())
+    .join('') || 'ST'
+
   return (
     <div className="space-y-6 max-w-[1200px]">
       {/* Welcome */}
@@ -92,7 +103,13 @@ export default function StudentDashboard({ user, navigate }: Props) {
       {/* Profile completion */}
       <div className="bg-[#EFF6FF] border border-[#BFDBFE] rounded-lg p-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#163A5F] flex items-center justify-center text-white font-bold text-sm">{user.name.split(' ').map(n => n[0]).join('')}</div>
+          {user.profileImage ? (
+            <img src={user.profileImage} alt={user.name} className="w-10 h-10 rounded-full object-cover border border-[#BFDBFE]" />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-[#163A5F] flex items-center justify-center text-white font-bold text-sm">
+              {initials}
+            </div>
+          )}
           <div>
             <p className="text-sm font-semibold text-[#172033]">Complete your profile to increase visibility</p>
             <p className="text-xs text-[#667085] mt-0.5">Recruiters with complete profiles get 3× more views</p>
@@ -100,9 +117,12 @@ export default function StudentDashboard({ user, navigate }: Props) {
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <div className="flex flex-col items-end">
-            <span className="text-sm font-bold text-[#2563EB]">78%</span>
+            <span className="text-sm font-bold text-[#2563EB]">{completionPercentage}%</span>
             <div className="w-28 h-1.5 bg-[#BFDBFE] rounded-full mt-1">
-              <div className="h-1.5 bg-[#2563EB] rounded-full" style={{ width: '78%' }} />
+              <div
+                className="h-1.5 bg-[#2563EB] rounded-full transition-all duration-300"
+                style={{ width: `${completionPercentage}%` }}
+              />
             </div>
           </div>
           <button

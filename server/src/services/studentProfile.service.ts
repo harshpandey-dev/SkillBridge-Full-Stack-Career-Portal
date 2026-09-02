@@ -196,7 +196,7 @@ export class StudentProfileService {
           data: profileUpdateData,
         });
       }
-    });
+    }, { maxWait: 15000, timeout: 30000 });
 
     return this.getStudentProfile(user);
   }
