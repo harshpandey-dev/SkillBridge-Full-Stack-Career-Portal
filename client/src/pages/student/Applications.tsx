@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { MY_APPLICATIONS } from '../../mockData'
-import type { ApplicationStatus } from '../../types'
+import { useState, useEffect, useCallback } from 'react'
+import type { Application, ApplicationStatus } from '../../types'
 import { SearchIcon, XIcon } from '../../components/icons'
+import { applicationService, formatUIToBackendApplicationStatus } from '../../services/application.service'
+import { getApiErrorMessage } from '../../lib/api'
 
 const STATUSES: ApplicationStatus[] = ['Applied', 'Under Review', 'Shortlisted', 'Rejected', 'Selected']
 
@@ -18,29 +19,79 @@ interface Props {
 }
 
 export default function Applications({ navigate }: Props) {
+  const [applications, setApplications] = useState<Application[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [filterStatus, setFilterStatus] = useState<ApplicationStatus | 'All'>('All')
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
 
-  const filtered = MY_APPLICATIONS.filter(a => {
-    const matchStatus = filterStatus === 'All' || a.status === filterStatus
-    const matchSearch = !search || a.jobTitle.toLowerCase().includes(search.toLowerCase()) || a.company.toLowerCase().includes(search.toLowerCase())
-    return matchStatus && matchSearch
+  const [statusCounts, setStatusCounts] = useState<Record<string, number>>({
+    All: 0,
+    Applied: 0,
+    'Under Review': 0,
+    Shortlisted: 0,
+    Rejected: 0,
+    Selected: 0,
   })
 
-  const counts: Record<string, number> = { All: MY_APPLICATIONS.length }
-  STATUSES.forEach(s => { counts[s] = MY_APPLICATIONS.filter(a => a.status === s).length })
+  const fetchApplications = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
 
-  const selectedApp = MY_APPLICATIONS.find(a => a.id === selected)
+      const backendStatus = filterStatus !== 'All' ? formatUIToBackendApplicationStatus(filterStatus) : undefined
+
+      const result = await applicationService.getMyApplications({
+        search: search.trim() || undefined,
+        status: backendStatus,
+        page,
+        limit: 20,
+      })
+
+      setApplications(result.items)
+      setTotalCount(result.total)
+      setTotalPages(Math.max(1, result.totalPages))
+
+      // Update aggregate counts when fetching all
+      if (filterStatus === 'All' && !search.trim()) {
+        const counts: Record<string, number> = { All: result.total }
+        STATUSES.forEach(s => {
+          counts[s] = result.items.filter(a => a.status === s).length
+        })
+        setStatusCounts(counts)
+      }
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Failed to load applications.'))
+      setApplications([])
+    } finally {
+      setLoading(false)
+    }
+  }, [filterStatus, search, page])
+
+  useEffect(() => {
+    fetchApplications()
+  }, [fetchApplications])
+
+  const selectedApp = applications.find(a => a.id === selected)
 
   return (
     <div className="space-y-5 max-w-[1200px]">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#172033]">My Applications</h1>
-          <p className="text-sm text-[#667085] mt-0.5">{MY_APPLICATIONS.length} total · tracking all your activity</p>
+          <p className="text-sm text-[#667085] mt-0.5">{totalCount} total · tracking all your activity</p>
         </div>
       </div>
+
+      {error && (
+        <div className="bg-[#FEF2F2] border border-[#FECACA] rounded p-4 text-sm text-[#DC2626]">
+          {error}
+        </div>
+      )}
 
       {/* Status tabs */}
       <div className="flex gap-2 overflow-x-auto pb-1">
@@ -49,7 +100,7 @@ export default function Applications({ navigate }: Props) {
           return (
             <button
               key={s}
-              onClick={() => setFilterStatus(s)}
+              onClick={() => { setFilterStatus(s); setPage(1) }}
               className={`flex items-center gap-2 px-3 py-2 rounded text-sm font-medium whitespace-nowrap transition-all ${
                 isActive
                   ? 'bg-[#163A5F] text-white'
@@ -60,7 +111,7 @@ export default function Applications({ navigate }: Props) {
               <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
                 isActive ? 'bg-[rgba(255,255,255,0.2)] text-white' : 'bg-[#F2F4F7] text-[#667085]'
               }`}>
-                {counts[s] ?? 0}
+                {statusCounts[s] ?? 0}
               </span>
             </button>
           )
@@ -74,7 +125,7 @@ export default function Applications({ navigate }: Props) {
           type="text"
           placeholder="Search by job or company..."
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={e => { setSearch(e.target.value); setPage(1) }}
           className="flex-1 text-sm text-[#172033] placeholder-[#94A3B8] outline-none"
         />
       </div>
@@ -93,58 +144,66 @@ export default function Applications({ navigate }: Props) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map(app => {
-              const config = STATUS_CONFIG[app.status]
-              return (
-                <tr key={app.id} className={`border-b border-[#F2F4F7] hover:bg-[#FAFBFC] transition-colors ${selected === app.id ? 'bg-[#F7F9FF]' : ''}`}>
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded flex items-center justify-center text-white font-bold text-sm shrink-0" style={{ backgroundColor: app.companyColor }}>
-                        {app.company[0]}
+            {loading ? (
+              <tr>
+                <td colSpan={6} className="px-5 py-12 text-center text-sm text-[#667085]">
+                  <div className="inline-block animate-spin rounded-full h-5 w-5 border-2 border-[#2563EB] border-t-transparent mr-2 align-middle" />
+                  Loading your applications...
+                </td>
+              </tr>
+            ) : applications.length > 0 ? (
+              applications.map(app => {
+                const config = STATUS_CONFIG[app.status] || STATUS_CONFIG.Applied
+                return (
+                  <tr key={app.id} className={`border-b border-[#F2F4F7] hover:bg-[#FAFBFC] transition-colors ${selected === app.id ? 'bg-[#F7F9FF]' : ''}`}>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded flex items-center justify-center text-white font-bold text-sm shrink-0" style={{ backgroundColor: app.companyColor }}>
+                          {app.company[0]}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-[#172033]">{app.jobTitle}</p>
+                          <p className="text-xs text-[#667085]">{app.company} · {app.location}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-semibold text-[#172033]">{app.jobTitle}</p>
-                        <p className="text-xs text-[#667085]">{app.company} · {app.location}</p>
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                        app.type === 'Internship' ? 'bg-[#E6F7F5] text-[#0F9D8A]' : 'bg-[#EFF6FF] text-[#2563EB]'
+                      }`}>
+                        {app.type}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-sm text-[#667085]">{app.appliedDate}</td>
+                    <td className="px-5 py-4 text-sm text-[#667085]">{app.lastUpdated}</td>
+                    <td className="px-5 py-4">
+                      <span className={`inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full border ${config.bg} ${config.text} ${config.border}`}>
+                        {app.status === 'Selected' && <span className="w-1.5 h-1.5 rounded-full bg-[#059669] mr-1.5" />}
+                        {app.status === 'Shortlisted' && <span className="w-1.5 h-1.5 rounded-full bg-[#0F9D8A] mr-1.5" />}
+                        {app.status}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => navigate('job-details', app.jobId)}
+                          className="text-xs text-[#2563EB] hover:underline font-medium"
+                        >
+                          View job
+                        </button>
+                        <span className="text-[#E4E7EC]">·</span>
+                        <button
+                          onClick={() => setSelected(selected === app.id ? null : app.id)}
+                          className="text-xs text-[#667085] hover:text-[#172033] transition-colors"
+                        >
+                          Details
+                        </button>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4">
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                      app.type === 'Internship' ? 'bg-[#E6F7F5] text-[#0F9D8A]' : 'bg-[#EFF6FF] text-[#2563EB]'
-                    }`}>
-                      {app.type}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4 text-sm text-[#667085]">{app.appliedDate}</td>
-                  <td className="px-5 py-4 text-sm text-[#667085]">{app.lastUpdated}</td>
-                  <td className="px-5 py-4">
-                    <span className={`inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full border ${config.bg} ${config.text} ${config.border}`}>
-                      {app.status === 'Selected' && <span className="w-1.5 h-1.5 rounded-full bg-[#059669] mr-1.5" />}
-                      {app.status === 'Shortlisted' && <span className="w-1.5 h-1.5 rounded-full bg-[#0F9D8A] mr-1.5" />}
-                      {app.status}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => navigate('job-details', app.jobId)}
-                        className="text-xs text-[#2563EB] hover:underline font-medium"
-                      >
-                        View job
-                      </button>
-                      <span className="text-[#E4E7EC]">·</span>
-                      <button
-                        onClick={() => setSelected(selected === app.id ? null : app.id)}
-                        className="text-xs text-[#667085] hover:text-[#172033] transition-colors"
-                      >
-                        Details
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )
-            })}
-            {filtered.length === 0 && (
+                    </td>
+                  </tr>
+                )
+              })
+            ) : (
               <tr>
                 <td colSpan={6} className="px-5 py-12 text-center text-sm text-[#667085]">
                   No applications match your filters.
@@ -154,6 +213,22 @@ export default function Applications({ navigate }: Props) {
           </tbody>
         </table>
       </div>
+
+      {!loading && totalPages > 1 && (
+        <div className="flex justify-center gap-1 pt-2">
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              onClick={() => setPage(i + 1)}
+              className={`w-8 h-8 rounded text-sm font-medium transition-colors ${
+                page === i + 1 ? 'bg-[#2563EB] text-white' : 'text-[#667085] hover:bg-[#F2F4F7]'
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Application timeline info box */}
       {selectedApp && (

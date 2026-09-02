@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import type { Job } from '../../types'
 import { SearchIcon, MapPinIcon, BookmarkIcon, BookmarkFilledIcon } from '../../components/icons'
 import { jobService, formatUIToBackendJobType } from '../../services/job.service'
+import { applicationService } from '../../services/application.service'
+import { useAuth } from '../../context/AuthContext'
 import { getApiErrorMessage } from '../../lib/api'
 
 const JOB_TYPES = ['All', 'Full-time', 'Internship', 'Part-time', 'Contract']
@@ -12,6 +14,7 @@ interface Props {
 }
 
 export default function Opportunities({ navigate }: Props) {
+  const { user, role } = useAuth()
   const [jobs, setJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -24,6 +27,8 @@ export default function Opportunities({ navigate }: Props) {
   const [remoteOnly, setRemoteOnly] = useState(false)
   const [saved, setSaved] = useState<string[]>([])
   const [applied, setApplied] = useState<string[]>([])
+  const [applyingId, setApplyingId] = useState<string | null>(null)
+  const [applyError, setApplyError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
   const PER_PAGE = 5
 
@@ -65,8 +70,41 @@ export default function Opportunities({ navigate }: Props) {
     fetchJobs()
   }, [fetchJobs])
 
-  const handleApply = (jobId: string) => {
-    setApplied(prev => [...prev, jobId])
+  // Load existing student applications to reflect applied states
+  useEffect(() => {
+    async function loadAppliedJobs() {
+      if (user && role === 'student') {
+        try {
+          const res = await applicationService.getMyApplications({ limit: 50 })
+          setApplied(res.items.map(a => a.jobId))
+        } catch {
+          // Ignore
+        }
+      }
+    }
+    loadAppliedJobs()
+  }, [user, role])
+
+  const handleApply = async (jobId: string) => {
+    if (!user) {
+      navigate('login')
+      return
+    }
+    if (role !== 'student') {
+      alert('Only students can apply for jobs.')
+      return
+    }
+
+    try {
+      setApplyingId(jobId)
+      setApplyError(null)
+      await applicationService.applyForJob(jobId)
+      setApplied(prev => (prev.includes(jobId) ? prev : [...prev, jobId]))
+    } catch (err: unknown) {
+      setApplyError(getApiErrorMessage(err, 'Failed to apply for job.'))
+    } finally {
+      setApplyingId(null)
+    }
   }
 
   return (
@@ -75,6 +113,13 @@ export default function Opportunities({ navigate }: Props) {
         <h1 className="text-2xl font-bold text-[#172033]">Opportunities</h1>
         <p className="text-sm text-[#667085] mt-0.5">Discover roles matched to your profile and skills</p>
       </div>
+
+      {applyError && (
+        <div className="bg-[#FEF2F2] border border-[#FECACA] rounded p-3 text-sm text-[#DC2626] flex justify-between items-center">
+          <span>{applyError}</span>
+          <button onClick={() => setApplyError(null)} className="text-xs text-[#DC2626] underline">Dismiss</button>
+        </div>
+      )}
 
       <div className="flex gap-5">
         {/* Filters */}
@@ -235,10 +280,11 @@ export default function Opportunities({ navigate }: Props) {
                             <span className="text-xs font-medium text-[#0F9D8A] bg-[#E6F7F5] px-3 py-1.5 rounded">Applied ✓</span>
                           ) : (
                             <button
+                              disabled={applyingId === job.id}
                               onClick={() => handleApply(job.id)}
-                              className="text-xs font-semibold bg-[#2563EB] text-white px-4 py-1.5 rounded hover:bg-[#1D4ED8] transition-colors"
+                              className="text-xs font-semibold bg-[#2563EB] text-white px-4 py-1.5 rounded hover:bg-[#1D4ED8] disabled:opacity-60 transition-colors"
                             >
-                              Apply now
+                              {applyingId === job.id ? 'Applying…' : 'Apply now'}
                             </button>
                           )}
                           <button

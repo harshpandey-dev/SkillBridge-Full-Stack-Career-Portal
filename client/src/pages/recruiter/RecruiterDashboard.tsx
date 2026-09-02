@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
-import { APPLICANTS, CHART_DATA } from '../../mockData'
-import type { NavUser, Job } from '../../types'
+import { CHART_DATA } from '../../mockData'
+import type { NavUser, Job, Applicant } from '../../types'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   Legend,
 } from 'recharts'
 import { BriefcaseIcon, UsersIcon, ChevronRightIcon, PlusIcon, TrendingUpIcon } from '../../components/icons'
 import { jobService } from '../../services/job.service'
+import { applicationService } from '../../services/application.service'
 
 const TrendingUpIcon2 = TrendingUpIcon
 
@@ -26,29 +27,59 @@ interface Props {
 export default function RecruiterDashboard({ user, navigate }: Props) {
   const [recruiterJobs, setRecruiterJobs] = useState<Job[]>([])
   const [activeJobsCount, setActiveJobsCount] = useState(0)
-  const recentApplicants = APPLICANTS.slice(0, 5)
+  const [applicants, setApplicants] = useState<Applicant[]>([])
 
   useEffect(() => {
-    async function loadDashboardJobs() {
+    async function loadDashboardData() {
       try {
         const result = await jobService.getMyJobs({ limit: 10 })
-        setRecruiterJobs(result.jobs.slice(0, 5))
-        setActiveJobsCount(result.jobs.filter(j => j.status === 'Open').length)
+        const jobs = result.jobs
+        setRecruiterJobs(jobs.slice(0, 5))
+        setActiveJobsCount(jobs.filter(j => j.status === 'Open').length)
+
+        if (jobs.length > 0) {
+          const promises = jobs.map(j =>
+            applicationService.getJobApplicants(j.id, { limit: 10 }).catch(() => ({ items: [] }))
+          )
+          const appResults = await Promise.all(promises)
+          const allApps = appResults.flatMap((r, i) =>
+            r.items.map(a => ({ ...a, jobTitle: jobs[i]?.title || a.jobTitle }))
+          )
+          setApplicants(allApps)
+        }
       } catch {
         // Fallback silently if offline or token refreshing
       }
     }
-    loadDashboardJobs()
+    loadDashboardData()
   }, [])
 
   const companyName = user.recruiterProfile?.company?.name || 'Company'
   const position = user.recruiterProfile?.position || 'Recruiter'
 
+  const recentApplicants = applicants.slice(0, 5)
+
+  const pipelineCounts = {
+    applied: applicants.filter(a => a.status === 'Applied').length,
+    underReview: applicants.filter(a => a.status === 'Under Review').length,
+    shortlisted: applicants.filter(a => a.status === 'Shortlisted').length,
+    selected: applicants.filter(a => a.status === 'Selected').length,
+  }
+
+  const totalAppCount = applicants.length
+
+  const pipeline = [
+    { stage: 'Applied', count: pipelineCounts.applied, color: '#2563EB', pct: totalAppCount ? Math.round((pipelineCounts.applied / totalAppCount) * 100) : 0 },
+    { stage: 'Under Review', count: pipelineCounts.underReview, color: '#D97706', pct: totalAppCount ? Math.round((pipelineCounts.underReview / totalAppCount) * 100) : 0 },
+    { stage: 'Shortlisted', count: pipelineCounts.shortlisted, color: '#0F9D8A', pct: totalAppCount ? Math.round((pipelineCounts.shortlisted / totalAppCount) * 100) : 0 },
+    { stage: 'Hired', count: pipelineCounts.selected, color: '#059669', pct: totalAppCount ? Math.round((pipelineCounts.selected / totalAppCount) * 100) : 0 },
+  ]
+
   const stats = [
     { label: 'Active job postings', value: activeJobsCount, icon: BriefcaseIcon, color: 'bg-[#EFF6FF] text-[#2563EB]', change: '+2 this month' },
-    { label: 'Total applicants', value: APPLICANTS.length, icon: UsersIcon, color: 'bg-[#E6F7F5] text-[#0F9D8A]', change: '+34 this week' },
-    { label: 'Interviews scheduled', value: 8, icon: TrendingUpIcon2, color: 'bg-[#FFFBEB] text-[#D97706]', change: '3 this week' },
-    { label: 'Hires made', value: 2, icon: TrendingUpIcon2, color: 'bg-[#ECFDF5] text-[#059669]', change: 'This quarter' },
+    { label: 'Total applicants', value: totalAppCount, icon: UsersIcon, color: 'bg-[#E6F7F5] text-[#0F9D8A]', change: `Across ${recruiterJobs.length} jobs` },
+    { label: 'Shortlisted candidates', value: pipelineCounts.shortlisted, icon: TrendingUpIcon2, color: 'bg-[#FFFBEB] text-[#D97706]', change: 'In active review' },
+    { label: 'Hires made', value: pipelineCounts.selected, icon: TrendingUpIcon2, color: 'bg-[#ECFDF5] text-[#059669]', change: 'Selected candidates' },
   ]
 
   return (
@@ -106,13 +137,7 @@ export default function RecruiterDashboard({ user, navigate }: Props) {
         {/* Pipeline summary */}
         <div className="lg:col-span-2 bg-white border border-[#E4E7EC] rounded-lg p-5">
           <h2 className="text-base font-semibold text-[#172033] mb-4">Pipeline overview</h2>
-          {[
-            { stage: 'Applied', count: 12, color: '#2563EB', pct: 100 },
-            { stage: 'Under Review', count: 8, color: '#D97706', pct: 67 },
-            { stage: 'Shortlisted', count: 5, color: '#0F9D8A', pct: 42 },
-            { stage: 'Interviewed', count: 3, color: '#163A5F', pct: 25 },
-            { stage: 'Hired', count: 2, color: '#059669', pct: 17 },
-          ].map(({ stage, count, color, pct }) => (
+          {pipeline.map(({ stage, count, color, pct }) => (
             <div key={stage} className="mb-3">
               <div className="flex items-center justify-between text-sm mb-1">
                 <span className="text-[#667085]">{stage}</span>
@@ -124,9 +149,11 @@ export default function RecruiterDashboard({ user, navigate }: Props) {
             </div>
           ))}
           <div className="border-t border-[#F2F4F7] pt-3 mt-4">
-            <p className="text-xs text-[#667085]">Conversion rate</p>
-            <p className="text-xl font-bold text-[#172033]">16.7%</p>
-            <p className="text-xs text-[#0F9D8A] mt-0.5">↑ +2.3% vs. last quarter</p>
+            <p className="text-xs text-[#667085]">Active review rate</p>
+            <p className="text-xl font-bold text-[#172033]">
+              {totalAppCount > 0 ? ((pipelineCounts.shortlisted + pipelineCounts.underReview + pipelineCounts.selected) / totalAppCount * 100).toFixed(1) : '0.0'}%
+            </p>
+            <p className="text-xs text-[#0F9D8A] mt-0.5">Across all active postings</p>
           </div>
         </div>
       </div>
@@ -173,20 +200,26 @@ export default function RecruiterDashboard({ user, navigate }: Props) {
             </button>
           </div>
           <div>
-            {recentApplicants.map((ap, i) => (
-              <div key={ap.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < recentApplicants.length - 1 ? 'border-b border-[#F2F4F7]' : ''}`}>
-                <div className="w-9 h-9 rounded-full bg-[#163A5F] flex items-center justify-center text-white font-semibold text-xs shrink-0">
-                  {ap.name.split(' ').map(n => n[0]).join('')}
+            {recentApplicants.length > 0 ? (
+              recentApplicants.map((ap, i) => (
+                <div key={ap.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < recentApplicants.length - 1 ? 'border-b border-[#F2F4F7]' : ''}`}>
+                  <div className="w-9 h-9 rounded-full bg-[#163A5F] flex items-center justify-center text-white font-semibold text-xs shrink-0">
+                    {ap.name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-[#172033] truncate">{ap.name}</p>
+                    <p className="text-xs text-[#667085]">{ap.university} · {ap.jobTitle}</p>
+                  </div>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${STATUS_COLORS[ap.status] || STATUS_COLORS.Applied}`}>
+                    {ap.status}
+                  </span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[#172033] truncate">{ap.name}</p>
-                  <p className="text-xs text-[#667085]">{ap.university} · {ap.jobTitle}</p>
-                </div>
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${STATUS_COLORS[ap.status]}`}>
-                  {ap.status}
-                </span>
+              ))
+            ) : (
+              <div className="p-6 text-center text-sm text-[#667085]">
+                No applicants yet.
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>

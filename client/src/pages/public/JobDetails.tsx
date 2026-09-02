@@ -5,6 +5,8 @@ import {
   BookmarkIcon, BookmarkFilledIcon, BuildingIcon, GlobeIcon, ChevronLeftIcon, CheckIcon,
 } from '../../components/icons'
 import { jobService } from '../../services/job.service'
+import { applicationService } from '../../services/application.service'
+import { useAuth } from '../../context/AuthContext'
 import { getApiErrorMessage } from '../../lib/api'
 
 interface Props {
@@ -13,6 +15,7 @@ interface Props {
 }
 
 export default function JobDetails({ jobId, navigate }: Props) {
+  const { user, role } = useAuth()
   const [job, setJob] = useState<Job | null>(null)
   const [otherJobs, setOtherJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
@@ -20,11 +23,13 @@ export default function JobDetails({ jobId, navigate }: Props) {
   const [saved, setSaved] = useState(false)
   const [applied, setApplied] = useState(false)
   const [showApplyModal, setShowApplyModal] = useState(false)
+  const [coverLetter, setCoverLetter] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [modalError, setModalError] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadJobDetails() {
       if (!jobId) {
-        // If no jobId passed, load first available job
         try {
           setLoading(true)
           const result = await jobService.getJobs({ limit: 4 })
@@ -51,6 +56,17 @@ export default function JobDetails({ jobId, navigate }: Props) {
         ])
         setJob(fetchedJob)
         setOtherJobs(listResult.jobs.filter(j => j.id !== jobId).slice(0, 3))
+
+        // Check if current student user already applied for this job
+        if (user && role === 'student') {
+          try {
+            const myApps = await applicationService.getMyApplications({ limit: 50 })
+            const alreadyApplied = myApps.items.some(a => a.jobId === jobId)
+            if (alreadyApplied) setApplied(true)
+          } catch {
+            // Ignore error checking status
+          }
+        }
       } catch (err: unknown) {
         setError(getApiErrorMessage(err, 'Job not found or no longer available.'))
         setJob(null)
@@ -60,11 +76,36 @@ export default function JobDetails({ jobId, navigate }: Props) {
     }
 
     loadJobDetails()
-  }, [jobId])
+  }, [jobId, user, role])
 
-  const handleApply = () => {
-    setApplied(true)
-    setShowApplyModal(false)
+  const handleOpenApplyModal = () => {
+    if (!user) {
+      navigate('login')
+      return
+    }
+    if (role !== 'student') {
+      alert('Only student accounts can apply for jobs.')
+      return
+    }
+    setModalError(null)
+    setShowApplyModal(true)
+  }
+
+  const handleSubmitApplication = async () => {
+    if (!job) return
+    try {
+      setSubmitting(true)
+      setModalError(null)
+      await applicationService.applyForJob(job.id, {
+        coverLetter: coverLetter.trim() || null,
+      })
+      setApplied(true)
+      setShowApplyModal(false)
+    } catch (err: unknown) {
+      setModalError(getApiErrorMessage(err, 'Failed to submit application. Please try again.'))
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (loading) {
@@ -174,7 +215,7 @@ export default function JobDetails({ jobId, navigate }: Props) {
                   </div>
                 ) : (
                   <button
-                    onClick={() => setShowApplyModal(true)}
+                    onClick={handleOpenApplyModal}
                     className="bg-[#2563EB] text-white px-5 py-2.5 rounded text-sm font-semibold hover:bg-[#1D4ED8] transition-colors"
                   >
                     Apply now
@@ -360,33 +401,65 @@ export default function JobDetails({ jobId, navigate }: Props) {
               <h2 className="text-lg font-semibold text-[#172033]">Apply to {job.title}</h2>
               <p className="text-sm text-[#667085] mt-0.5">{job.company} · {job.location}</p>
             </div>
+
+            {modalError && (
+              <div className="mx-6 mt-4 p-3 bg-[#FEF2F2] border border-[#FECACA] rounded text-sm text-[#DC2626]">
+                {modalError}
+              </div>
+            )}
+
             <div className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-[#172033] mb-1.5">Full name</label>
-                <input defaultValue="Alex Chen" className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm text-[#172033] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10" />
+                <input
+                  readOnly
+                  value={user?.name || 'Student Candidate'}
+                  className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm text-[#172033] bg-[#F7F8FA] outline-none"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#172033] mb-1.5">Email address</label>
-                <input defaultValue="alex.chen@stanford.edu" className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm text-[#172033] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10" />
+                <input
+                  readOnly
+                  value={user?.email || 'student@university.edu'}
+                  className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm text-[#172033] bg-[#F7F8FA] outline-none"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#172033] mb-1.5">Cover letter <span className="text-[#667085] font-normal">(optional)</span></label>
-                <textarea rows={4} placeholder="Tell the recruiter why you're a great fit..." className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm text-[#172033] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10 resize-none" />
+                <textarea
+                  rows={4}
+                  value={coverLetter}
+                  onChange={e => setCoverLetter(e.target.value)}
+                  placeholder="Tell the recruiter why you're a great fit..."
+                  className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm text-[#172033] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10 resize-none"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#172033] mb-1.5">Resume</label>
                 <div className="border-2 border-dashed border-[#E4E7EC] rounded p-4 text-center">
-                  <p className="text-sm text-[#667085]">alex-chen-resume-2026.pdf already on file</p>
-                  <button className="text-xs text-[#2563EB] mt-1 hover:underline">Upload different file</button>
+                  <p className="text-sm text-[#667085]">
+                    {user?.studentProfile?.resumeUrl ? 'Profile resume attached' : 'Student resume on profile'}
+                  </p>
+                  <p className="text-xs text-[#94A3B8] mt-1">Managed in your student profile</p>
                 </div>
               </div>
             </div>
             <div className="p-6 border-t border-[#E4E7EC] flex gap-3 justify-end">
-              <button onClick={() => setShowApplyModal(false)} className="px-4 py-2 text-sm font-medium text-[#667085] hover:text-[#172033] border border-[#E4E7EC] rounded hover:bg-[#F7F8FA] transition-colors">
+              <button
+                type="button"
+                onClick={() => setShowApplyModal(false)}
+                className="px-4 py-2 text-sm font-medium text-[#667085] hover:text-[#172033] border border-[#E4E7EC] rounded hover:bg-[#F7F8FA] transition-colors"
+              >
                 Cancel
               </button>
-              <button onClick={handleApply} className="px-5 py-2 text-sm font-semibold bg-[#2563EB] text-white rounded hover:bg-[#1D4ED8] transition-colors">
-                Submit application
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={handleSubmitApplication}
+                className="px-5 py-2 text-sm font-semibold bg-[#2563EB] text-white rounded hover:bg-[#1D4ED8] disabled:opacity-60 transition-colors"
+              >
+                {submitting ? 'Submitting…' : 'Submit application'}
               </button>
             </div>
           </div>

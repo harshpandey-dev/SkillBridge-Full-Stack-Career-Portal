@@ -1,7 +1,9 @@
-import { useState } from 'react'
-import { APPLICANTS, JOBS } from '../../mockData'
-import type { ApplicationStatus } from '../../types'
+import { useState, useEffect, useCallback } from 'react'
+import type { Applicant, ApplicationStatus, Job } from '../../types'
 import { SearchIcon, EyeIcon, DownloadIcon, ChevronDownIcon } from '../../components/icons'
+import { jobService } from '../../services/job.service'
+import { applicationService, formatUIToBackendApplicationStatus } from '../../services/application.service'
+import { getApiErrorMessage } from '../../lib/api'
 
 const STATUS_CONFIG: Record<ApplicationStatus, { bg: string; text: string }> = {
   Applied: { bg: 'bg-[#EFF6FF]', text: 'text-[#2563EB]' },
@@ -22,14 +24,79 @@ interface Props {
 }
 
 export default function Applicants({ navigate: _navigate }: Props) {
-  const [applicants, setApplicants] = useState(APPLICANTS)
+  const [recruiterJobs, setRecruiterJobs] = useState<Job[]>([])
+  const [applicants, setApplicants] = useState<Applicant[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState<ApplicationStatus | 'All'>('All')
   const [filterJob, setFilterJob] = useState('All')
   const [selected, setSelected] = useState<string | null>(null)
   const [statusDropdown, setStatusDropdown] = useState<string | null>(null)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
 
-  const recruiterJobs = JOBS.filter(j => j.recruiterId === 'r1')
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const jobsResult = await jobService.getMyJobs({ limit: 50 })
+      setRecruiterJobs(jobsResult.jobs)
+
+      if (jobsResult.jobs.length === 0) {
+        setApplicants([])
+        return
+      }
+
+      const backendStatus = filterStatus !== 'All' ? formatUIToBackendApplicationStatus(filterStatus) : undefined
+
+      if (filterJob !== 'All') {
+        const targetJob = jobsResult.jobs.find(j => j.title === filterJob || j.id === filterJob)
+        if (targetJob) {
+          const appResult = await applicationService.getJobApplicants(targetJob.id, {
+            search: search.trim() || undefined,
+            status: backendStatus,
+            limit: 50,
+          })
+          setApplicants(appResult.items.map(a => ({ ...a, jobTitle: targetJob.title })))
+        }
+      } else {
+        const promises = jobsResult.jobs.map(j =>
+          applicationService.getJobApplicants(j.id, {
+            search: search.trim() || undefined,
+            status: backendStatus,
+            limit: 50,
+          }).catch(() => ({ items: [] }))
+        )
+        const results = await Promise.all(promises)
+        const combined = results.flatMap((r, i) =>
+          r.items.map(a => ({ ...a, jobTitle: jobsResult.jobs[i]?.title || a.jobTitle }))
+        )
+        setApplicants(combined)
+      }
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, 'Failed to load applicants.'))
+      setApplicants([])
+    } finally {
+      setLoading(false)
+    }
+  }, [filterJob, filterStatus, search])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  const updateStatus = async (id: string, status: ApplicationStatus) => {
+    try {
+      setUpdatingId(id)
+      await applicationService.updateApplicationStatus(id, status)
+      setApplicants(prev => prev.map(a => (a.id === id ? { ...a, status } : a)))
+      setStatusDropdown(null)
+    } catch (err: unknown) {
+      alert(getApiErrorMessage(err, 'Failed to update application status.'))
+    } finally {
+      setUpdatingId(null)
+    }
+  }
 
   const filtered = applicants.filter(a => {
     const matchSearch = !search || a.name.toLowerCase().includes(search.toLowerCase()) || a.university.toLowerCase().includes(search.toLowerCase())
@@ -37,11 +104,6 @@ export default function Applicants({ navigate: _navigate }: Props) {
     const matchJob = filterJob === 'All' || a.jobTitle === filterJob
     return matchSearch && matchStatus && matchJob
   })
-
-  const updateStatus = (id: string, status: ApplicationStatus) => {
-    setApplicants(prev => prev.map(a => a.id === id ? { ...a, status } : a))
-    setStatusDropdown(null)
-  }
 
   const selectedApplicant = applicants.find(a => a.id === selected)
 
@@ -51,6 +113,12 @@ export default function Applicants({ navigate: _navigate }: Props) {
         <h1 className="text-2xl font-bold text-[#172033]">Applicants</h1>
         <p className="text-sm text-[#667085] mt-0.5">{applicants.length} total applications across {recruiterJobs.length} jobs</p>
       </div>
+
+      {error && (
+        <div className="bg-[#FEF2F2] border border-[#FECACA] rounded p-4 text-sm text-[#DC2626]">
+          {error}
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
@@ -106,73 +174,82 @@ export default function Applicants({ navigate: _navigate }: Props) {
               </tr>
             </thead>
             <tbody>
-              {filtered.map(ap => {
-                const config = STATUS_CONFIG[ap.status]
-                const nextOptions = NEXT_STATUS[ap.status] ?? []
-                return (
-                  <tr key={ap.id} className={`border-b border-[#F2F4F7] hover:bg-[#FAFBFC] transition-colors ${selected === ap.id ? 'bg-[#EFF6FF]' : ''}`}>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#163A5F] flex items-center justify-center text-white text-xs font-semibold shrink-0">
-                          {ap.name.split(' ').map(n => n[0]).join('')}
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-[#172033]">{ap.name}</p>
-                          <p className="text-xs text-[#667085]">{ap.major}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 text-sm text-[#667085]">{ap.university}</td>
-                    <td className="px-5 py-4">
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${parseFloat(ap.gpa) >= 3.8 ? 'bg-[#E6F7F5] text-[#0F9D8A]' : 'bg-[#F2F4F7] text-[#667085]'}`}>
-                        {ap.gpa}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-sm text-[#667085]">{ap.jobTitle}</td>
-                    <td className="px-5 py-4">
-                      <div className="relative">
-                        <button
-                          onClick={() => setStatusDropdown(statusDropdown === ap.id ? null : ap.id)}
-                          className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${config.bg} ${config.text}`}
-                        >
-                          {ap.status} {nextOptions.length > 0 && <ChevronDownIcon size={11} />}
-                        </button>
-                        {statusDropdown === ap.id && nextOptions.length > 0 && (
-                          <div className="absolute top-full mt-1 left-0 bg-white border border-[#E4E7EC] rounded shadow-lg z-10 min-w-[140px]">
-                            {nextOptions.map(s => (
-                              <button
-                                key={s}
-                                onClick={() => updateStatus(ap.id, s)}
-                                className={`w-full text-left text-xs px-3 py-2 hover:bg-[#F7F8FA] transition-colors ${STATUS_CONFIG[s].text}`}
-                              >
-                                Move to: {s}
-                              </button>
-                            ))}
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="px-5 py-12 text-center text-sm text-[#667085]">
+                    <div className="inline-block animate-spin rounded-full h-5 w-5 border-2 border-[#2563EB] border-t-transparent mr-2 align-middle" />
+                    Loading applicants...
+                  </td>
+                </tr>
+              ) : filtered.length > 0 ? (
+                filtered.map(ap => {
+                  const config = STATUS_CONFIG[ap.status] || STATUS_CONFIG.Applied
+                  const nextOptions = NEXT_STATUS[ap.status] ?? []
+                  return (
+                    <tr key={ap.id} className={`border-b border-[#F2F4F7] hover:bg-[#FAFBFC] transition-colors ${selected === ap.id ? 'bg-[#EFF6FF]' : ''}`}>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-[#163A5F] flex items-center justify-center text-white text-xs font-semibold shrink-0">
+                            {ap.name.split(' ').map(n => n[0]).join('')}
                           </div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => setSelected(selected === ap.id ? null : ap.id)}
-                          className="p-1.5 rounded hover:bg-[#F2F4F7] text-[#667085] hover:text-[#172033] transition-colors"
-                          title="View profile"
-                        >
-                          <EyeIcon size={14} />
-                        </button>
-                        <button
-                          className="p-1.5 rounded hover:bg-[#F2F4F7] text-[#667085] hover:text-[#172033] transition-colors"
-                          title="Download resume"
-                        >
-                          <DownloadIcon size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-              {filtered.length === 0 && (
+                          <div>
+                            <p className="text-sm font-semibold text-[#172033]">{ap.name}</p>
+                            <p className="text-xs text-[#667085]">{ap.major}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 text-sm text-[#667085]">{ap.university}</td>
+                      <td className="px-5 py-4">
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${parseFloat(ap.gpa) >= 3.8 ? 'bg-[#E6F7F5] text-[#0F9D8A]' : 'bg-[#F2F4F7] text-[#667085]'}`}>
+                          {ap.gpa}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-sm text-[#667085]">{ap.jobTitle}</td>
+                      <td className="px-5 py-4">
+                        <div className="relative">
+                          <button
+                            disabled={updatingId === ap.id}
+                            onClick={() => setStatusDropdown(statusDropdown === ap.id ? null : ap.id)}
+                            className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${config.bg} ${config.text}`}
+                          >
+                            {updatingId === ap.id ? 'Updating…' : ap.status} {nextOptions.length > 0 && <ChevronDownIcon size={11} />}
+                          </button>
+                          {statusDropdown === ap.id && nextOptions.length > 0 && (
+                            <div className="absolute top-full mt-1 left-0 bg-white border border-[#E4E7EC] rounded shadow-lg z-10 min-w-[140px]">
+                              {nextOptions.map(s => (
+                                <button
+                                  key={s}
+                                  onClick={() => updateStatus(ap.id, s)}
+                                  className={`w-full text-left text-xs px-3 py-2 hover:bg-[#F7F8FA] transition-colors ${STATUS_CONFIG[s].text}`}
+                                >
+                                  Move to: {s}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => setSelected(selected === ap.id ? null : ap.id)}
+                            className="p-1.5 rounded hover:bg-[#F2F4F7] text-[#667085] hover:text-[#172033] transition-colors"
+                            title="View profile"
+                          >
+                            <EyeIcon size={14} />
+                          </button>
+                          <button
+                            className="p-1.5 rounded hover:bg-[#F2F4F7] text-[#667085] hover:text-[#172033] transition-colors"
+                            title="Download resume"
+                          >
+                            <DownloadIcon size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
+              ) : (
                 <tr>
                   <td colSpan={6} className="px-5 py-12 text-center text-sm text-[#667085]">No applicants match your filters.</td>
                 </tr>

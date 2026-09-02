@@ -111,10 +111,11 @@ export class JobService {
       throw new BadRequestError('Recruiter must be associated with a company to post jobs.');
     }
 
-    return prisma.$transaction(async tx => {
-      const skillIds = await this.resolveSkills(tx, input.skills || []);
+    return prisma.$transaction(
+      async tx => {
+        const skillIds = await this.resolveSkills(tx, input.skills || []);
 
-      const job = await tx.job.create({
+        const job = await tx.job.create({
         data: {
           recruiterId: recruiterProfile.id,
           companyId: recruiterProfile.companyId!,
@@ -142,7 +143,7 @@ export class JobService {
       });
 
       return job;
-    });
+    }, { maxWait: 15000, timeout: 30000 });
   }
 
   // 2. Update an existing Job (Owner or Admin)
@@ -192,7 +193,7 @@ export class JobService {
       });
 
       return updatedJob;
-    });
+    }, { maxWait: 15000, timeout: 30000 });
   }
 
   // 3. Delete a Job (Owner or Admin)

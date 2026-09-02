@@ -1,9 +1,12 @@
-import { MY_APPLICATIONS, JOBS, CHART_DATA } from '../../mockData'
-import type { NavUser } from '../../types'
+import { useState, useEffect } from 'react'
+import { CHART_DATA } from '../../mockData'
+import type { NavUser, Application, Job } from '../../types'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
 import { BriefcaseIcon, CheckIcon, TrendingUpIcon, EyeIcon, ChevronRightIcon } from '../../components/icons'
+import { applicationService } from '../../services/application.service'
+import { jobService } from '../../services/job.service'
 
 const TrendingUpIconLocal = TrendingUpIcon
 
@@ -21,14 +24,48 @@ interface Props {
 }
 
 export default function StudentDashboard({ user, navigate }: Props) {
-  const recent = MY_APPLICATIONS.slice(0, 4)
-  const latestJobs = JOBS.slice(0, 4)
+  const [applications, setApplications] = useState<Application[]>([])
+  const [jobs, setJobs] = useState<Job[]>([])
+
+  useEffect(() => {
+    async function loadDashboardData() {
+      try {
+        const [appResult, jobResult] = await Promise.all([
+          applicationService.getMyApplications({ limit: 20 }),
+          jobService.getJobs({ limit: 4 }),
+        ])
+        setApplications(appResult.items)
+        setJobs(jobResult.jobs)
+      } catch {
+        // Fallback gracefully
+      }
+    }
+    loadDashboardData()
+  }, [])
+
+  const recent = applications.slice(0, 4)
+  const latestJobs = jobs.slice(0, 4)
+
   const stats = {
-    total: MY_APPLICATIONS.length,
-    shortlisted: MY_APPLICATIONS.filter(a => a.status === 'Shortlisted').length,
-    selected: MY_APPLICATIONS.filter(a => a.status === 'Selected').length,
+    total: applications.length,
+    shortlisted: applications.filter(a => a.status === 'Shortlisted').length,
+    selected: applications.filter(a => a.status === 'Selected').length,
+    underReview: applications.filter(a => a.status === 'Under Review').length,
+    rejected: applications.filter(a => a.status === 'Rejected').length,
+    applied: applications.filter(a => a.status === 'Applied').length,
     saved: 4,
   }
+
+  const breakdown = [
+    { label: 'Applied', count: stats.applied, pct: stats.total ? Math.round((stats.applied / stats.total) * 100) : 0, color: '#2563EB' },
+    { label: 'Under Review', count: stats.underReview, pct: stats.total ? Math.round((stats.underReview / stats.total) * 100) : 0, color: '#D97706' },
+    { label: 'Shortlisted', count: stats.shortlisted, pct: stats.total ? Math.round((stats.shortlisted / stats.total) * 100) : 0, color: '#0F9D8A' },
+    { label: 'Rejected', count: stats.rejected, pct: stats.total ? Math.round((stats.rejected / stats.total) * 100) : 0, color: '#DC2626' },
+  ]
+
+  const responseRate = stats.total > 0
+    ? (((stats.shortlisted + stats.selected + stats.underReview + stats.rejected) / stats.total) * 100).toFixed(1)
+    : '0.0'
 
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 
@@ -131,12 +168,7 @@ export default function StudentDashboard({ user, navigate }: Props) {
         {/* Quick stats */}
         <div className="bg-white border border-[#E4E7EC] rounded-lg p-5">
           <h2 className="text-base font-semibold text-[#172033] mb-4">Application breakdown</h2>
-          {[
-            { label: 'Applied', count: 3, pct: 50, color: '#2563EB' },
-            { label: 'Under Review', count: 1, pct: 16, color: '#D97706' },
-            { label: 'Shortlisted', count: 1, pct: 17, color: '#0F9D8A' },
-            { label: 'Rejected', count: 1, pct: 17, color: '#DC2626' },
-          ].map(({ label, count, pct, color }) => (
+          {breakdown.map(({ label, count, pct, color }) => (
             <div key={label} className="mb-3">
               <div className="flex items-center justify-between text-sm mb-1">
                 <span className="text-[#667085]">{label}</span>
@@ -149,7 +181,7 @@ export default function StudentDashboard({ user, navigate }: Props) {
           ))}
           <div className="border-t border-[#F2F4F7] pt-3 mt-4">
             <p className="text-xs text-[#667085]">Response rate</p>
-            <p className="text-xl font-bold text-[#172033] mt-0.5">66.7%</p>
+            <p className="text-xl font-bold text-[#172033] mt-0.5">{responseRate}%</p>
             <p className="text-xs text-[#0F9D8A]">↑ Above average for your field</p>
           </div>
         </div>
@@ -165,23 +197,29 @@ export default function StudentDashboard({ user, navigate }: Props) {
             </button>
           </div>
           <div>
-            {recent.map((app, i) => (
-              <div key={app.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < recent.length - 1 ? 'border-b border-[#F2F4F7]' : ''}`}>
-                <div
-                  className="w-9 h-9 rounded flex items-center justify-center text-white font-bold text-sm shrink-0"
-                  style={{ backgroundColor: app.companyColor }}
-                >
-                  {app.company[0]}
+            {recent.length > 0 ? (
+              recent.map((app, i) => (
+                <div key={app.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < recent.length - 1 ? 'border-b border-[#F2F4F7]' : ''}`}>
+                  <div
+                    className="w-9 h-9 rounded flex items-center justify-center text-white font-bold text-sm shrink-0"
+                    style={{ backgroundColor: app.companyColor }}
+                  >
+                    {app.company[0]}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-[#172033] truncate">{app.jobTitle}</p>
+                    <p className="text-xs text-[#667085]">{app.company} · {app.appliedDate}</p>
+                  </div>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${STATUS_COLORS[app.status] || STATUS_COLORS.Applied}`}>
+                    {app.status}
+                  </span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[#172033] truncate">{app.jobTitle}</p>
-                  <p className="text-xs text-[#667085]">{app.company} · {app.appliedDate}</p>
-                </div>
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${STATUS_COLORS[app.status]}`}>
-                  {app.status}
-                </span>
+              ))
+            ) : (
+              <div className="px-5 py-8 text-center text-sm text-[#667085]">
+                No applications submitted yet.
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -194,26 +232,32 @@ export default function StudentDashboard({ user, navigate }: Props) {
             </button>
           </div>
           <div>
-            {latestJobs.map((job, i) => (
-              <div key={job.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < latestJobs.length - 1 ? 'border-b border-[#F2F4F7]' : ''}`}>
-                <div
-                  className="w-9 h-9 rounded flex items-center justify-center text-white font-bold text-sm shrink-0"
-                  style={{ backgroundColor: job.companyColor }}
-                >
-                  {job.company[0]}
+            {latestJobs.length > 0 ? (
+              latestJobs.map((job, i) => (
+                <div key={job.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < latestJobs.length - 1 ? 'border-b border-[#F2F4F7]' : ''}`}>
+                  <div
+                    className="w-9 h-9 rounded flex items-center justify-center text-white font-bold text-sm shrink-0"
+                    style={{ backgroundColor: job.companyColor }}
+                  >
+                    {job.company[0]}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-[#172033] truncate">{job.title}</p>
+                    <p className="text-xs text-[#667085]">{job.company} · {job.salary}</p>
+                  </div>
+                  <button
+                    onClick={() => navigate('job-details', job.id)}
+                    className="text-xs font-medium text-[#2563EB] hover:text-[#1D4ED8] shrink-0 transition-colors"
+                  >
+                    View →
+                  </button>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[#172033] truncate">{job.title}</p>
-                  <p className="text-xs text-[#667085]">{job.company} · {job.salary}</p>
-                </div>
-                <button
-                  onClick={() => navigate('job-details', job.id)}
-                  className="text-xs font-medium text-[#2563EB] hover:text-[#1D4ED8] shrink-0 transition-colors"
-                >
-                  View →
-                </button>
+              ))
+            ) : (
+              <div className="px-5 py-8 text-center text-sm text-[#667085]">
+                No jobs available.
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
