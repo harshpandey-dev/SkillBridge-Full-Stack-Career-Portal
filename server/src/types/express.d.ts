@@ -1,3 +1,5 @@
+import 'express';
+import 'multer';
 import { Role, UserStatus } from '@prisma/client';
 
 export interface AuthenticatedUser {

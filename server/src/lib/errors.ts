@@ -8,7 +8,9 @@ export class AppError extends Error {
     this.statusCode = statusCode;
     this.isOperational = true;
     this.errors = errors;
-    Error.captureStackTrace(this, this.constructor);
+    if (typeof (Error as { captureStackTrace?: (target: object, constructorOpt?: Function) => void }).captureStackTrace === 'function') {
+      (Error as { captureStackTrace: (target: object, constructorOpt?: Function) => void }).captureStackTrace(this, this.constructor);
+    }
   }
 }
 

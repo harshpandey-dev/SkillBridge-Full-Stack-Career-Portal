@@ -1,3 +1,4 @@
+import 'multer';
 import { prisma } from '../lib/prisma';
 import { uploadToCloudinary, deleteFromCloudinary } from '../lib/cloudinary';
 import { NotFoundError, BadRequestError } from '../lib/errors';

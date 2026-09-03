@@ -1,4 +1,5 @@
 import { v2 as cloudinary, UploadApiResponse, UploadApiOptions } from 'cloudinary';
+import { Writable } from 'stream';
 import { logger } from './logger';
 
 cloudinary.config({
@@ -26,7 +27,7 @@ export async function uploadToCloudinary(
       resolve(result);
     });
 
-    uploadStream.end(buffer);
+    (uploadStream as Writable).end(buffer);
   });
 }
 
