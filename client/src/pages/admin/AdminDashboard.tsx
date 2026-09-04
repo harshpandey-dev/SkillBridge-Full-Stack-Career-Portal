@@ -17,12 +17,12 @@ import { getApiErrorMessage } from '../../lib/api'
 const TrendingIcon = TrendingUpIcon
 
 const STATUS_CONFIG: Record<string, string> = {
-  ACTIVE: 'bg-[#E6F7F5] text-[#0F9D8A]',
-  Active: 'bg-[#E6F7F5] text-[#0F9D8A]',
-  SUSPENDED: 'bg-[#FEF2F2] text-[#DC2626]',
-  Suspended: 'bg-[#FEF2F2] text-[#DC2626]',
-  PENDING: 'bg-[#FFFBEB] text-[#D97706]',
-  Pending: 'bg-[#FFFBEB] text-[#D97706]',
+  ACTIVE: 'bg-[#E6F7F5] dark:bg-[#042F2E] text-[#0F9D8A]',
+  Active: 'bg-[#E6F7F5] dark:bg-[#042F2E] text-[#0F9D8A]',
+  SUSPENDED: 'bg-[#FEF2F2] dark:bg-[#3B0A0A] text-[#DC2626] dark:text-[#F87171]',
+  Suspended: 'bg-[#FEF2F2] dark:bg-[#3B0A0A] text-[#DC2626] dark:text-[#F87171]',
+  PENDING: 'bg-[#FFFBEB] dark:bg-[#2D1B00] text-[#D97706]',
+  Pending: 'bg-[#FFFBEB] dark:bg-[#2D1B00] text-[#D97706]',
 }
 
 interface Props {
@@ -100,16 +100,16 @@ export default function AdminDashboard({ user: _user, navigate }: Props) {
   if (loading) {
     return (
       <div className="space-y-6 max-w-[1200px] animate-pulse">
-        <div className="h-8 bg-[#E4E7EC] rounded w-52" />
-        <div className="h-14 bg-[#E4E7EC] rounded-lg" />
+        <div className="h-8 bg-sb-surface-2 rounded w-52" />
+        <div className="h-14 bg-sb-surface-2 rounded-lg" />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map(n => (
-            <div key={n} className="bg-white border border-[#E4E7EC] rounded-lg p-5 h-32" />
+            <div key={n} className="bg-sb-surface border border-sb-border rounded-lg p-5 h-32" />
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          <div className="lg:col-span-2 bg-white border border-[#E4E7EC] rounded-lg h-72" />
-          <div className="bg-white border border-[#E4E7EC] rounded-lg h-72" />
+          <div className="lg:col-span-2 bg-sb-surface border border-sb-border rounded-lg h-72" />
+          <div className="bg-sb-surface border border-sb-border rounded-lg h-72" />
         </div>
       </div>
     )
@@ -119,11 +119,11 @@ export default function AdminDashboard({ user: _user, navigate }: Props) {
     return (
       <div className="space-y-6 max-w-[1200px]">
         <div>
-          <h1 className="text-2xl font-bold text-[#172033]">Admin Dashboard</h1>
-          <p className="text-sm text-[#667085] mt-0.5">Platform overview and management</p>
+          <h1 className="text-2xl font-bold text-sb-text">Admin Dashboard</h1>
+          <p className="text-sm text-sb-text-2 mt-0.5">Platform overview and management</p>
         </div>
-        <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-lg p-6 text-center">
-          <p className="text-sm text-[#DC2626] font-medium">{error || 'Failed to load dashboard metrics.'}</p>
+        <div className="bg-[#FEF2F2] dark:bg-[#3B0A0A] border border-[#FECACA] dark:border-[#7F1D1D] rounded-lg p-6 text-center">
+          <p className="text-sm text-[#DC2626] dark:text-[#F87171] font-medium">{error || 'Failed to load dashboard metrics.'}</p>
           <button
             onClick={loadDashboardData}
             className="mt-4 bg-[#2563EB] text-white px-4 py-2 rounded text-sm font-semibold hover:bg-[#1D4ED8]"
@@ -142,28 +142,28 @@ export default function AdminDashboard({ user: _user, navigate }: Props) {
       label: 'Total students',
       value: users.students.toLocaleString(),
       icon: UsersIcon,
-      color: 'bg-[#EFF6FF] text-[#2563EB]',
+      color: 'bg-sb-brand-bg text-[#2563EB] dark:text-[#3B82F6]',
       change: `${users.active} active platform users`,
     },
     {
       label: 'Active recruiters',
       value: users.recruiters.toLocaleString(),
       icon: BriefcaseIcon,
-      color: 'bg-[#E6F7F5] text-[#0F9D8A]',
+      color: 'bg-[#E6F7F5] dark:bg-[#042F2E] text-[#0F9D8A]',
       change: `${users.pending} pending verification`,
     },
     {
       label: 'Open jobs',
       value: jobs.open.toLocaleString(),
       icon: BriefcaseIcon,
-      color: 'bg-[#FFFBEB] text-[#D97706]',
+      color: 'bg-[#FFFBEB] dark:bg-[#2D1B00] text-[#D97706]',
       change: `${jobs.total} total listings`,
     },
     {
       label: 'Total applications',
       value: applications.total.toLocaleString(),
       icon: TrendingIcon,
-      color: 'bg-[#ECFDF5] text-[#059669]',
+      color: 'bg-[#ECFDF5] dark:bg-[#052E16] text-[#059669]',
       change: `${applications.underReview + applications.shortlisted} under review / shortlisted`,
     },
   ]
@@ -199,13 +199,13 @@ export default function AdminDashboard({ user: _user, navigate }: Props) {
   return (
     <div className="space-y-6 max-w-[1200px]">
       <div>
-        <h1 className="text-2xl font-bold text-[#172033]">Admin Dashboard</h1>
-        <p className="text-sm text-[#667085] mt-0.5">Platform overview and management</p>
+        <h1 className="text-2xl font-bold text-sb-text">Admin Dashboard</h1>
+        <p className="text-sm text-sb-text-2 mt-0.5">Platform overview and management</p>
       </div>
 
       {/* Alert */}
       {users.pending > 0 && (
-        <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-lg p-3 flex items-center gap-3">
+        <div className="bg-[#FFFBEB] dark:bg-[#2D1B00] border border-[#FDE68A] dark:border-[#78350F] rounded-lg p-3 flex items-center gap-3">
           <AlertCircleIcon size={16} className="text-[#D97706] shrink-0" />
           <p className="text-sm text-[#D97706]">
             <span className="font-semibold">{users.pending} users pending review</span> — recruiter accounts awaiting verification.{' '}
@@ -217,34 +217,34 @@ export default function AdminDashboard({ user: _user, navigate }: Props) {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map(({ label, value, icon: Icon, color, change }) => (
-          <div key={label} className="bg-white border border-[#E4E7EC] rounded-lg p-5">
+          <div key={label} className="bg-sb-surface border border-sb-border rounded-lg p-5">
             <div className={`w-9 h-9 rounded flex items-center justify-center mb-3 ${color}`}>
               <Icon size={17} />
             </div>
-            <div className="text-2xl font-bold text-[#172033]">{value}</div>
-            <div className="text-sm text-[#667085] mt-0.5">{label}</div>
-            <div className="text-xs text-[#94A3B8] mt-2">{change}</div>
+            <div className="text-2xl font-bold text-sb-text">{value}</div>
+            <div className="text-sm text-sb-text-2 mt-0.5">{label}</div>
+            <div className="text-xs text-sb-text-3 mt-2">{change}</div>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Growth chart */}
-        <div className="lg:col-span-2 bg-white border border-[#E4E7EC] rounded-lg p-5 flex flex-col justify-between">
+        <div className="lg:col-span-2 bg-sb-surface border border-sb-border rounded-lg p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-base font-semibold text-[#172033]">Platform growth</h2>
-              <p className="text-xs text-[#667085] mt-0.5">Daily activity and onboarding registrations</p>
+              <h2 className="text-base font-semibold text-sb-text">Platform growth</h2>
+              <p className="text-xs text-sb-text-2 mt-0.5">Daily activity and onboarding registrations</p>
             </div>
-            <div className="flex items-center gap-1 bg-[#F7F8FA] p-1 rounded border border-[#E4E7EC]">
+            <div className="flex items-center gap-1 bg-sb-surface-2 p-1 rounded border border-sb-border">
               {[7, 30, 90].map(days => (
                 <button
                   key={days}
                   onClick={() => setGrowthDays(days)}
                   className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors ${
                     growthDays === days
-                      ? 'bg-white text-[#2563EB] shadow-xs'
-                      : 'text-[#667085] hover:text-[#172033]'
+                      ? 'bg-sb-surface text-[#2563EB] dark:text-[#3B82F6] shadow-xs'
+                      : 'text-sb-text-2 hover:text-sb-text'
                   }`}
                 >
                   {days}d
@@ -255,7 +255,7 @@ export default function AdminDashboard({ user: _user, navigate }: Props) {
 
           <div className="h-56 relative">
             {chartLoading && (
-              <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10 text-xs text-[#667085]">
+              <div className="absolute inset-0 bg-sb-surface/60 flex items-center justify-center z-10 text-xs text-sb-text-2">
                 Updating chart…
               </div>
             )}
@@ -275,10 +275,10 @@ export default function AdminDashboard({ user: _user, navigate }: Props) {
                     <stop offset="95%" stopColor="#D97706" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F2F4F7" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#888888" strokeOpacity={0.2} />
                 <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#667085' }} axisLine={false} tickLine={false} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: '#667085' }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ border: '1px solid #E4E7EC', borderRadius: '6px', fontSize: '12px' }} />
+                <Tooltip contentStyle={{ border: '1px solid #2D3344', borderRadius: '6px', fontSize: '12px', backgroundColor: '#1A1F2E', color: '#F1F5F9' }} />
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px', paddingTop: '8px' }} />
                 <Area type="monotone" dataKey="newUsers" name="New Users" stroke="#2563EB" strokeWidth={2} fill="url(#colorUsers)" dot={false} />
                 <Area type="monotone" dataKey="newApplications" name="Applications" stroke="#0F9D8A" strokeWidth={2} fill="url(#colorApplications)" dot={false} />
@@ -289,8 +289,8 @@ export default function AdminDashboard({ user: _user, navigate }: Props) {
         </div>
 
         {/* Quick actions */}
-        <div className="bg-white border border-[#E4E7EC] rounded-lg p-5">
-          <h2 className="text-base font-semibold text-[#172033] mb-4">Quick actions</h2>
+        <div className="bg-sb-surface border border-sb-border rounded-lg p-5">
+          <h2 className="text-base font-semibold text-sb-text mb-4">Quick actions</h2>
           <div className="space-y-2">
             {[
               { label: 'Review pending users', count: users.pending, page: 'user-management', urgent: users.pending > 0 },
@@ -302,11 +302,11 @@ export default function AdminDashboard({ user: _user, navigate }: Props) {
               <button
                 key={label}
                 onClick={() => navigate(page)}
-                className="w-full flex items-center justify-between px-3 py-2.5 rounded border border-[#E4E7EC] hover:bg-[#F7F8FA] hover:border-[#94A3B8] transition-all text-left"
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded border border-sb-border hover:bg-sb-surface-2 hover:border-sb-border-2 transition-all text-left"
               >
-                <span className={`text-sm font-medium ${urgent ? 'text-[#D97706]' : 'text-[#172033]'}`}>{label}</span>
+                <span className={`text-sm font-medium ${urgent ? 'text-[#D97706]' : 'text-sb-text'}`}>{label}</span>
                 {count !== null && (
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${urgent ? 'bg-[#FFFBEB] text-[#D97706]' : 'bg-[#F2F4F7] text-[#667085]'}`}>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${urgent ? 'bg-[#FFFBEB] dark:bg-[#2D1B00] text-[#D97706]' : 'bg-sb-surface-2 text-sb-text-2'}`}>
                     {count}
                   </span>
                 )}
@@ -318,28 +318,28 @@ export default function AdminDashboard({ user: _user, navigate }: Props) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Recent registrations */}
-        <div className="bg-white border border-[#E4E7EC] rounded-lg overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#F2F4F7]">
-            <h2 className="text-base font-semibold text-[#172033]">Recent registrations</h2>
-            <button onClick={() => navigate('user-management')} className="text-xs text-[#2563EB] hover:underline flex items-center gap-1">
+        <div className="bg-sb-surface border border-sb-border rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-sb-border">
+            <h2 className="text-base font-semibold text-sb-text">Recent registrations</h2>
+            <button onClick={() => navigate('user-management')} className="text-xs text-[#2563EB] dark:text-[#3B82F6] hover:underline flex items-center gap-1">
               View all <ChevronRightIcon size={13} />
             </button>
           </div>
           <div>
             {recentUsers.length === 0 ? (
-              <div className="p-8 text-center text-xs text-[#667085]">No users registered yet</div>
+              <div className="p-8 text-center text-xs text-sb-text-2">No users registered yet</div>
             ) : (
               recentUsers.slice(0, 5).map((u, i) => (
-                <div key={u.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < Math.min(recentUsers.length, 5) - 1 ? 'border-b border-[#F2F4F7]' : ''}`}>
+                <div key={u.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < Math.min(recentUsers.length, 5) - 1 ? 'border-b border-sb-border' : ''}`}>
                   <div className="w-8 h-8 rounded-full bg-[#163A5F] flex items-center justify-center text-white text-xs font-semibold shrink-0">
                     {u.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[#172033] truncate">{u.name}</p>
-                    <p className="text-xs text-[#667085]">{u.email} · {formatRelativeTime(u.createdAt)}</p>
+                    <p className="text-sm font-medium text-sb-text truncate">{u.name}</p>
+                    <p className="text-xs text-sb-text-2">{u.email} · {formatRelativeTime(u.createdAt)}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#F2F4F7] text-[#667085] lowercase">
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-sb-surface-2 text-sb-text-2 lowercase">
                       {u.role}
                     </span>
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_CONFIG[u.status] || STATUS_CONFIG.Active}`}>
@@ -353,18 +353,18 @@ export default function AdminDashboard({ user: _user, navigate }: Props) {
         </div>
 
         {/* Activity feed */}
-        <div className="bg-white border border-[#E4E7EC] rounded-lg p-5">
-          <h2 className="text-base font-semibold text-[#172033] mb-4">Recent activity</h2>
+        <div className="bg-sb-surface border border-sb-border rounded-lg p-5">
+          <h2 className="text-base font-semibold text-sb-text mb-4">Recent activity</h2>
           <div className="space-y-3">
             {combinedActivity.length === 0 ? (
-              <p className="text-xs text-[#667085] py-4 text-center">No recent platform activity recorded</p>
+              <p className="text-xs text-sb-text-2 py-4 text-center">No recent platform activity recorded</p>
             ) : (
               combinedActivity.map((a, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${a.type === 'application' ? 'bg-[#2563EB]' : a.type === 'job' ? 'bg-[#0F9D8A]' : a.type === 'user' ? 'bg-[#D97706]' : 'bg-[#94A3B8]'}`} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[#172033] leading-snug">{a.event}</p>
-                    <p className="text-xs text-[#94A3B8] mt-0.5">{a.time}</p>
+                    <p className="text-sm text-sb-text leading-snug">{a.event}</p>
+                    <p className="text-xs text-sb-text-3 mt-0.5">{a.time}</p>
                   </div>
                 </div>
               ))

@@ -95,8 +95,8 @@ export default function RecruiterDashboard({ user, navigate }: Props) {
     <div className="space-y-6 max-w-[1200px]">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#172033]">Welcome back, {user.name.split(' ')[0]}</h1>
-          <p className="text-sm text-[#667085] mt-0.5">{companyName} · {position}</p>
+          <h1 className="text-2xl font-bold text-sb-text">Welcome back, {user.name.split(' ')[0]}</h1>
+          <p className="text-sm text-sb-text-2 mt-0.5">{companyName} · {position}</p>
         </div>
         <button
           onClick={() => navigate('post-job')}
@@ -109,24 +109,24 @@ export default function RecruiterDashboard({ user, navigate }: Props) {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map(({ label, value, icon: Icon, color, change }) => (
-          <div key={label} className="bg-white border border-[#E4E7EC] rounded-lg p-5">
+          <div key={label} className="bg-sb-surface border border-sb-border rounded-lg p-5">
             <div className={`w-9 h-9 rounded flex items-center justify-center mb-3 ${color}`}>
               <Icon size={17} />
             </div>
-            <div className="text-2xl font-bold text-[#172033]">{value}</div>
-            <div className="text-sm text-[#667085] mt-0.5">{label}</div>
-            <div className="text-xs text-[#94A3B8] mt-2">{change}</div>
+            <div className="text-2xl font-bold text-sb-text">{value}</div>
+            <div className="text-sm text-sb-text-2 mt-0.5">{label}</div>
+            <div className="text-xs text-sb-text-3 mt-2">{change}</div>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
         {/* Applications chart */}
-        <div className="lg:col-span-3 bg-white border border-[#E4E7EC] rounded-lg p-5">
+        <div className="lg:col-span-3 bg-sb-surface border border-sb-border rounded-lg p-5">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-base font-semibold text-[#172033]">Applications by job</h2>
-              <p className="text-xs text-[#667085] mt-0.5">Applications, interviews, and hires</p>
+              <h2 className="text-base font-semibold text-sb-text">Applications by job</h2>
+              <p className="text-xs text-sb-text-2 mt-0.5">Applications, interviews, and hires</p>
             </div>
           </div>
           <ResponsiveContainer width="100%" height={210}>
@@ -134,35 +134,35 @@ export default function RecruiterDashboard({ user, navigate }: Props) {
               data={jobChartData.length > 0 ? jobChartData : [{ name: 'No jobs yet', applications: 0, interviews: 0, hires: 0 }]}
               margin={{ top: 0, right: 4, bottom: 0, left: -20 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#F2F4F7" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#888888" strokeOpacity={0.2} />
               <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#667085' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: '#667085' }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ border: '1px solid #E4E7EC', borderRadius: '6px', fontSize: '12px' }} />
+              <Tooltip contentStyle={{ border: '1px solid #2D3344', borderRadius: '6px', fontSize: '12px', backgroundColor: '#1A1F2E', color: '#F1F5F9' }} />
               <Legend iconType="square" iconSize={8} wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }} />
               <Bar dataKey="applications" name="Applications" fill="#2563EB" radius={[2, 2, 0, 0]} />
               <Bar dataKey="interviews" name="Interviews" fill="#0F9D8A" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="hires" name="Hires" fill="#163A5F" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="hires" name="Hires" fill="#3B82F6" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         {/* Pipeline summary */}
-        <div className="lg:col-span-2 bg-white border border-[#E4E7EC] rounded-lg p-5">
-          <h2 className="text-base font-semibold text-[#172033] mb-4">Pipeline overview</h2>
+        <div className="lg:col-span-2 bg-sb-surface border border-sb-border rounded-lg p-5">
+          <h2 className="text-base font-semibold text-sb-text mb-4">Pipeline overview</h2>
           {pipeline.map(({ stage, count, color, pct }) => (
             <div key={stage} className="mb-3">
               <div className="flex items-center justify-between text-sm mb-1">
-                <span className="text-[#667085]">{stage}</span>
-                <span className="font-semibold text-[#172033]">{count}</span>
+                <span className="text-sb-text-2">{stage}</span>
+                <span className="font-semibold text-sb-text">{count}</span>
               </div>
-              <div className="h-1.5 bg-[#F2F4F7] rounded-full">
+              <div className="h-1.5 bg-sb-surface-2 rounded-full">
                 <div className="h-1.5 rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
               </div>
             </div>
           ))}
-          <div className="border-t border-[#F2F4F7] pt-3 mt-4">
-            <p className="text-xs text-[#667085]">Active review rate</p>
-            <p className="text-xl font-bold text-[#172033]">
+          <div className="border-t border-sb-border pt-3 mt-4">
+            <p className="text-xs text-sb-text-2">Active review rate</p>
+            <p className="text-xl font-bold text-sb-text">
               {totalAppCount > 0 ? ((pipelineCounts.shortlisted + pipelineCounts.underReview + pipelineCounts.selected) / totalAppCount * 100).toFixed(1) : '0.0'}%
             </p>
             <p className="text-xs text-[#0F9D8A] mt-0.5">Across all active postings</p>
@@ -172,55 +172,55 @@ export default function RecruiterDashboard({ user, navigate }: Props) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Active jobs */}
-        <div className="bg-white border border-[#E4E7EC] rounded-lg overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#F2F4F7]">
-            <h2 className="text-base font-semibold text-[#172033]">Active jobs</h2>
-            <button onClick={() => navigate('my-jobs')} className="text-xs text-[#2563EB] hover:underline flex items-center gap-1">
+        <div className="bg-sb-surface border border-sb-border rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-sb-border">
+            <h2 className="text-base font-semibold text-sb-text">Active jobs</h2>
+            <button onClick={() => navigate('my-jobs')} className="text-xs text-[#2563EB] dark:text-[#3B82F6] hover:underline flex items-center gap-1">
               Manage all <ChevronRightIcon size={13} />
             </button>
           </div>
           <div>
             {recruiterJobs.map((job, i) => (
-              <div key={job.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < recruiterJobs.length - 1 ? 'border-b border-[#F2F4F7]' : ''}`}>
+              <div key={job.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < recruiterJobs.length - 1 ? 'border-b border-sb-border' : ''}`}>
                 <div className="w-9 h-9 rounded flex items-center justify-center text-white font-bold text-sm shrink-0" style={{ backgroundColor: job.companyColor }}>
                   {job.company[0]}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[#172033] truncate">{job.title}</p>
-                  <p className="text-xs text-[#667085]">{job.applicants} applicants · {job.status}</p>
+                  <p className="text-sm font-medium text-sb-text truncate">{job.title}</p>
+                  <p className="text-xs text-sb-text-2">{job.applicants} applicants · {job.status}</p>
                 </div>
-                <button onClick={() => navigate('applicants')} className="text-xs text-[#2563EB] shrink-0 hover:underline">
+                <button onClick={() => navigate('applicants')} className="text-xs text-[#2563EB] dark:text-[#3B82F6] shrink-0 hover:underline">
                   Review
                 </button>
               </div>
             ))}
             {recruiterJobs.length === 0 && (
-              <div className="p-6 text-center text-sm text-[#667085]">
+              <div className="p-6 text-center text-sm text-sb-text-2">
                 No active jobs posted yet.{' '}
-                <button onClick={() => navigate('post-job')} className="text-[#2563EB] hover:underline">Post a job</button>
+                <button onClick={() => navigate('post-job')} className="text-[#2563EB] dark:text-[#3B82F6] hover:underline">Post a job</button>
               </div>
             )}
           </div>
         </div>
 
         {/* Recent applicants */}
-        <div className="bg-white border border-[#E4E7EC] rounded-lg overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#F2F4F7]">
-            <h2 className="text-base font-semibold text-[#172033]">Recent applicants</h2>
-            <button onClick={() => navigate('applicants')} className="text-xs text-[#2563EB] hover:underline flex items-center gap-1">
+        <div className="bg-sb-surface border border-sb-border rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-sb-border">
+            <h2 className="text-base font-semibold text-sb-text">Recent applicants</h2>
+            <button onClick={() => navigate('applicants')} className="text-xs text-[#2563EB] dark:text-[#3B82F6] hover:underline flex items-center gap-1">
               View all <ChevronRightIcon size={13} />
             </button>
           </div>
           <div>
             {recentApplicants.length > 0 ? (
               recentApplicants.map((ap, i) => (
-                <div key={ap.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < recentApplicants.length - 1 ? 'border-b border-[#F2F4F7]' : ''}`}>
+                <div key={ap.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < recentApplicants.length - 1 ? 'border-b border-sb-border' : ''}`}>
                   <div className="w-9 h-9 rounded-full bg-[#163A5F] flex items-center justify-center text-white font-semibold text-xs shrink-0">
                     {ap.name.split(' ').map(n => n[0]).join('')}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[#172033] truncate">{ap.name}</p>
-                    <p className="text-xs text-[#667085]">{ap.university} · {ap.jobTitle}</p>
+                    <p className="text-sm font-medium text-sb-text truncate">{ap.name}</p>
+                    <p className="text-xs text-sb-text-2">{ap.university} · {ap.jobTitle}</p>
                   </div>
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${STATUS_COLORS[ap.status] || STATUS_COLORS.Applied}`}>
                     {ap.status}
@@ -228,7 +228,7 @@ export default function RecruiterDashboard({ user, navigate }: Props) {
                 </div>
               ))
             ) : (
-              <div className="p-6 text-center text-sm text-[#667085]">
+              <div className="p-6 text-center text-sm text-sb-text-2">
                 No applicants yet.
               </div>
             )}

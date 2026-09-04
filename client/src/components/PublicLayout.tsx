@@ -1,4 +1,7 @@
+import { useState, useEffect, useRef } from 'react'
 import type { NavUser } from '../types'
+import { MenuIcon, XIcon, SunIcon, MoonIcon } from './icons'
+import { useTheme } from '../context/ThemeContext'
 
 interface Props {
   user: NavUser | null
@@ -15,29 +18,64 @@ const NAV_LINKS = [
 ]
 
 export default function PublicLayout({ user, currentPage, navigate, onLogout, children }: Props) {
+  const { resolvedTheme, toggleTheme } = useTheme()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement | null>(null)
+
+  // Close menu on nav
+  const handleNav = (page: string) => {
+    navigate(page)
+    setMobileMenuOpen(false)
+  }
+
+  // Close mobile menu on ESC
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setMobileMenuOpen(false)
+    }
+    document.addEventListener('keydown', handleKey)
+    return () => document.removeEventListener('keydown', handleKey)
+  }, [])
+
+  // Close mobile menu on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMobileMenuOpen(false)
+      }
+    }
+    if (mobileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [mobileMenuOpen])
+
   return (
     <div className="min-h-full flex flex-col">
-      <header className="bg-white border-b border-[#E4E7EC] sticky top-0 z-40">
-        <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between gap-6">
+      <header className="bg-sb-surface border-b border-sb-border sticky top-0 z-40" ref={menuRef}>
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+
+          {/* Logo */}
           <button
-            onClick={() => navigate('landing')}
+            onClick={() => handleNav('landing')}
             className="flex items-center gap-2 shrink-0"
           >
             <div className="w-8 h-8 bg-[#163A5F] rounded flex items-center justify-center">
               <span className="text-white font-bold text-sm tracking-tight">SB</span>
             </div>
-            <span className="font-bold text-[#163A5F] text-lg tracking-tight">SkillBridge</span>
+            <span className="font-bold text-[#163A5F] dark:text-white text-lg tracking-tight">SkillBridge</span>
           </button>
 
+          {/* Desktop Nav Links */}
           <nav className="hidden md:flex items-center gap-1">
             {NAV_LINKS.map(link => (
               <button
                 key={link.label}
-                onClick={() => navigate(link.page)}
+                onClick={() => handleNav(link.page)}
                 className={`px-3 py-2 text-sm font-medium rounded transition-colors ${
                   currentPage === link.page
-                    ? 'text-[#2563EB] bg-[#EFF6FF]'
-                    : 'text-[#667085] hover:text-[#172033] hover:bg-[#F7F8FA]'
+                    ? 'text-[#2563EB] dark:text-[#3B82F6] bg-sb-brand-bg'
+                    : 'text-sb-text-2 hover:text-sb-text hover:bg-sb-surface-2'
                 }`}
               >
                 {link.label}
@@ -45,18 +83,35 @@ export default function PublicLayout({ user, currentPage, navigate, onLogout, ch
             ))}
           </nav>
 
-          <div className="flex items-center gap-3 ml-auto">
+          {/* Desktop Right Actions */}
+          <div className="hidden md:flex items-center gap-2">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded text-sb-text-2 hover:bg-sb-surface-2 hover:text-sb-text transition-colors"
+              aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              title={resolvedTheme === 'dark' ? 'Light mode' : 'Dark mode'}
+            >
+              {resolvedTheme === 'dark' ? <SunIcon size={18} /> : <MoonIcon size={18} />}
+            </button>
+
             {user ? (
               <>
                 <button
-                  onClick={() => navigate(user.role === 'student' ? 'student-dashboard' : user.role === 'recruiter' ? 'recruiter-dashboard' : 'admin-dashboard')}
-                  className="text-sm font-medium text-[#163A5F] hover:text-[#2563EB] transition-colors"
+                  onClick={() => handleNav(
+                    user.role === 'student'
+                      ? 'student-dashboard'
+                      : user.role === 'recruiter'
+                        ? 'recruiter-dashboard'
+                        : 'admin-dashboard'
+                  )}
+                  className="text-sm font-medium text-[#163A5F] dark:text-white hover:text-[#2563EB] dark:hover:text-[#3B82F6] transition-colors px-3 py-2"
                 >
                   Dashboard
                 </button>
                 <button
                   onClick={onLogout}
-                  className="text-sm text-[#667085] hover:text-[#172033] transition-colors"
+                  className="text-sm text-sb-text-2 hover:text-sb-text transition-colors px-3 py-2"
                 >
                   Log out
                 </button>
@@ -64,13 +119,13 @@ export default function PublicLayout({ user, currentPage, navigate, onLogout, ch
             ) : (
               <>
                 <button
-                  onClick={() => navigate('login')}
-                  className="text-sm font-medium text-[#172033] hover:text-[#2563EB] transition-colors px-3 py-2"
+                  onClick={() => handleNav('login')}
+                  className="text-sm font-medium text-sb-text hover:text-[#2563EB] dark:hover:text-[#3B82F6] transition-colors px-3 py-2"
                 >
                   Log in
                 </button>
                 <button
-                  onClick={() => navigate('register')}
+                  onClick={() => handleNav('register')}
                   className="text-sm font-medium bg-[#163A5F] text-white px-4 py-2 rounded hover:bg-[#0F2A45] transition-colors"
                 >
                   Sign up free
@@ -78,12 +133,92 @@ export default function PublicLayout({ user, currentPage, navigate, onLogout, ch
               </>
             )}
           </div>
+
+          {/* Mobile: Theme toggle + Hamburger */}
+          <div className="flex items-center gap-1 md:hidden">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded text-sb-text-2 hover:bg-sb-surface-2 hover:text-sb-text transition-colors"
+              aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {resolvedTheme === 'dark' ? <SunIcon size={18} /> : <MoonIcon size={18} />}
+            </button>
+            <button
+              onClick={() => setMobileMenuOpen(prev => !prev)}
+              className="p-2 rounded text-sb-text-2 hover:bg-sb-surface-2 hover:text-sb-text transition-colors"
+              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <XIcon size={20} /> : <MenuIcon size={20} />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Menu — slide-down dropdown */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-sb-border bg-sb-surface">
+            <div className="max-w-[1280px] mx-auto px-4 py-3 space-y-1">
+              {NAV_LINKS.map(link => (
+                <button
+                  key={link.label}
+                  onClick={() => handleNav(link.page)}
+                  className={`w-full text-left px-3 py-2.5 rounded text-sm font-medium transition-colors ${
+                    currentPage === link.page
+                      ? 'text-[#2563EB] dark:text-[#3B82F6] bg-sb-brand-bg'
+                      : 'text-sb-text hover:bg-sb-surface-2'
+                  }`}
+                >
+                  {link.label}
+                </button>
+              ))}
+
+              <div className="pt-2 border-t border-sb-border mt-2 space-y-1">
+                {user ? (
+                  <>
+                    <button
+                      onClick={() => handleNav(
+                        user.role === 'student'
+                          ? 'student-dashboard'
+                          : user.role === 'recruiter'
+                            ? 'recruiter-dashboard'
+                            : 'admin-dashboard'
+                      )}
+                      className="w-full text-left px-3 py-2.5 rounded text-sm font-medium text-sb-text hover:bg-sb-surface-2 transition-colors"
+                    >
+                      Dashboard
+                    </button>
+                    <button
+                      onClick={() => { onLogout(); setMobileMenuOpen(false) }}
+                      className="w-full text-left px-3 py-2.5 rounded text-sm text-sb-text-2 hover:text-sb-text hover:bg-sb-surface-2 transition-colors"
+                    >
+                      Log out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => handleNav('login')}
+                      className="w-full text-left px-3 py-2.5 rounded text-sm font-medium text-sb-text hover:bg-sb-surface-2 transition-colors"
+                    >
+                      Log in
+                    </button>
+                    <button
+                      onClick={() => handleNav('register')}
+                      className="w-full text-left px-3 py-2.5 rounded text-sm font-semibold bg-[#163A5F] text-white hover:bg-[#0F2A45] transition-colors"
+                    >
+                      Sign up free
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="flex-1">{children}</main>
 
-      <footer className="bg-[#172033] text-white mt-auto">
+      <footer className="bg-[#172033] dark:bg-[#0A0E17] text-white mt-auto">
         <div className="max-w-[1280px] mx-auto px-6 py-12">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-10">
             <div className="col-span-2">

@@ -8,13 +8,14 @@ import {
 import { getApiErrorMessage } from '../../lib/api'
 
 const STATUS_STYLES: Record<string, string> = {
-  ACTIVE: 'bg-[#E6F7F5] text-[#0F9D8A]',
-  Active: 'bg-[#E6F7F5] text-[#0F9D8A]',
-  SUSPENDED: 'bg-[#FEF2F2] text-[#DC2626]',
-  Suspended: 'bg-[#FEF2F2] text-[#DC2626]',
-  PENDING: 'bg-[#FFFBEB] text-[#D97706]',
-  Pending: 'bg-[#FFFBEB] text-[#D97706]',
+  ACTIVE: 'bg-[#E6F7F5] text-[#0F9D8A] dark:bg-teal-950/40 dark:text-teal-400',
+  Active: 'bg-[#E6F7F5] text-[#0F9D8A] dark:bg-teal-950/40 dark:text-teal-400',
+  SUSPENDED: 'bg-[#FEF2F2] text-[#DC2626] dark:bg-red-950/40 dark:text-red-400',
+  Suspended: 'bg-[#FEF2F2] text-[#DC2626] dark:bg-red-950/40 dark:text-red-400',
+  PENDING: 'bg-[#FFFBEB] text-[#D97706] dark:bg-amber-950/40 dark:text-amber-400',
+  Pending: 'bg-[#FFFBEB] text-[#D97706] dark:bg-amber-950/40 dark:text-amber-400',
 }
+
 
 interface Props {
   navigate?: (page: string) => void
@@ -134,21 +135,21 @@ export default function UserManagement({ navigate: _navigate }: Props) {
   return (
     <div className="space-y-5 max-w-[1200px]">
       <div>
-        <h1 className="text-2xl font-bold text-[#172033]">User Management</h1>
-        <p className="text-sm text-[#667085] mt-0.5">
+        <h1 className="text-2xl font-bold text-sb-text">User Management</h1>
+        <p className="text-sm text-sb-text-2 mt-0.5">
           {total} total users · manage accounts, statuses, and permissions
         </p>
       </div>
 
       {successBanner && (
-        <div className="bg-[#E6F7F5] border border-[#BFDBFE] text-[#0F9D8A] rounded-lg p-3 text-sm flex items-center justify-between">
+        <div className="bg-[#E6F7F5] dark:bg-teal-950/40 border border-[#BFDBFE] dark:border-teal-800 text-[#0F9D8A] dark:text-teal-400 rounded-lg p-3 text-sm flex items-center justify-between">
           <span>{successBanner}</span>
           <button onClick={() => setSuccessBanner(null)} className="text-xs underline">Dismiss</button>
         </div>
       )}
 
       {actionError && (
-        <div className="bg-[#FEF2F2] border border-[#FECACA] text-[#DC2626] rounded-lg p-3 text-sm flex items-center justify-between">
+        <div className="bg-[#FEF2F2] dark:bg-red-950/40 border border-[#FECACA] dark:border-red-900 text-[#DC2626] dark:text-red-400 rounded-lg p-3 text-sm flex items-center justify-between">
           <span>{actionError}</span>
           <button onClick={() => setActionError(null)} className="text-xs underline">Dismiss</button>
         </div>
@@ -157,22 +158,22 @@ export default function UserManagement({ navigate: _navigate }: Props) {
       {/* Stats bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Students', count: counts.student, color: 'text-[#2563EB]' },
-          { label: 'Recruiters', count: counts.recruiter, color: 'text-[#0F9D8A]' },
-          { label: 'Admins', count: counts.admin, color: 'text-[#163A5F]' },
-          { label: 'Pending review', count: counts.pending, color: 'text-[#D97706]' },
+          { label: 'Students', count: counts.student, color: 'text-[#2563EB] dark:text-blue-400' },
+          { label: 'Recruiters', count: counts.recruiter, color: 'text-[#0F9D8A] dark:text-teal-400' },
+          { label: 'Admins', count: counts.admin, color: 'text-[#163A5F] dark:text-sky-300' },
+          { label: 'Pending review', count: counts.pending, color: 'text-[#D97706] dark:text-amber-400' },
         ].map(({ label, count, color }) => (
-          <div key={label} className="bg-white border border-[#E4E7EC] rounded-lg p-4">
+          <div key={label} className="bg-sb-surface border border-sb-border rounded-lg p-4">
             <div className={`text-2xl font-bold ${color}`}>{count}</div>
-            <div className="text-xs text-[#667085] mt-0.5">{label}</div>
+            <div className="text-xs text-sb-text-2 mt-0.5">{label}</div>
           </div>
         ))}
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2 bg-white border border-[#E4E7EC] rounded px-3 py-2.5 flex-1 min-w-52 max-w-80">
-          <SearchIcon size={15} className="text-[#667085]" />
+        <div className="flex items-center gap-2 bg-sb-surface border border-sb-border rounded px-3 py-2.5 flex-1 min-w-52 max-w-80">
+          <SearchIcon size={15} className="text-sb-text-3" />
           <input
             type="text"
             placeholder="Search by name, email, or phone..."
@@ -181,7 +182,7 @@ export default function UserManagement({ navigate: _navigate }: Props) {
               setSearch(e.target.value)
               setPage(1)
             }}
-            className="flex-1 text-sm text-[#172033] placeholder-[#94A3B8] outline-none"
+            className="flex-1 text-sm text-sb-text placeholder-sb-text-3 bg-transparent outline-none"
           />
         </div>
 
@@ -200,8 +201,8 @@ export default function UserManagement({ navigate: _navigate }: Props) {
               }}
               className={`px-3 py-2 text-xs font-medium rounded transition-colors ${
                 roleFilter === r.val
-                  ? 'bg-[#163A5F] text-white'
-                  : 'bg-white border border-[#E4E7EC] text-[#667085] hover:border-[#94A3B8]'
+                  ? 'bg-[#163A5F] text-white dark:bg-sb-brand dark:text-white'
+                  : 'bg-sb-surface border border-sb-border text-sb-text-2 hover:border-sb-border-2 hover:text-sb-text'
               }`}
             >
               {r.label}
@@ -215,7 +216,7 @@ export default function UserManagement({ navigate: _navigate }: Props) {
             setStatusFilter(e.target.value as typeof statusFilter)
             setPage(1)
           }}
-          className="border border-[#E4E7EC] rounded px-3 py-2 text-xs text-[#172033] bg-white outline-none"
+          className="border border-sb-border rounded px-3 py-2 text-xs text-sb-text bg-sb-surface outline-none"
         >
           <option value="All">All statuses</option>
           <option value="ACTIVE">Active</option>
@@ -225,28 +226,28 @@ export default function UserManagement({ navigate: _navigate }: Props) {
       </div>
 
       {error && (
-        <div className="bg-[#FEF2F2] border border-[#FECACA] text-[#DC2626] rounded-lg p-4 text-sm">
+        <div className="bg-[#FEF2F2] dark:bg-red-950/40 border border-[#FECACA] dark:border-red-900 text-[#DC2626] dark:text-red-400 rounded-lg p-4 text-sm">
           {error}
         </div>
       )}
 
       {/* Table */}
-      <div className="bg-white border border-[#E4E7EC] rounded-lg overflow-hidden">
+      <div className="bg-sb-surface border border-sb-border rounded-lg overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-sm text-[#667085]">Loading users…</div>
+          <div className="p-8 text-center text-sm text-sb-text-2">Loading users…</div>
         ) : users.length === 0 ? (
-          <div className="p-12 text-center text-sm text-[#667085]">No users match your filters.</div>
+          <div className="p-12 text-center text-sm text-sb-text-2">No users match your filters.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#F2F4F7] bg-[#F7F8FA]">
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">User</th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Role</th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Institution / Org</th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Joined</th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Status</th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Actions</th>
+                <tr className="border-b border-sb-border bg-sb-surface-2">
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-sb-text-2 uppercase tracking-wide">User</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-sb-text-2 uppercase tracking-wide">Role</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-sb-text-2 uppercase tracking-wide">Institution / Org</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-sb-text-2 uppercase tracking-wide">Joined</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-sb-text-2 uppercase tracking-wide">Status</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-sb-text-2 uppercase tracking-wide">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -265,18 +266,18 @@ export default function UserManagement({ navigate: _navigate }: Props) {
                   return (
                     <tr
                       key={u.id}
-                      className={`border-b border-[#F2F4F7] hover:bg-[#FAFBFC] transition-colors ${
-                        deleteConfirm === u.id ? 'bg-[#FEF2F2]' : ''
+                      className={`border-b border-sb-border hover:bg-sb-surface-2 transition-colors ${
+                        deleteConfirm === u.id ? 'bg-[#FEF2F2] dark:bg-red-950/20' : ''
                       }`}
                     >
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-[#163A5F] flex items-center justify-center text-white text-xs font-semibold shrink-0">
+                          <div className="w-8 h-8 rounded-full bg-[#163A5F] dark:bg-sb-brand flex items-center justify-center text-white text-xs font-semibold shrink-0">
                             {u.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                           </div>
                           <div>
-                            <p className="text-sm font-semibold text-[#172033]">{u.name}</p>
-                            <p className="text-xs text-[#667085]">{u.email}</p>
+                            <p className="text-sm font-semibold text-sb-text">{u.name}</p>
+                            <p className="text-xs text-sb-text-2">{u.email}</p>
                           </div>
                         </div>
                       </td>
@@ -284,17 +285,17 @@ export default function UserManagement({ navigate: _navigate }: Props) {
                         <span
                           className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${
                             u.role === 'ADMIN'
-                              ? 'bg-[#163A5F] text-white'
+                              ? 'bg-[#163A5F] text-white dark:bg-slate-800 dark:text-slate-200'
                               : u.role === 'RECRUITER'
-                              ? 'bg-[#E6F7F5] text-[#0F9D8A]'
-                              : 'bg-[#EFF6FF] text-[#2563EB]'
+                              ? 'bg-[#E6F7F5] text-[#0F9D8A] dark:bg-teal-950/40 dark:text-teal-400'
+                              : 'bg-[#EFF6FF] text-[#2563EB] dark:bg-blue-950/40 dark:text-blue-400'
                           }`}
                         >
                           {u.role.toLowerCase()}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-sm text-[#667085]">{institution}</td>
-                      <td className="px-5 py-4 text-sm text-[#667085]">{joinedDate}</td>
+                      <td className="px-5 py-4 text-sm text-sb-text-2">{institution}</td>
+                      <td className="px-5 py-4 text-sm text-sb-text-2">{joinedDate}</td>
                       <td className="px-5 py-4">
                         <span
                           className={`text-xs font-medium px-2.5 py-1 rounded-full ${
@@ -307,17 +308,17 @@ export default function UserManagement({ navigate: _navigate }: Props) {
                       <td className="px-5 py-4">
                         {deleteConfirm === u.id ? (
                           <div className="flex items-center gap-2">
-                            <span className="text-xs text-[#DC2626] font-medium">Delete?</span>
+                            <span className="text-xs text-[#DC2626] dark:text-red-400 font-medium">Delete?</span>
                             <button
                               disabled={isProcessing}
                               onClick={() => handleDeleteUser(u.id)}
-                              className="text-xs font-medium text-[#DC2626] hover:underline disabled:opacity-50"
+                              className="text-xs font-medium text-[#DC2626] dark:text-red-400 hover:underline disabled:opacity-50"
                             >
                               Yes
                             </button>
                             <button
                               onClick={() => setDeleteConfirm(null)}
-                              className="text-xs text-[#667085] hover:underline"
+                              className="text-xs text-sb-text-2 hover:underline"
                             >
                               No
                             </button>
@@ -329,7 +330,7 @@ export default function UserManagement({ navigate: _navigate }: Props) {
                                 disabled={isProcessing}
                                 onClick={() => handleUpdateStatus(u.id, 'SUSPENDED')}
                                 title="Suspend user"
-                                className="text-xs px-2 py-1 border border-[#E4E7EC] rounded text-[#667085] hover:border-[#DC2626] hover:text-[#DC2626] transition-colors disabled:opacity-50"
+                                className="text-xs px-2 py-1 border border-sb-border rounded text-sb-text-2 hover:border-red-500 hover:text-red-500 bg-sb-surface transition-colors disabled:opacity-50"
                               >
                                 Suspend
                               </button>
@@ -338,7 +339,7 @@ export default function UserManagement({ navigate: _navigate }: Props) {
                                 disabled={isProcessing}
                                 onClick={() => handleUpdateStatus(u.id, 'ACTIVE')}
                                 title="Restore user"
-                                className="text-xs px-2 py-1 border border-[#E4E7EC] rounded text-[#0F9D8A] hover:bg-[#E6F7F5] transition-colors disabled:opacity-50"
+                                className="text-xs px-2 py-1 border border-sb-border rounded text-[#0F9D8A] dark:text-teal-400 hover:bg-[#E6F7F5] dark:hover:bg-teal-950/40 bg-sb-surface transition-colors disabled:opacity-50"
                               >
                                 Restore
                               </button>
@@ -347,7 +348,7 @@ export default function UserManagement({ navigate: _navigate }: Props) {
                                 disabled={isProcessing}
                                 onClick={() => handleUpdateStatus(u.id, 'ACTIVE')}
                                 title="Approve user"
-                                className="text-xs px-2 py-1 bg-[#E6F7F5] border border-[#99E6DD] rounded text-[#0F9D8A] hover:bg-[#0F9D8A] hover:text-white transition-colors disabled:opacity-50"
+                                className="text-xs px-2 py-1 bg-[#E6F7F5] dark:bg-teal-950/40 border border-[#99E6DD] dark:border-teal-800 rounded text-[#0F9D8A] dark:text-teal-400 hover:bg-[#0F9D8A] hover:text-white transition-colors disabled:opacity-50"
                               >
                                 Approve
                               </button>
@@ -356,7 +357,7 @@ export default function UserManagement({ navigate: _navigate }: Props) {
                             {u.role !== 'ADMIN' && (
                               <button
                                 onClick={() => setDeleteConfirm(u.id)}
-                                className="p-1.5 rounded hover:bg-[#FEF2F2] text-[#94A3B8] hover:text-[#DC2626] transition-colors"
+                                className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-950/30 text-sb-text-3 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                                 title="Delete user"
                               >
                                 <TrashIcon size={13} />
@@ -376,7 +377,7 @@ export default function UserManagement({ navigate: _navigate }: Props) {
 
       {/* Pagination Footer */}
       <div className="flex items-center justify-between pt-2">
-        <p className="text-xs text-[#94A3B8]">
+        <p className="text-xs text-sb-text-3">
           Showing {users.length} of {total} users
         </p>
         {totalPages > 1 && (
@@ -384,7 +385,7 @@ export default function UserManagement({ navigate: _navigate }: Props) {
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="w-8 h-8 flex items-center justify-center rounded border border-[#E4E7EC] bg-white text-[#667085] hover:bg-[#F7F8FA] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded border border-sb-border bg-sb-surface text-sb-text-2 hover:bg-sb-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeftIcon size={14} />
             </button>
@@ -395,7 +396,7 @@ export default function UserManagement({ navigate: _navigate }: Props) {
                 className={`w-8 h-8 flex items-center justify-center rounded text-xs font-medium transition-colors ${
                   page === i + 1
                     ? 'bg-[#2563EB] text-white border border-[#2563EB]'
-                    : 'border border-[#E4E7EC] bg-white text-[#667085] hover:bg-[#F7F8FA]'
+                    : 'border border-sb-border bg-sb-surface text-sb-text-2 hover:bg-sb-surface-2'
                 }`}
               >
                 {i + 1}
@@ -404,7 +405,7 @@ export default function UserManagement({ navigate: _navigate }: Props) {
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="w-8 h-8 flex items-center justify-center rounded border border-[#E4E7EC] bg-white text-[#667085] hover:bg-[#F7F8FA] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded border border-sb-border bg-sb-surface text-sb-text-2 hover:bg-sb-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronRightIcon size={14} />
             </button>

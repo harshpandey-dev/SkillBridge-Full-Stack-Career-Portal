@@ -140,22 +140,22 @@ export default function JobDetails({ jobId, navigate }: Props) {
 
   if (loading) {
     return (
-      <div className="bg-[#F7F8FA] min-h-screen">
-        <div className="bg-white border-b border-[#E4E7EC]">
-          <div className="max-w-[1280px] mx-auto px-6 py-4">
+      <div className="bg-sb-bg min-h-screen">
+        <div className="bg-sb-surface border-b border-sb-border">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-4">
             <button
               onClick={() => navigate('jobs')}
-              className="flex items-center gap-1.5 text-sm text-[#667085] hover:text-[#172033] transition-colors"
+              className="flex items-center gap-1.5 text-sm text-sb-text-2 hover:text-sb-text transition-colors"
             >
               <ChevronLeftIcon size={16} /> Back to jobs
             </button>
           </div>
         </div>
-        <div className="max-w-[1280px] mx-auto px-6 py-8">
-          <div className="bg-white border border-[#E4E7EC] rounded-lg p-8 animate-pulse space-y-4">
-            <div className="h-6 bg-[#F2F4F7] rounded w-1/3" />
-            <div className="h-4 bg-[#F2F4F7] rounded w-1/4" />
-            <div className="h-24 bg-[#F2F4F7] rounded mt-4" />
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
+          <div className="bg-sb-surface border border-sb-border rounded-lg p-8 animate-pulse space-y-4">
+            <div className="h-6 bg-sb-surface-2 rounded w-1/3" />
+            <div className="h-4 bg-sb-surface-2 rounded w-1/4" />
+            <div className="h-24 bg-sb-surface-2 rounded mt-4" />
           </div>
         </div>
       </div>
@@ -164,21 +164,21 @@ export default function JobDetails({ jobId, navigate }: Props) {
 
   if (error || !job) {
     return (
-      <div className="bg-[#F7F8FA] min-h-screen">
-        <div className="bg-white border-b border-[#E4E7EC]">
-          <div className="max-w-[1280px] mx-auto px-6 py-4">
+      <div className="bg-sb-bg min-h-screen">
+        <div className="bg-sb-surface border-b border-sb-border">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-4">
             <button
               onClick={() => navigate('jobs')}
-              className="flex items-center gap-1.5 text-sm text-[#667085] hover:text-[#172033] transition-colors"
+              className="flex items-center gap-1.5 text-sm text-sb-text-2 hover:text-sb-text transition-colors"
             >
               <ChevronLeftIcon size={16} /> Back to jobs
             </button>
           </div>
         </div>
-        <div className="max-w-[1280px] mx-auto px-6 py-16 text-center">
-          <div className="bg-white border border-[#E4E7EC] rounded-lg p-12 max-w-md mx-auto">
-            <h2 className="text-xl font-bold text-[#172033] mb-2">Job Not Found</h2>
-            <p className="text-sm text-[#667085] mb-6">{error || 'The job you are looking for is not available or has been removed.'}</p>
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-16 text-center">
+          <div className="bg-sb-surface border border-sb-border rounded-lg p-12 max-w-md mx-auto">
+            <h2 className="text-xl font-bold text-sb-text mb-2">Job Not Found</h2>
+            <p className="text-sm text-sb-text-2 mb-6">{error || 'The job you are looking for is not available or has been removed.'}</p>
             <button
               onClick={() => navigate('jobs')}
               className="bg-[#2563EB] text-white px-5 py-2.5 rounded text-sm font-semibold hover:bg-[#1D4ED8] transition-colors"
@@ -192,24 +192,24 @@ export default function JobDetails({ jobId, navigate }: Props) {
   }
 
   return (
-    <div className="bg-[#F7F8FA] min-h-screen">
-      <div className="bg-white border-b border-[#E4E7EC]">
-        <div className="max-w-[1280px] mx-auto px-6 py-4">
+    <div className="bg-sb-bg min-h-screen">
+      <div className="bg-sb-surface border-b border-sb-border">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-4">
           <button
             onClick={() => navigate('jobs')}
-            className="flex items-center gap-1.5 text-sm text-[#667085] hover:text-[#172033] transition-colors"
+            className="flex items-center gap-1.5 text-sm text-sb-text-2 hover:text-sb-text transition-colors"
           >
             <ChevronLeftIcon size={16} /> Back to jobs
           </button>
         </div>
       </div>
 
-      <div className="max-w-[1280px] mx-auto px-6 py-8">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Main content */}
           <div className="flex-1 min-w-0 space-y-5">
             {/* Header card */}
-            <div className="bg-white border border-[#E4E7EC] rounded-lg p-6">
+            <div className="bg-sb-surface border border-sb-border rounded-lg p-6">
               <div className="flex items-start gap-4">
                 <div
                   className="w-14 h-14 rounded-lg flex items-center justify-center text-white font-bold text-xl shrink-0"
@@ -218,29 +218,30 @@ export default function JobDetails({ jobId, navigate }: Props) {
                   {job.company[0]}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-2xl font-bold text-[#172033]">{job.title}</h1>
-                  <p className="text-base text-[#667085] mt-1">{job.company} · {job.department}</p>
+                  <h1 className="text-2xl font-bold text-sb-text">{job.title}</h1>
+                  <p className="text-base text-sb-text-2 mt-1">{job.company} · {job.department}</p>
 
                   <div className="flex flex-wrap items-center gap-3 mt-3">
-                    <span className="flex items-center gap-1.5 text-sm text-[#667085]">
+                    <span className="flex items-center gap-1.5 text-sm text-sb-text-2">
                       <MapPinIcon size={14} /> {job.location}
                     </span>
+                    {/* Job type badge — semantic colors */}
                     <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-                      job.type === 'Internship' ? 'bg-[#E6F7F5] text-[#0F9D8A]' :
-                      job.type === 'Full-time' ? 'bg-[#EFF6FF] text-[#2563EB]' :
-                      'bg-[#F2F4F7] text-[#667085]'
+                      job.type === 'Internship' ? 'bg-[#E6F7F5] text-[#0F9D8A] dark:bg-[#042F2E]' :
+                      job.type === 'Full-time' ? 'bg-[#EFF6FF] text-[#2563EB] dark:bg-[#1E3A5F] dark:text-[#3B82F6]' :
+                      'bg-sb-surface-2 text-sb-text-2'
                     }`}>
                       {job.type}
                     </span>
-                    {job.remote && <span className="text-xs bg-[#F2F4F7] text-[#667085] px-2.5 py-1 rounded-full">Remote OK</span>}
-                    <span className="text-sm font-semibold text-[#172033]">{job.salary}</span>
+                    {job.remote && <span className="text-xs bg-sb-surface-2 text-sb-text-2 px-2.5 py-1 rounded-full">Remote OK</span>}
+                    <span className="text-sm font-semibold text-sb-text">{job.salary}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex gap-3 mt-5 pt-5 border-t border-[#F2F4F7]">
+              <div className="flex gap-3 mt-5 pt-5 border-t border-sb-border">
                 {applied ? (
-                  <div className="flex items-center gap-2 bg-[#E6F7F5] text-[#0F9D8A] px-5 py-2.5 rounded font-medium text-sm">
+                  <div className="flex items-center gap-2 bg-[#E6F7F5] dark:bg-[#042F2E] text-[#0F9D8A] px-5 py-2.5 rounded font-medium text-sm">
                     <CheckIcon size={16} /> Applied
                   </div>
                 ) : (
@@ -255,8 +256,8 @@ export default function JobDetails({ jobId, navigate }: Props) {
                   onClick={handleToggleSave}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded text-sm font-medium border transition-colors ${
                     saved
-                      ? 'bg-[#EFF6FF] text-[#2563EB] border-[#2563EB]'
-                      : 'bg-white text-[#667085] border-[#E4E7EC] hover:border-[#2563EB] hover:text-[#2563EB]'
+                      ? 'bg-sb-brand-bg text-[#2563EB] dark:text-[#3B82F6] border-[#2563EB] dark:border-[#3B82F6]'
+                      : 'bg-sb-surface text-sb-text-2 border-sb-border hover:border-[#2563EB] hover:text-[#2563EB] dark:hover:border-[#3B82F6] dark:hover:text-[#3B82F6]'
                   }`}
                 >
                   {saved ? <BookmarkFilledIcon size={16} /> : <BookmarkIcon size={16} />}
@@ -266,7 +267,7 @@ export default function JobDetails({ jobId, navigate }: Props) {
             </div>
 
             {/* Quick info */}
-            <div className="bg-white border border-[#E4E7EC] rounded-lg p-5 grid grid-cols-2 md:grid-cols-4 gap-5">
+            <div className="bg-sb-surface border border-sb-border rounded-lg p-5 grid grid-cols-2 md:grid-cols-4 gap-5">
               {[
                 { icon: DollarSignIcon, label: 'Compensation', value: job.salary },
                 { icon: BriefcaseIcon, label: 'Experience', value: job.experience },
@@ -274,26 +275,26 @@ export default function JobDetails({ jobId, navigate }: Props) {
                 { icon: UsersIcon, label: 'Total applicants', value: `${job.applicants.toLocaleString()}` },
               ].map(({ icon: Icon, label, value }) => (
                 <div key={label}>
-                  <div className="flex items-center gap-2 text-[#667085] mb-1">
+                  <div className="flex items-center gap-2 text-sb-text-2 mb-1">
                     <Icon size={14} />
                     <span className="text-xs font-medium">{label}</span>
                   </div>
-                  <p className="text-sm font-semibold text-[#172033]">{value}</p>
+                  <p className="text-sm font-semibold text-sb-text">{value}</p>
                 </div>
               ))}
             </div>
 
             {/* Description */}
-            <div className="bg-white border border-[#E4E7EC] rounded-lg p-6">
-              <h2 className="text-lg font-semibold text-[#172033] mb-4">About this role</h2>
-              <p className="text-sm text-[#667085] leading-relaxed whitespace-pre-line">{job.description}</p>
+            <div className="bg-sb-surface border border-sb-border rounded-lg p-6">
+              <h2 className="text-lg font-semibold text-sb-text mb-4">About this role</h2>
+              <p className="text-sm text-sb-text-2 leading-relaxed whitespace-pre-line">{job.description}</p>
 
               {job.responsibilities && job.responsibilities.length > 0 && (
                 <>
-                  <h3 className="text-base font-semibold text-[#172033] mt-6 mb-3">Responsibilities</h3>
+                  <h3 className="text-base font-semibold text-sb-text mt-6 mb-3">Responsibilities</h3>
                   <ul className="space-y-2">
                     {job.responsibilities.map((r, i) => (
-                      <li key={i} className="flex items-start gap-3 text-sm text-[#667085]">
+                      <li key={i} className="flex items-start gap-3 text-sm text-sb-text-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#2563EB] shrink-0 mt-2" />
                         {r}
                       </li>
@@ -304,10 +305,10 @@ export default function JobDetails({ jobId, navigate }: Props) {
 
               {job.requirements && job.requirements.length > 0 && (
                 <>
-                  <h3 className="text-base font-semibold text-[#172033] mt-6 mb-3">Requirements</h3>
+                  <h3 className="text-base font-semibold text-sb-text mt-6 mb-3">Requirements</h3>
                   <ul className="space-y-2">
                     {job.requirements.map((r, i) => (
-                      <li key={i} className="flex items-start gap-3 text-sm text-[#667085]">
+                      <li key={i} className="flex items-start gap-3 text-sm text-sb-text-2">
                         <CheckIcon size={14} className="text-[#0F9D8A] shrink-0 mt-0.5" />
                         {r}
                       </li>
@@ -318,10 +319,10 @@ export default function JobDetails({ jobId, navigate }: Props) {
 
               {job.skills && job.skills.length > 0 && (
                 <>
-                  <h3 className="text-base font-semibold text-[#172033] mt-6 mb-3">Skills required</h3>
+                  <h3 className="text-base font-semibold text-sb-text mt-6 mb-3">Skills required</h3>
                   <div className="flex flex-wrap gap-2">
                     {job.skills.map(s => (
-                      <span key={s} className="text-sm bg-[#EFF6FF] text-[#2563EB] px-3 py-1.5 rounded-full font-medium">{s}</span>
+                      <span key={s} className="text-sm bg-sb-brand-bg text-[#2563EB] dark:text-[#3B82F6] px-3 py-1.5 rounded-full font-medium">{s}</span>
                     ))}
                   </div>
                 </>
@@ -329,10 +330,10 @@ export default function JobDetails({ jobId, navigate }: Props) {
 
               {job.benefits && job.benefits.length > 0 && (
                 <>
-                  <h3 className="text-base font-semibold text-[#172033] mt-6 mb-3">Benefits</h3>
+                  <h3 className="text-base font-semibold text-sb-text mt-6 mb-3">Benefits</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {job.benefits.map(b => (
-                      <div key={b} className="flex items-center gap-2 text-sm text-[#667085]">
+                      <div key={b} className="flex items-center gap-2 text-sm text-sb-text-2">
                         <CheckIcon size={14} className="text-[#0F9D8A] shrink-0" />
                         {b}
                       </div>
@@ -344,59 +345,60 @@ export default function JobDetails({ jobId, navigate }: Props) {
           </div>
 
           {/* Sidebar */}
-          <div className="w-72 shrink-0 space-y-4">
+          <div className="w-full lg:w-72 shrink-0 space-y-4">
             {/* Company info */}
-            <div className="bg-white border border-[#E4E7EC] rounded-lg p-5">
-              <h3 className="text-sm font-semibold text-[#172033] mb-4">About {job.company}</h3>
+            <div className="bg-sb-surface border border-sb-border rounded-lg p-5">
+              <h3 className="text-sm font-semibold text-sb-text mb-4">About {job.company}</h3>
               <div
                 className="w-12 h-12 rounded flex items-center justify-center text-white font-bold text-lg mb-3"
                 style={{ backgroundColor: job.companyColor }}
               >
                 {job.company[0]}
               </div>
-              <h4 className="font-semibold text-[#172033]">{job.company}</h4>
-              <p className="text-sm text-[#667085] mb-4">Leading Employer · Hiring on SkillBridge</p>
+              <h4 className="font-semibold text-sb-text">{job.company}</h4>
+              <p className="text-sm text-sb-text-2 mb-4">Leading Employer · Hiring on SkillBridge</p>
               <div className="space-y-2.5">
-                <div className="flex items-center gap-2 text-sm text-[#667085]">
+                <div className="flex items-center gap-2 text-sm text-sb-text-2">
                   <MapPinIcon size={14} className="shrink-0" /> {job.location}
                 </div>
-                <div className="flex items-center gap-2 text-sm text-[#667085]">
+                <div className="flex items-center gap-2 text-sm text-sb-text-2">
                   <GlobeIcon size={14} className="shrink-0" />
-                  <span className="text-[#2563EB] text-sm">{job.company.toLowerCase().replace(/[^a-z0-9]/g, '')}.com</span>
+                  <span className="text-[#2563EB] dark:text-[#3B82F6] text-sm">{job.company.toLowerCase().replace(/[^a-z0-9]/g, '')}.com</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-[#667085]">
+                <div className="flex items-center gap-2 text-sm text-sb-text-2">
                   <BuildingIcon size={14} className="shrink-0" /> {job.department}
                 </div>
               </div>
             </div>
 
             {/* Posted info */}
-            <div className="bg-white border border-[#E4E7EC] rounded-lg p-5">
-              <h3 className="text-sm font-semibold text-[#172033] mb-3">Listing details</h3>
+            <div className="bg-sb-surface border border-sb-border rounded-lg p-5">
+              <h3 className="text-sm font-semibold text-sb-text mb-3">Listing details</h3>
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-[#667085]">Posted</span>
-                  <span className="font-medium text-[#172033]">{job.postedDate}</span>
+                  <span className="text-sb-text-2">Posted</span>
+                  <span className="font-medium text-sb-text">{job.postedDate}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#667085]">Deadline</span>
-                  <span className="font-medium text-[#172033]">{job.deadline}</span>
+                  <span className="text-sb-text-2">Deadline</span>
+                  <span className="font-medium text-sb-text">{job.deadline}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#667085]">Applicants</span>
-                  <span className="font-medium text-[#172033]">{job.applicants}</span>
+                  <span className="text-sb-text-2">Applicants</span>
+                  <span className="font-medium text-sb-text">{job.applicants}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#667085]">Status</span>
-                  <span className="text-[#0F9D8A] font-medium bg-[#E6F7F5] px-2 py-0.5 rounded-full text-xs">{job.status}</span>
+                  <span className="text-sb-text-2">Status</span>
+                  {/* Active status badge — semantic teal color */}
+                  <span className="text-[#0F9D8A] font-medium bg-[#E6F7F5] dark:bg-[#042F2E] px-2 py-0.5 rounded-full text-xs">{job.status}</span>
                 </div>
               </div>
             </div>
 
             {/* Similar jobs */}
             {otherJobs.length > 0 && (
-              <div className="bg-white border border-[#E4E7EC] rounded-lg p-5">
-                <h3 className="text-sm font-semibold text-[#172033] mb-3">Similar roles</h3>
+              <div className="bg-sb-surface border border-sb-border rounded-lg p-5">
+                <h3 className="text-sm font-semibold text-sb-text mb-3">Similar roles</h3>
                 <div className="space-y-3">
                   {otherJobs.map(j => (
                     <button
@@ -411,8 +413,8 @@ export default function JobDetails({ jobId, navigate }: Props) {
                         {j.company[0]}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-[#172033] group-hover:text-[#2563EB] transition-colors truncate">{j.title}</p>
-                        <p className="text-xs text-[#667085]">{j.company}</p>
+                        <p className="text-sm font-medium text-sb-text group-hover:text-[#2563EB] dark:group-hover:text-[#3B82F6] transition-colors truncate">{j.title}</p>
+                        <p className="text-xs text-sb-text-2">{j.company}</p>
                       </div>
                     </button>
                   ))}
@@ -425,61 +427,61 @@ export default function JobDetails({ jobId, navigate }: Props) {
 
       {/* Apply modal */}
       {showApplyModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg w-full max-w-lg shadow-xl">
-            <div className="p-6 border-b border-[#E4E7EC]">
-              <h2 className="text-lg font-semibold text-[#172033]">Apply to {job.title}</h2>
-              <p className="text-sm text-[#667085] mt-0.5">{job.company} · {job.location}</p>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-sb-surface rounded-lg w-full max-w-lg shadow-2xl border border-sb-border">
+            <div className="p-6 border-b border-sb-border">
+              <h2 className="text-lg font-semibold text-sb-text">Apply to {job.title}</h2>
+              <p className="text-sm text-sb-text-2 mt-0.5">{job.company} · {job.location}</p>
             </div>
 
             {modalError && (
-              <div className="mx-6 mt-4 p-3 bg-[#FEF2F2] border border-[#FECACA] rounded text-sm text-[#DC2626]">
+              <div className="mx-6 mt-4 p-3 bg-[#FEF2F2] dark:bg-[#3B0A0A] border border-[#FECACA] dark:border-[#7F1D1D] rounded text-sm text-[#DC2626] dark:text-[#F87171]">
                 {modalError}
               </div>
             )}
 
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[#172033] mb-1.5">Full name</label>
+                <label className="block text-sm font-medium text-sb-text mb-1.5">Full name</label>
                 <input
                   readOnly
                   value={user?.name || 'Student Candidate'}
-                  className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm text-[#172033] bg-[#F7F8FA] outline-none"
+                  className="w-full border border-sb-border rounded px-3 py-2 text-sm text-sb-text bg-sb-bg outline-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#172033] mb-1.5">Email address</label>
+                <label className="block text-sm font-medium text-sb-text mb-1.5">Email address</label>
                 <input
                   readOnly
                   value={user?.email || 'student@university.edu'}
-                  className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm text-[#172033] bg-[#F7F8FA] outline-none"
+                  className="w-full border border-sb-border rounded px-3 py-2 text-sm text-sb-text bg-sb-bg outline-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#172033] mb-1.5">Cover letter <span className="text-[#667085] font-normal">(optional)</span></label>
+                <label className="block text-sm font-medium text-sb-text mb-1.5">Cover letter <span className="text-sb-text-2 font-normal">(optional)</span></label>
                 <textarea
                   rows={4}
                   value={coverLetter}
                   onChange={e => setCoverLetter(e.target.value)}
                   placeholder="Tell the recruiter why you're a great fit..."
-                  className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm text-[#172033] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10 resize-none"
+                  className="w-full border border-sb-border bg-sb-surface rounded px-3 py-2 text-sm text-sb-text placeholder-sb-text-3 outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10 resize-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#172033] mb-1.5">Resume</label>
-                <div className="border-2 border-dashed border-[#E4E7EC] rounded p-4 text-center">
-                  <p className="text-sm text-[#667085]">
+                <label className="block text-sm font-medium text-sb-text mb-1.5">Resume</label>
+                <div className="border-2 border-dashed border-sb-border rounded p-4 text-center">
+                  <p className="text-sm text-sb-text-2">
                     {user?.studentProfile?.resumeUrl ? 'Profile resume attached' : 'Student resume on profile'}
                   </p>
-                  <p className="text-xs text-[#94A3B8] mt-1">Managed in your student profile</p>
+                  <p className="text-xs text-sb-text-3 mt-1">Managed in your student profile</p>
                 </div>
               </div>
             </div>
-            <div className="p-6 border-t border-[#E4E7EC] flex gap-3 justify-end">
+            <div className="p-6 border-t border-sb-border flex gap-3 justify-end">
               <button
                 type="button"
                 onClick={() => setShowApplyModal(false)}
-                className="px-4 py-2 text-sm font-medium text-[#667085] hover:text-[#172033] border border-[#E4E7EC] rounded hover:bg-[#F7F8FA] transition-colors"
+                className="px-4 py-2 text-sm font-medium text-sb-text-2 hover:text-sb-text border border-sb-border rounded hover:bg-sb-surface-2 transition-colors"
               >
                 Cancel
               </button>

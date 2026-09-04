@@ -111,36 +111,36 @@ export default function Learning({ navigate: _navigate }: Props) {
   }
 
   return (
-    <div className="bg-[#F7F8FA] min-h-screen">
-      {/* Header */}
+    <div className="bg-sb-bg min-h-screen">
+      {/* Header — navy brand section stays */}
       <div className="bg-[#163A5F] py-10">
-        <div className="max-w-[1280px] mx-auto px-6">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
           <h1 className="text-3xl font-bold text-white mb-2">Learning Resources</h1>
           <p className="text-[rgba(255,255,255,0.65)] text-base mb-6">
             Curated courses, workshops, and certifications to build the skills employers want.
           </p>
-          <div className="flex items-center gap-2 bg-white rounded px-3 py-2.5 max-w-lg">
-            <SearchIcon size={16} className="text-[#667085]" />
+          <div className="flex items-center gap-2 bg-white dark:bg-sb-surface-2 rounded px-3 py-2.5 max-w-lg">
+            <SearchIcon size={16} className="text-[#667085] dark:text-sb-text-2" />
             <input
               type="text"
               placeholder="Search courses, topics, or providers..."
               value={search}
               onChange={handleSearchChange}
-              className="flex-1 text-sm text-[#172033] placeholder-[#667085] outline-none"
+              className="flex-1 text-sm text-[#172033] dark:text-sb-text placeholder-[#667085] dark:placeholder-sb-text-3 outline-none bg-transparent"
             />
           </div>
         </div>
       </div>
 
-      <div className="max-w-[1280px] mx-auto px-6 py-8">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
         {/* Featured Section */}
         {!search && category === 'All' && (featuredLoading || featuredResources.length > 0) && (
           <section className="mb-10">
-            <h2 className="text-xl font-bold text-[#172033] mb-5">Featured resources</h2>
+            <h2 className="text-xl font-bold text-sb-text mb-5">Featured resources</h2>
             {featuredLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 {[1, 2, 3].map(n => (
-                  <div key={n} className="bg-white border border-[#E4E7EC] rounded-lg h-72 animate-pulse" />
+                  <div key={n} className="bg-sb-surface border border-sb-border rounded-lg h-72 animate-pulse" />
                 ))}
               </div>
             ) : (
@@ -162,7 +162,7 @@ export default function Learning({ navigate: _navigate }: Props) {
               className={`text-sm font-medium px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
                 category === cat
                   ? 'bg-[#163A5F] text-white'
-                  : 'bg-white border border-[#E4E7EC] text-[#667085] hover:text-[#172033] hover:border-[#172033]'
+                  : 'bg-sb-surface border border-sb-border text-sb-text-2 hover:text-sb-text hover:border-sb-border-2'
               }`}
             >
               {cat}
@@ -172,9 +172,9 @@ export default function Learning({ navigate: _navigate }: Props) {
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Filters Sidebar */}
-          <aside className="w-52 shrink-0 space-y-5">
+          <aside className="w-full lg:w-52 shrink-0 space-y-5">
             <div>
-              <h3 className="text-sm font-semibold text-[#172033] mb-2.5">Difficulty</h3>
+              <h3 className="text-sm font-semibold text-sb-text mb-2.5">Difficulty</h3>
               {(['All', ...DIFFICULTIES] as const).map(d => (
                 <label key={d} className="flex items-center gap-2.5 mb-2 cursor-pointer">
                   <input
@@ -184,13 +184,13 @@ export default function Learning({ navigate: _navigate }: Props) {
                     onChange={() => handleDifficultySelect(d)}
                     className="accent-[#2563EB]"
                   />
-                  <span className="text-sm text-[#667085] hover:text-[#172033] transition-colors">{d}</span>
+                  <span className="text-sm text-sb-text-2 hover:text-sb-text transition-colors">{d}</span>
                 </label>
               ))}
             </div>
 
-            <div className="border-t border-[#E4E7EC] pt-4">
-              <h3 className="text-sm font-semibold text-[#172033] mb-2.5">Format</h3>
+            <div className="border-t border-sb-border pt-4">
+              <h3 className="text-sm font-semibold text-sb-text mb-2.5">Format</h3>
               {(['All', ...TYPES] as const).map(t => (
                 <label key={t} className="flex items-center gap-2.5 mb-2 cursor-pointer">
                   <input
@@ -200,13 +200,13 @@ export default function Learning({ navigate: _navigate }: Props) {
                     onChange={() => handleTypeSelect(t)}
                     className="accent-[#2563EB]"
                   />
-                  <span className="text-sm text-[#667085] hover:text-[#172033] transition-colors">{t}</span>
+                  <span className="text-sm text-sb-text-2 hover:text-sb-text transition-colors">{t}</span>
                 </label>
               ))}
             </div>
 
             {(category !== 'All' || difficulty !== 'All' || type !== 'All' || search) && (
-              <div className="border-t border-[#E4E7EC] pt-4">
+              <div className="border-t border-sb-border pt-4">
                 <button
                   type="button"
                   onClick={() => {
@@ -216,7 +216,7 @@ export default function Learning({ navigate: _navigate }: Props) {
                     setSearch('')
                     setPage(1)
                   }}
-                  className="text-xs text-[#2563EB] hover:text-[#1D4ED8] font-medium"
+                  className="text-xs text-[#2563EB] dark:text-[#3B82F6] hover:text-[#1D4ED8] font-medium"
                 >
                   Reset all filters
                 </button>
@@ -227,8 +227,8 @@ export default function Learning({ navigate: _navigate }: Props) {
           {/* Grid & Main Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-[#667085]">
-                Showing <span className="font-semibold text-[#172033]">{resources.length}</span> of <span className="font-semibold text-[#172033]">{total}</span> resources
+              <p className="text-sm text-sb-text-2">
+                Showing <span className="font-semibold text-sb-text">{resources.length}</span> of <span className="font-semibold text-sb-text">{total}</span> resources
               </p>
               <select
                 value={sort}
@@ -236,7 +236,7 @@ export default function Learning({ navigate: _navigate }: Props) {
                   setSort(e.target.value as typeof sort)
                   setPage(1)
                 }}
-                className="text-sm text-[#667085] border border-[#E4E7EC] rounded px-2 py-1.5 bg-white outline-none focus:border-[#2563EB]"
+                className="text-sm text-sb-text-2 border border-sb-border rounded px-2 py-1.5 bg-sb-surface outline-none focus:border-[#2563EB]"
               >
                 <option value="newest">Newest first</option>
                 <option value="rating_desc">Highest rated</option>
@@ -246,7 +246,7 @@ export default function Learning({ navigate: _navigate }: Props) {
             </div>
 
             {error && (
-              <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-lg p-4 text-sm text-[#DC2626] mb-4">
+              <div className="bg-[#FEF2F2] dark:bg-[#3B0A0A] border border-[#FECACA] dark:border-[#7F1D1D] rounded-lg p-4 text-sm text-[#DC2626] dark:text-[#F87171] mb-4">
                 {error}
               </div>
             )}
@@ -254,7 +254,7 @@ export default function Learning({ navigate: _navigate }: Props) {
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {[1, 2, 3, 4, 5, 6].map(n => (
-                  <div key={n} className="bg-white border border-[#E4E7EC] rounded-lg h-72 animate-pulse" />
+                  <div key={n} className="bg-sb-surface border border-sb-border rounded-lg h-72 animate-pulse" />
                 ))}
               </div>
             ) : (
@@ -264,10 +264,10 @@ export default function Learning({ navigate: _navigate }: Props) {
                     <ResourceCard key={r.id} resource={r} />
                   ))}
                   {resources.length === 0 && (
-                    <div className="col-span-3 bg-white border border-[#E4E7EC] rounded-lg p-12 text-center">
+                    <div className="col-span-3 bg-sb-surface border border-sb-border rounded-lg p-12 text-center">
                       <div className="text-3xl mb-2">📚</div>
-                      <p className="text-base font-semibold text-[#172033] mb-1">No resources found</p>
-                      <p className="text-[#667085] text-sm mb-4">Try clearing or adjusting your search filters.</p>
+                      <p className="text-base font-semibold text-sb-text mb-1">No resources found</p>
+                      <p className="text-sb-text-2 text-sm mb-4">Try clearing or adjusting your search filters.</p>
                       <button
                         onClick={() => {
                           setCategory('All')
@@ -286,15 +286,15 @@ export default function Learning({ navigate: _navigate }: Props) {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between mt-8 pt-4 border-t border-[#E4E7EC]">
-                    <p className="text-sm text-[#667085]">
+                  <div className="flex items-center justify-between mt-8 pt-4 border-t border-sb-border">
+                    <p className="text-sm text-sb-text-2">
                       Page {page} of {totalPages}
                     </p>
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => setPage(p => Math.max(1, p - 1))}
                         disabled={page === 1}
-                        className="w-8 h-8 flex items-center justify-center rounded border border-[#E4E7EC] bg-white text-[#667085] hover:bg-[#F7F8FA] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        className="w-8 h-8 flex items-center justify-center rounded border border-sb-border bg-sb-surface text-sb-text-2 hover:bg-sb-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                       >
                         <ChevronLeftIcon size={14} />
                       </button>
@@ -305,7 +305,7 @@ export default function Learning({ navigate: _navigate }: Props) {
                           className={`w-8 h-8 flex items-center justify-center rounded text-sm font-medium transition-colors ${
                             page === i + 1
                               ? 'bg-[#2563EB] text-white border border-[#2563EB]'
-                              : 'border border-[#E4E7EC] bg-white text-[#667085] hover:bg-[#F7F8FA]'
+                              : 'border border-sb-border bg-sb-surface text-sb-text-2 hover:bg-sb-surface-2'
                           }`}
                         >
                           {i + 1}
@@ -314,7 +314,7 @@ export default function Learning({ navigate: _navigate }: Props) {
                       <button
                         onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                         disabled={page === totalPages}
-                        className="w-8 h-8 flex items-center justify-center rounded border border-[#E4E7EC] bg-white text-[#667085] hover:bg-[#F7F8FA] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        className="w-8 h-8 flex items-center justify-center rounded border border-sb-border bg-sb-surface text-sb-text-2 hover:bg-sb-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                       >
                         <ChevronRightIcon size={14} />
                       </button>
@@ -339,6 +339,7 @@ function ResourceCard({
 }) {
   const uiDifficulty = formatBackendToUIDifficulty(r.difficulty)
 
+  // Difficulty badge colors — semantic, preserved in both modes
   const diffColors: Record<string, string> = {
     Beginner: 'bg-[#E6F7F5] text-[#0F9D8A]',
     Intermediate: 'bg-[#FFFBEB] text-[#D97706]',
@@ -349,7 +350,7 @@ function ResourceCard({
   const coverImage = r.imageUrl || r.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=144&fit=crop&auto=format'
 
   return (
-    <div className={`bg-white border border-[#E4E7EC] rounded-lg overflow-hidden hover:shadow-md transition-all flex flex-col group ${featured ? 'ring-1 ring-[#163A5F]/10' : ''}`}>
+    <div className={`bg-sb-surface border border-sb-border rounded-lg overflow-hidden hover:shadow-md transition-all flex flex-col group ${featured ? 'ring-1 ring-[#163A5F]/20 dark:ring-white/10' : ''}`}>
       <div className="h-36 bg-[#163A5F] relative overflow-hidden shrink-0">
         <img
           src={coverImage}
@@ -357,6 +358,7 @@ function ResourceCard({
           className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-300"
         />
         <div className="absolute top-3 left-3 flex gap-2">
+          {/* Difficulty badge — semantic colors kept */}
           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${diffColors[uiDifficulty] || diffColors.Beginner}`}>
             {uiDifficulty}
           </span>
@@ -371,36 +373,37 @@ function ResourceCard({
 
       <div className="p-4 flex flex-col flex-1">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-medium text-[#2563EB] bg-[#EFF6FF] px-2 py-0.5 rounded">{r.category}</span>
-          <span className="text-xs text-[#667085] font-medium">{r.provider}</span>
+          <span className="text-xs font-medium text-[#2563EB] dark:text-[#3B82F6] bg-sb-brand-bg px-2 py-0.5 rounded">{r.category}</span>
+          <span className="text-xs text-sb-text-2 font-medium">{r.provider}</span>
         </div>
 
         <a
           href={r.resourceUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm font-semibold text-[#172033] leading-snug mb-2 line-clamp-2 hover:text-[#2563EB] transition-colors"
+          className="text-sm font-semibold text-sb-text leading-snug mb-2 line-clamp-2 hover:text-[#2563EB] dark:hover:text-[#3B82F6] transition-colors"
           title={r.title}
         >
           {r.title}
         </a>
 
         {r.description && (
-          <p className="text-xs text-[#667085] line-clamp-2 mb-3 leading-relaxed">
+          <p className="text-xs text-sb-text-2 line-clamp-2 mb-3 leading-relaxed">
             {r.description}
           </p>
         )}
 
         <div className="flex flex-wrap gap-1.5 mb-3 mt-auto">
           {r.tags && r.tags.slice(0, 3).map(t => (
-            <span key={t} className="text-xs bg-[#F2F4F7] text-[#667085] px-1.5 py-0.5 rounded">{t}</span>
+            <span key={t} className="text-xs bg-sb-surface-2 text-sb-text-2 px-1.5 py-0.5 rounded">{t}</span>
           ))}
         </div>
 
-        <div className="flex items-center justify-between text-xs text-[#667085] pt-3 border-t border-[#F2F4F7]">
+        <div className="flex items-center justify-between text-xs text-sb-text-2 pt-3 border-t border-sb-border">
           <div className="flex items-center gap-1">
+            {/* Star rating — amber color is semantic, keep it */}
             <StarIcon size={12} className="text-[#D97706]" />
-            <span className="font-medium text-[#172033]">{r.rating !== null && r.rating !== undefined ? r.rating.toFixed(1) : '4.5'}</span>
+            <span className="font-medium text-sb-text">{r.rating !== null && r.rating !== undefined ? r.rating.toFixed(1) : '4.5'}</span>
           </div>
           <div className="flex items-center gap-1">
             <ClockIcon size={12} />
@@ -410,7 +413,7 @@ function ResourceCard({
             href={r.resourceUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-medium text-[#2563EB] hover:underline"
+            className="text-xs font-medium text-[#2563EB] dark:text-[#3B82F6] hover:underline"
           >
             Start learning ↗
           </a>

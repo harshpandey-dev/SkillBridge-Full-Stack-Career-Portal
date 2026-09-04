@@ -24,6 +24,12 @@ interface Props {
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/
 
+// Reusable dark-mode input class builder
+const inputCls = (hasError?: boolean) =>
+  `w-full border rounded px-3 py-2.5 text-sm bg-sb-surface text-sb-text placeholder-sb-text-3 outline-none focus:ring-2 focus:ring-[#2563EB]/10 transition-shadow ${
+    hasError ? 'border-[#DC2626]' : 'border-sb-border focus:border-[#2563EB] dark:focus:border-[#3B82F6]'
+  }`
+
 export default function Register({ onLogin, navigate }: Props) {
   const { registerStudent, registerRecruiter } = useAuth()
   const [role, setRole] = useState<'student' | 'recruiter'>('student')
@@ -125,11 +131,11 @@ export default function Register({ onLogin, navigate }: Props) {
   }
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-[#F7F8FA] flex items-center justify-center py-10 px-4">
+    <div className="min-h-[calc(100vh-64px)] bg-sb-bg flex items-center justify-center py-10 px-4">
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-[#172033]">Create your account</h1>
-          <p className="text-sm text-[#667085] mt-1">Join SkillBridge and take the next step in your career</p>
+          <h1 className="text-2xl font-bold text-sb-text">Create your account</h1>
+          <p className="text-sm text-sb-text-2 mt-1">Join SkillBridge and take the next step in your career</p>
         </div>
 
         {/* Role selector */}
@@ -148,37 +154,37 @@ export default function Register({ onLogin, navigate }: Props) {
               }}
               className={`flex flex-col items-start gap-1 p-4 rounded-lg border-2 text-left transition-all ${
                 role === value
-                  ? 'border-[#2563EB] bg-[#EFF6FF]'
-                  : 'border-[#E4E7EC] bg-white hover:border-[#94A3B8]'
+                  ? 'border-[#2563EB] bg-sb-brand-bg'
+                  : 'border-sb-border bg-sb-surface hover:border-sb-border-2'
               }`}
             >
-              <div className={`w-8 h-8 rounded flex items-center justify-center mb-1 ${role === value ? 'bg-[#2563EB] text-white' : 'bg-[#F2F4F7] text-[#667085]'}`}>
+              <div className={`w-8 h-8 rounded flex items-center justify-center mb-1 ${role === value ? 'bg-[#2563EB] text-white' : 'bg-sb-surface-2 text-sb-text-2'}`}>
                 <Icon size={15} />
               </div>
-              <span className={`text-sm font-semibold ${role === value ? 'text-[#2563EB]' : 'text-[#172033]'}`}>{label}</span>
-              <span className="text-xs text-[#667085]">{desc}</span>
+              <span className={`text-sm font-semibold ${role === value ? 'text-[#2563EB] dark:text-[#3B82F6]' : 'text-sb-text'}`}>{label}</span>
+              <span className="text-xs text-sb-text-2">{desc}</span>
             </button>
           ))}
         </div>
 
-        {/* Progress */}
+        {/* Progress steps */}
         <div className="flex items-center gap-3 mb-6">
           {[1, 2].map(s => (
             <div key={s} className="flex items-center gap-1">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${step >= s ? 'bg-[#2563EB] text-white' : 'bg-[#E4E7EC] text-[#667085]'}`}>
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${step >= s ? 'bg-[#2563EB] text-white' : 'bg-sb-surface-2 text-sb-text-2'}`}>
                 {s}
               </div>
-              <span className={`text-xs ${step >= s ? 'text-[#2563EB] font-medium' : 'text-[#667085]'}`}>
+              <span className={`text-xs ${step >= s ? 'text-[#2563EB] dark:text-[#3B82F6] font-medium' : 'text-sb-text-2'}`}>
                 {s === 1 ? 'Account details' : 'Your information'}
               </span>
-              {s < 2 && <div className={`w-12 h-0.5 ml-1 ${step > s ? 'bg-[#2563EB]' : 'bg-[#E4E7EC]'}`} />}
+              {s < 2 && <div className={`w-12 h-0.5 ml-1 ${step > s ? 'bg-[#2563EB]' : 'bg-sb-border'}`} />}
             </div>
           ))}
         </div>
 
-        <div className="bg-white border border-[#E4E7EC] rounded-lg p-6">
+        <div className="bg-sb-surface border border-sb-border rounded-lg p-6">
           {serverError && (
-            <div className="bg-[#FEF2F2] border border-[#FECACA] rounded p-3 text-sm text-[#DC2626] mb-4">
+            <div className="bg-[#FEF2F2] dark:bg-[#3B0A0A] border border-[#FECACA] dark:border-[#7F1D1D] rounded p-3 text-sm text-[#DC2626] dark:text-[#F87171] mb-4">
               {serverError}
             </div>
           )}
@@ -188,56 +194,56 @@ export default function Register({ onLogin, navigate }: Props) {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-medium text-[#172033] mb-1.5">First name</label>
+                    <label className="block text-sm font-medium text-sb-text mb-1.5">First name</label>
                     <input
                       value={form.firstName}
                       onChange={e => set('firstName', e.target.value)}
                       placeholder="Alex"
-                      className={`w-full border rounded px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#2563EB]/10 transition-shadow ${errors.firstName ? 'border-[#DC2626]' : 'border-[#E4E7EC] focus:border-[#2563EB]'}`}
+                      className={inputCls(!!errors.firstName)}
                     />
                     {errors.firstName && <p className="text-xs text-[#DC2626] mt-1">{errors.firstName}</p>}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#172033] mb-1.5">Last name</label>
+                    <label className="block text-sm font-medium text-sb-text mb-1.5">Last name</label>
                     <input
                       value={form.lastName}
                       onChange={e => set('lastName', e.target.value)}
                       placeholder="Chen"
-                      className={`w-full border rounded px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#2563EB]/10 transition-shadow ${errors.lastName ? 'border-[#DC2626]' : 'border-[#E4E7EC] focus:border-[#2563EB]'}`}
+                      className={inputCls(!!errors.lastName)}
                     />
                     {errors.lastName && <p className="text-xs text-[#DC2626] mt-1">{errors.lastName}</p>}
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#172033] mb-1.5">Email address</label>
+                  <label className="block text-sm font-medium text-sb-text mb-1.5">Email address</label>
                   <input
                     type="email"
                     value={form.email}
                     onChange={e => set('email', e.target.value)}
                     placeholder="you@university.edu"
-                    className={`w-full border rounded px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#2563EB]/10 transition-shadow ${errors.email ? 'border-[#DC2626]' : 'border-[#E4E7EC] focus:border-[#2563EB]'}`}
+                    className={inputCls(!!errors.email)}
                   />
                   {errors.email && <p className="text-xs text-[#DC2626] mt-1">{errors.email}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#172033] mb-1.5">Password</label>
+                  <label className="block text-sm font-medium text-sb-text mb-1.5">Password</label>
                   <input
                     type="password"
                     value={form.password}
                     onChange={e => set('password', e.target.value)}
                     placeholder="Min. 8 characters (Uppercase, lowercase, number)"
-                    className={`w-full border rounded px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#2563EB]/10 transition-shadow ${errors.password ? 'border-[#DC2626]' : 'border-[#E4E7EC] focus:border-[#2563EB]'}`}
+                    className={inputCls(!!errors.password)}
                   />
                   {errors.password && <p className="text-xs text-[#DC2626] mt-1">{errors.password}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#172033] mb-1.5">Confirm password</label>
+                  <label className="block text-sm font-medium text-sb-text mb-1.5">Confirm password</label>
                   <input
                     type="password"
                     value={form.confirmPassword}
                     onChange={e => set('confirmPassword', e.target.value)}
                     placeholder="Re-enter your password"
-                    className={`w-full border rounded px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#2563EB]/10 transition-shadow ${errors.confirmPassword ? 'border-[#DC2626]' : 'border-[#E4E7EC] focus:border-[#2563EB]'}`}
+                    className={inputCls(!!errors.confirmPassword)}
                   />
                   {errors.confirmPassword && <p className="text-xs text-[#DC2626] mt-1">{errors.confirmPassword}</p>}
                 </div>
@@ -252,30 +258,30 @@ export default function Register({ onLogin, navigate }: Props) {
                 {role === 'student' ? (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-[#172033] mb-1.5">University / College</label>
+                      <label className="block text-sm font-medium text-sb-text mb-1.5">University / College</label>
                       <input
                         value={form.university}
                         onChange={e => set('university', e.target.value)}
                         placeholder="Stanford University"
-                        className={`w-full border rounded px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#2563EB]/10 ${errors.university ? 'border-[#DC2626]' : 'border-[#E4E7EC] focus:border-[#2563EB]'}`}
+                        className={inputCls(!!errors.university)}
                       />
                       {errors.university && <p className="text-xs text-[#DC2626] mt-1">{errors.university}</p>}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#172033] mb-1.5">Field of study</label>
+                      <label className="block text-sm font-medium text-sb-text mb-1.5">Field of study</label>
                       <input
                         value={form.major}
                         onChange={e => set('major', e.target.value)}
                         placeholder="Computer Science"
-                        className="w-full border border-[#E4E7EC] rounded px-3 py-2.5 text-sm outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10"
+                        className={inputCls()}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#172033] mb-1.5">Expected graduation</label>
+                      <label className="block text-sm font-medium text-sb-text mb-1.5">Expected graduation</label>
                       <select
                         value={form.graduationYear}
                         onChange={e => set('graduationYear', e.target.value)}
-                        className="w-full border border-[#E4E7EC] rounded px-3 py-2.5 text-sm text-[#172033] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10"
+                        className="w-full border border-sb-border bg-sb-surface rounded px-3 py-2.5 text-sm text-sb-text outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10"
                       >
                         <option value="May 2025">May 2025</option>
                         <option value="December 2025">December 2025</option>
@@ -289,30 +295,30 @@ export default function Register({ onLogin, navigate }: Props) {
                 ) : (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-[#172033] mb-1.5">Company name</label>
+                      <label className="block text-sm font-medium text-sb-text mb-1.5">Company name</label>
                       <input
                         value={form.company}
                         onChange={e => set('company', e.target.value)}
                         placeholder="Stripe, Inc."
-                        className={`w-full border rounded px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#2563EB]/10 ${errors.company ? 'border-[#DC2626]' : 'border-[#E4E7EC] focus:border-[#2563EB]'}`}
+                        className={inputCls(!!errors.company)}
                       />
                       {errors.company && <p className="text-xs text-[#DC2626] mt-1">{errors.company}</p>}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#172033] mb-1.5">Your role / position</label>
+                      <label className="block text-sm font-medium text-sb-text mb-1.5">Your role / position</label>
                       <input
                         value={form.position}
                         onChange={e => set('position', e.target.value)}
                         placeholder="Senior Technical Recruiter"
-                        className="w-full border border-[#E4E7EC] rounded px-3 py-2.5 text-sm outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10"
+                        className={inputCls()}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#172033] mb-1.5">Company size</label>
+                      <label className="block text-sm font-medium text-sb-text mb-1.5">Company size</label>
                       <select
                         value={form.companySize}
                         onChange={e => set('companySize', e.target.value)}
-                        className="w-full border border-[#E4E7EC] rounded px-3 py-2.5 text-sm text-[#172033] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10"
+                        className="w-full border border-sb-border bg-sb-surface rounded px-3 py-2.5 text-sm text-sb-text outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10"
                       >
                         <option value="1–50 employees">1–50 employees</option>
                         <option value="51–200 employees">51–200 employees</option>
@@ -331,14 +337,14 @@ export default function Register({ onLogin, navigate }: Props) {
                     onChange={e => set('terms', e.target.checked)}
                     className="w-4 h-4 rounded accent-[#2563EB] mt-0.5"
                   />
-                  <span className="text-sm text-[#667085]">
-                    I agree to the <a href="#" className="text-[#2563EB] hover:underline">Terms of Service</a> and <a href="#" className="text-[#2563EB] hover:underline">Privacy Policy</a>
+                  <span className="text-sm text-sb-text-2">
+                    I agree to the <a href="#" className="text-[#2563EB] dark:text-[#3B82F6] hover:underline">Terms of Service</a> and <a href="#" className="text-[#2563EB] dark:text-[#3B82F6] hover:underline">Privacy Policy</a>
                   </span>
                 </label>
                 {errors.terms && <p className="text-xs text-[#DC2626]">{errors.terms}</p>}
 
                 <div className="flex gap-3">
-                  <button type="button" onClick={() => setStep(1)} className="flex-1 border border-[#E4E7EC] text-[#667085] py-2.5 rounded text-sm font-medium hover:bg-[#F7F8FA] transition-colors">
+                  <button type="button" onClick={() => setStep(1)} className="flex-1 border border-sb-border text-sb-text-2 py-2.5 rounded text-sm font-medium hover:bg-sb-surface-2 transition-colors">
                     Back
                   </button>
                   <button type="submit" disabled={loading} className="flex-1 bg-[#2563EB] text-white py-2.5 rounded text-sm font-semibold hover:bg-[#1D4ED8] disabled:opacity-60 transition-colors">
@@ -350,9 +356,9 @@ export default function Register({ onLogin, navigate }: Props) {
           </form>
         </div>
 
-        <p className="text-center text-sm text-[#667085] mt-4">
+        <p className="text-center text-sm text-sb-text-2 mt-4">
           Already have an account?{' '}
-          <button onClick={() => navigate('login')} className="text-[#2563EB] font-medium hover:underline">Sign in</button>
+          <button onClick={() => navigate('login')} className="text-[#2563EB] dark:text-[#3B82F6] font-medium hover:underline">Sign in</button>
         </p>
       </div>
     </div>

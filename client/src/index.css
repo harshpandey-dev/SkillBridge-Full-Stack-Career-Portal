@@ -4,8 +4,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Light Theme (default) ──────────────────────────────────────────────── */
 :root {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Existing brand tokens (unchanged) */
   --color-navy: #163A5F;
   --color-navy-dark: #0F2A45;
   --color-navy-light: #1E4A75;
@@ -28,8 +31,39 @@
   --color-warning-light: #FFFBEB;
   --color-success: #059669;
   --color-success-light: #ECFDF5;
+
+  /* Semantic theme tokens — Light Mode values */
+  --sb-bg:            #F7F8FA;   /* page background */
+  --sb-surface:       #FFFFFF;   /* cards, panels, headers */
+  --sb-surface-2:     #F2F4F7;   /* subtle panels, alternating rows */
+  --sb-surface-3:     #E9ECF0;   /* deep subtle, hover states */
+  --sb-border:        #E4E7EC;   /* standard border */
+  --sb-border-2:      #CBD5E1;   /* stronger border */
+  --sb-text:          #172033;   /* primary text */
+  --sb-text-2:        #667085;   /* secondary / muted text */
+  --sb-text-3:        #94A3B8;   /* placeholder / very dim text */
+  --sb-brand:         #2563EB;   /* brand blue */
+  --sb-brand-bg:      #EFF6FF;   /* brand-tinted background */
+  --sb-brand-border:  #BFDBFE;   /* brand-tinted border */
 }
 
+/* ─── Dark Theme ─────────────────────────────────────────────────────────── */
+.dark {
+  --sb-bg:            #0F1117;   /* deep dark page background */
+  --sb-surface:       #1A1F2E;   /* card / panel surface */
+  --sb-surface-2:     #242938;   /* subtle raised surface */
+  --sb-surface-3:     #2D3344;   /* hover / deeper panel */
+  --sb-border:        #2D3344;   /* standard border */
+  --sb-border-2:      #3D4558;   /* stronger border */
+  --sb-text:          #F1F5F9;   /* primary text */
+  --sb-text-2:        #94A3B8;   /* secondary text */
+  --sb-text-3:        #64748B;   /* placeholder / dim text */
+  --sb-brand:         #3B82F6;   /* slightly brighter blue for dark */
+  --sb-brand-bg:      #1E3A5F;   /* brand-tinted dark bg */
+  --sb-brand-border:  #2563EB;   /* brand border on dark */
+}
+
+/* ─── Base styles ────────────────────────────────────────────────────────── */
 html,
 body,
 #root {
@@ -38,15 +72,17 @@ body,
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--color-page);
-  color: var(--color-ink);
+  background-color: var(--sb-bg);
+  color: var(--sb-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+/* ─── Scrollbar ──────────────────────────────────────────────────────────── */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #E4E7EC transparent;
+  scrollbar-color: var(--sb-border) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -59,6 +95,16 @@ body {
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: #E4E7EC;
+  background-color: var(--sb-border);
   border-radius: 3px;
+}
+
+/* ─── Mobile sidebar transition ─────────────────────────────────────────── */
+.sidebar-transition {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Theme transition — prevents flash on toggle only ──────────────────── */
+.theme-ready * {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
 }

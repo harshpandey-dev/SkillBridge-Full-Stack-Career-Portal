@@ -131,30 +131,30 @@ export default function Jobs({ navigate }: Props) {
   }
 
   return (
-    <div className="bg-[#F7F8FA] min-h-screen">
-      {/* Search bar */}
+    <div className="bg-sb-bg min-h-screen">
+      {/* Search bar — navy brand section stays */}
       <div className="bg-[#163A5F] py-8">
-        <div className="max-w-[1280px] mx-auto px-6">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
           <h1 className="text-2xl font-bold text-white mb-4">Find your next opportunity</h1>
           <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row gap-2">
-            <div className="flex items-center gap-2 bg-white rounded px-3 py-2.5 flex-1">
-              <SearchIcon size={16} className="text-[#667085]" />
+            <div className="flex items-center gap-2 bg-white dark:bg-sb-surface-2 rounded px-3 py-2.5 flex-1">
+              <SearchIcon size={16} className="text-[#667085] dark:text-sb-text-2" />
               <input
                 type="text"
                 placeholder="Job title or company"
                 value={search}
                 onChange={e => { setSearch(e.target.value); setPage(1) }}
-                className="flex-1 text-sm text-[#172033] placeholder-[#667085] outline-none"
+                className="flex-1 text-sm text-[#172033] dark:text-sb-text placeholder-[#667085] dark:placeholder-sb-text-3 outline-none bg-transparent"
               />
             </div>
-            <div className="flex items-center gap-2 bg-white rounded px-3 py-2.5 flex-1">
-              <MapPinIcon size={16} className="text-[#667085]" />
+            <div className="flex items-center gap-2 bg-white dark:bg-sb-surface-2 rounded px-3 py-2.5 flex-1">
+              <MapPinIcon size={16} className="text-[#667085] dark:text-sb-text-2" />
               <input
                 type="text"
                 placeholder="City, state, or 'Remote'"
                 value={locationInput}
                 onChange={e => { setLocationInput(e.target.value); setPage(1) }}
-                className="flex-1 text-sm text-[#172033] placeholder-[#667085] outline-none"
+                className="flex-1 text-sm text-[#172033] dark:text-sb-text placeholder-[#667085] dark:placeholder-sb-text-3 outline-none bg-transparent"
               />
             </div>
             <button
@@ -167,13 +167,13 @@ export default function Jobs({ navigate }: Props) {
         </div>
       </div>
 
-      <div className="max-w-[1280px] mx-auto px-6 py-8">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters Sidebar */}
           <aside className="w-full lg:w-64 shrink-0 space-y-6">
-            <div className="bg-white border border-[#E4E7EC] rounded-lg p-5 space-y-6">
-              <div className="flex items-center justify-between pb-3 border-b border-[#F2F4F7]">
-                <h2 className="font-semibold text-[#172033] text-sm">Filters</h2>
+            <div className="bg-sb-surface border border-sb-border rounded-lg p-5 space-y-6">
+              <div className="flex items-center justify-between pb-3 border-b border-sb-border">
+                <h2 className="font-semibold text-sb-text text-sm">Filters</h2>
                 {(selectedTypes.length > 0 || selectedLocations.length > 0 || remoteOnly || search || locationInput) && (
                   <button
                     onClick={() => {
@@ -184,7 +184,7 @@ export default function Jobs({ navigate }: Props) {
                       setLocationInput('')
                       setPage(1)
                     }}
-                    className="text-xs text-[#2563EB] hover:text-[#1D4ED8] font-medium"
+                    className="text-xs text-[#2563EB] dark:text-[#3B82F6] hover:text-[#1D4ED8] font-medium"
                   >
                     Reset all
                   </button>
@@ -198,15 +198,15 @@ export default function Jobs({ navigate }: Props) {
                     type="checkbox"
                     checked={remoteOnly}
                     onChange={e => { setRemoteOnly(e.target.checked); setPage(1) }}
-                    className="w-4 h-4 rounded border-[#E4E7EC] text-[#2563EB] focus:ring-[#2563EB] accent-[#2563EB]"
+                    className="w-4 h-4 rounded accent-[#2563EB]"
                   />
-                  <span className="text-sm font-medium text-[#172033]">Remote only</span>
+                  <span className="text-sm font-medium text-sb-text">Remote only</span>
                 </label>
               </div>
 
               {/* Job Type */}
               <div>
-                <h3 className="text-xs font-semibold text-[#667085] uppercase tracking-wide mb-3">Job Type</h3>
+                <h3 className="text-xs font-semibold text-sb-text-2 uppercase tracking-wide mb-3">Job Type</h3>
                 <div className="space-y-2">
                   {JOB_TYPES.map(t => (
                     <label key={t} className="flex items-center gap-2.5 cursor-pointer">
@@ -214,9 +214,9 @@ export default function Jobs({ navigate }: Props) {
                         type="checkbox"
                         checked={selectedTypes.includes(t)}
                         onChange={() => { toggle(selectedTypes, setSelectedTypes, t); setPage(1) }}
-                        className="w-4 h-4 rounded border-[#E4E7EC] text-[#2563EB] accent-[#2563EB]"
+                        className="w-4 h-4 rounded accent-[#2563EB]"
                       />
-                      <span className="text-sm text-[#667085] hover:text-[#172033] transition-colors">{t}</span>
+                      <span className="text-sm text-sb-text-2 hover:text-sb-text transition-colors">{t}</span>
                     </label>
                   ))}
                 </div>
@@ -224,7 +224,7 @@ export default function Jobs({ navigate }: Props) {
 
               {/* Location */}
               <div>
-                <h3 className="text-xs font-semibold text-[#667085] uppercase tracking-wide mb-3">Popular Locations</h3>
+                <h3 className="text-xs font-semibold text-sb-text-2 uppercase tracking-wide mb-3">Popular Locations</h3>
                 <div className="space-y-2">
                   {LOCATIONS.map(loc => (
                     <label key={loc} className="flex items-center gap-2.5 cursor-pointer">
@@ -232,9 +232,9 @@ export default function Jobs({ navigate }: Props) {
                         type="checkbox"
                         checked={selectedLocations.includes(loc)}
                         onChange={() => { toggle(selectedLocations, setSelectedLocations, loc); setPage(1) }}
-                        className="w-4 h-4 rounded border-[#E4E7EC] text-[#2563EB] accent-[#2563EB]"
+                        className="w-4 h-4 rounded accent-[#2563EB]"
                       />
-                      <span className="text-sm text-[#667085] hover:text-[#172033] transition-colors">{loc}</span>
+                      <span className="text-sm text-sb-text-2 hover:text-sb-text transition-colors">{loc}</span>
                     </label>
                   ))}
                 </div>
@@ -246,15 +246,15 @@ export default function Jobs({ navigate }: Props) {
           <div className="flex-1 min-w-0">
             {/* Sort & Count Header */}
             <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-[#667085]">
-                Showing <span className="font-semibold text-[#172033]">{jobs.length}</span> of <span className="font-semibold text-[#172033]">{total}</span> roles
+              <p className="text-sm text-sb-text-2">
+                Showing <span className="font-semibold text-sb-text">{jobs.length}</span> of <span className="font-semibold text-sb-text">{total}</span> roles
               </p>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-[#667085]">Sort by:</span>
+                <span className="text-xs text-sb-text-2">Sort by:</span>
                 <select
                   value={sort}
                   onChange={e => { setSort(e.target.value as 'newest' | 'salary_desc' | 'oldest'); setPage(1) }}
-                  className="text-xs font-medium text-[#172033] bg-white border border-[#E4E7EC] rounded px-2.5 py-1.5 outline-none focus:border-[#2563EB]"
+                  className="text-xs font-medium text-sb-text bg-sb-surface border border-sb-border rounded px-2.5 py-1.5 outline-none focus:border-[#2563EB]"
                 >
                   <option value="newest">Newest first</option>
                   <option value="salary_desc">Highest salary</option>
@@ -264,7 +264,7 @@ export default function Jobs({ navigate }: Props) {
             </div>
 
             {error && (
-              <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-lg p-4 text-sm text-[#DC2626] mb-4">
+              <div className="bg-[#FEF2F2] dark:bg-[#3B0A0A] border border-[#FECACA] dark:border-[#7F1D1D] rounded-lg p-4 text-sm text-[#DC2626] dark:text-[#F87171] mb-4">
                 {error}
               </div>
             )}
@@ -272,13 +272,13 @@ export default function Jobs({ navigate }: Props) {
             {loading ? (
               <div className="space-y-3">
                 {[1, 2, 3, 4].map(n => (
-                  <div key={n} className="bg-white border border-[#E4E7EC] rounded-lg p-5 animate-pulse">
+                  <div key={n} className="bg-sb-surface border border-sb-border rounded-lg p-5 animate-pulse">
                     <div className="flex items-start gap-4">
-                      <div className="w-11 h-11 bg-[#F2F4F7] rounded shrink-0" />
+                      <div className="w-11 h-11 bg-sb-surface-2 rounded shrink-0" />
                       <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-[#F2F4F7] rounded w-1/3" />
-                        <div className="h-3 bg-[#F2F4F7] rounded w-1/4" />
-                        <div className="h-3 bg-[#F2F4F7] rounded w-1/2 mt-2" />
+                        <div className="h-4 bg-sb-surface-2 rounded w-1/3" />
+                        <div className="h-3 bg-sb-surface-2 rounded w-1/4" />
+                        <div className="h-3 bg-sb-surface-2 rounded w-1/2 mt-2" />
                       </div>
                     </div>
                   </div>
@@ -297,10 +297,10 @@ export default function Jobs({ navigate }: Props) {
                 ))}
 
                 {jobs.length === 0 && (
-                  <div className="bg-white border border-[#E4E7EC] rounded-lg p-12 text-center">
+                  <div className="bg-sb-surface border border-sb-border rounded-lg p-12 text-center">
                     <div className="text-3xl mb-3">🔍</div>
-                    <h3 className="font-semibold text-[#172033] text-base mb-1">No roles matched your search</h3>
-                    <p className="text-sm text-[#667085] mb-4">Try broadening your search terms or clearing active filters.</p>
+                    <h3 className="font-semibold text-sb-text text-base mb-1">No roles matched your search</h3>
+                    <p className="text-sm text-sb-text-2 mb-4">Try broadening your search terms or clearing active filters.</p>
                     <button
                       onClick={() => {
                         setSelectedTypes([])
@@ -321,14 +321,14 @@ export default function Jobs({ navigate }: Props) {
 
             {!loading && totalPages > 1 && (
               <div className="flex items-center justify-between mt-6">
-                <p className="text-sm text-[#667085]">
+                <p className="text-sm text-sb-text-2">
                   Page {page} of {totalPages}
                 </p>
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => setPage(p => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="w-8 h-8 flex items-center justify-center rounded border border-[#E4E7EC] bg-white text-[#667085] hover:bg-[#F7F8FA] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="w-8 h-8 flex items-center justify-center rounded border border-sb-border bg-sb-surface text-sb-text-2 hover:bg-sb-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   >
                     <ChevronLeftIcon size={14} />
                   </button>
@@ -339,7 +339,7 @@ export default function Jobs({ navigate }: Props) {
                       className={`w-8 h-8 flex items-center justify-center rounded text-sm font-medium transition-colors ${
                         page === i + 1
                           ? 'bg-[#2563EB] text-white border border-[#2563EB]'
-                          : 'border border-[#E4E7EC] bg-white text-[#667085] hover:bg-[#F7F8FA]'
+                          : 'border border-sb-border bg-sb-surface text-sb-text-2 hover:bg-sb-surface-2'
                       }`}
                     >
                       {i + 1}
@@ -348,7 +348,7 @@ export default function Jobs({ navigate }: Props) {
                   <button
                     onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
-                    className="w-8 h-8 flex items-center justify-center rounded border border-[#E4E7EC] bg-white text-[#667085] hover:bg-[#F7F8FA] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="w-8 h-8 flex items-center justify-center rounded border border-sb-border bg-sb-surface text-sb-text-2 hover:bg-sb-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   >
                     <ChevronRightIcon size={14} />
                   </button>
@@ -374,7 +374,7 @@ function JobCard({
   onClick: () => void;
 }) {
   return (
-    <div className="bg-white border border-[#E4E7EC] rounded-lg p-5 hover:border-[#2563EB] hover:shadow-sm transition-all group">
+    <div className="bg-sb-surface border border-sb-border rounded-lg p-5 hover:border-[#2563EB] dark:hover:border-[#3B82F6] hover:shadow-sm transition-all group">
       <div className="flex items-start gap-4">
         <div
           className="w-11 h-11 rounded flex items-center justify-center text-white font-bold text-base shrink-0"
@@ -385,14 +385,14 @@ function JobCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <button onClick={onClick} className="font-semibold text-[#172033] group-hover:text-[#2563EB] transition-colors text-[15px] text-left">
+              <button onClick={onClick} className="font-semibold text-sb-text group-hover:text-[#2563EB] dark:group-hover:text-[#3B82F6] transition-colors text-[15px] text-left">
                 {job.title}
               </button>
-              <p className="text-sm text-[#667085] mt-0.5">{job.company} · {job.department}</p>
+              <p className="text-sm text-sb-text-2 mt-0.5">{job.company} · {job.department}</p>
             </div>
             <button
               onClick={e => { e.stopPropagation(); onToggleSave() }}
-              className={`shrink-0 p-1.5 rounded hover:bg-[#F7F8FA] transition-colors ${isSaved ? 'text-[#2563EB]' : 'text-[#94A3B8]'}`}
+              className={`shrink-0 p-1.5 rounded hover:bg-sb-surface-2 transition-colors ${isSaved ? 'text-[#2563EB] dark:text-[#3B82F6]' : 'text-sb-text-3'}`}
               title={isSaved ? 'Remove bookmark' : 'Bookmark job'}
             >
               {isSaved ? <BookmarkFilledIcon size={16} /> : <BookmarkIcon size={16} />}
@@ -400,35 +400,36 @@ function JobCard({
           </div>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2.5 mb-3">
-            <span className="flex items-center gap-1 text-xs text-[#667085]">
+            <span className="flex items-center gap-1 text-xs text-sb-text-2">
               <MapPinIcon size={12} /> {job.location}
             </span>
+            {/* Job type badges — semantic colors preserved */}
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-              job.type === 'Internship' ? 'bg-[#E6F7F5] text-[#0F9D8A]' :
-              job.type === 'Full-time' ? 'bg-[#EFF6FF] text-[#2563EB]' :
-              'bg-[#F2F4F7] text-[#667085]'
+              job.type === 'Internship' ? 'bg-[#E6F7F5] text-[#0F9D8A] dark:bg-[#042F2E]' :
+              job.type === 'Full-time' ? 'bg-[#EFF6FF] text-[#2563EB] dark:bg-[#1E3A5F] dark:text-[#3B82F6]' :
+              'bg-sb-surface-2 text-sb-text-2'
             }`}>
               {job.type}
             </span>
-            {job.remote && <span className="text-xs bg-[#F2F4F7] text-[#667085] px-2 py-0.5 rounded-full">Remote</span>}
-            <span className="text-xs text-[#667085]">{job.experience}</span>
+            {job.remote && <span className="text-xs bg-sb-surface-2 text-sb-text-2 px-2 py-0.5 rounded-full">Remote</span>}
+            <span className="text-xs text-sb-text-2">{job.experience}</span>
           </div>
 
           <div className="flex flex-wrap gap-1.5 mb-3">
             {job.skills.slice(0, 4).map(s => (
-              <span key={s} className="text-xs bg-[#F2F4F7] text-[#667085] px-2 py-0.5 rounded">{s}</span>
+              <span key={s} className="text-xs bg-sb-surface-2 text-sb-text-2 px-2 py-0.5 rounded">{s}</span>
             ))}
-            {job.skills.length > 4 && <span className="text-xs text-[#667085]">+{job.skills.length - 4} more</span>}
+            {job.skills.length > 4 && <span className="text-xs text-sb-text-2">+{job.skills.length - 4} more</span>}
           </div>
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <span className="text-sm font-semibold text-[#172033]">{job.salary}</span>
-              <span className="text-xs text-[#667085]">Posted {job.postedDate}</span>
+              <span className="text-sm font-semibold text-sb-text">{job.salary}</span>
+              <span className="text-xs text-sb-text-2">Posted {job.postedDate}</span>
             </div>
             <button
               onClick={onClick}
-              className="text-xs font-medium text-[#2563EB] hover:text-[#1D4ED8] transition-colors"
+              className="text-xs font-medium text-[#2563EB] dark:text-[#3B82F6] hover:text-[#1D4ED8] transition-colors"
             >
               View details →
             </button>

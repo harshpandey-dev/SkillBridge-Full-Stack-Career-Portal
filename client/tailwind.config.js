@@ -4,12 +4,14 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
       colors: {
+        // ── Existing brand palette (unchanged) ──────────────────────────────
         navy: {
           DEFAULT: '#163A5F',
           dark: '#0F2A45',
@@ -53,6 +55,21 @@ export default {
           DEFAULT: '#059669',
           light: '#ECFDF5',
         },
+
+        // ── Semantic dark-mode-aware tokens (map to CSS variables) ──────────
+        // Use these for surfaces, text, borders — NOT for status badges/brand
+        'sb-bg':        'var(--sb-bg)',
+        'sb-surface':   'var(--sb-surface)',
+        'sb-surface-2': 'var(--sb-surface-2)',
+        'sb-surface-3': 'var(--sb-surface-3)',
+        'sb-border':    'var(--sb-border)',
+        'sb-border-2':  'var(--sb-border-2)',
+        'sb-text':      'var(--sb-text)',
+        'sb-text-2':    'var(--sb-text-2)',
+        'sb-text-3':    'var(--sb-text-3)',
+        'sb-brand':     'var(--sb-brand)',
+        'sb-brand-bg':  'var(--sb-brand-bg)',
+        'sb-brand-border': 'var(--sb-brand-border)',
       },
     },
   },

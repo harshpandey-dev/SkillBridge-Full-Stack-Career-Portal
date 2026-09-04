@@ -5,8 +5,32 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SkillBridge</title>
+    <!--
+      Anti-flash theme script: runs synchronously before any rendering.
+      Reads the saved theme from localStorage and applies the 'dark' class
+      to <html> immediately, preventing a white flash before React hydrates.
+    -->
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('sb-theme');
+          if (saved === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else if (saved === 'light') {
+            document.documentElement.classList.remove('dark');
+          } else {
+            // No preference saved — detect system preference
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+              document.documentElement.classList.add('dark');
+            }
+          }
+        } catch (e) {
+          // localStorage may be blocked in some environments — fail silently
+        }
+      })();
+    </script>
   </head>
-  <body class="bg-gray-50 text-gray-900 antialiased">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

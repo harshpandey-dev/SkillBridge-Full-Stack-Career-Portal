@@ -410,19 +410,19 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
   if (loading) {
     return (
       <div className="space-y-5 max-w-[960px] animate-pulse">
-        <div className="h-8 bg-[#E4E7EC] rounded w-48" />
+        <div className="h-8 bg-sb-surface-2 rounded w-48" />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           <div className="space-y-4">
-            <div className="bg-white border border-[#E4E7EC] rounded-lg p-8 text-center space-y-3">
-              <div className="w-20 h-20 bg-[#F2F4F7] rounded-full mx-auto" />
-              <div className="h-4 bg-[#F2F4F7] rounded w-3/4 mx-auto" />
-              <div className="h-3 bg-[#F2F4F7] rounded w-1/2 mx-auto" />
+            <div className="bg-sb-surface border border-sb-border rounded-lg p-8 text-center space-y-3">
+              <div className="w-20 h-20 bg-sb-surface-2 rounded-full mx-auto" />
+              <div className="h-4 bg-sb-surface-2 rounded w-3/4 mx-auto" />
+              <div className="h-3 bg-sb-surface-2 rounded w-1/2 mx-auto" />
             </div>
-            <div className="bg-white border border-[#E4E7EC] rounded-lg p-5 h-44" />
+            <div className="bg-sb-surface border border-sb-border rounded-lg p-5 h-44" />
           </div>
           <div className="lg:col-span-2 space-y-4">
-            <div className="bg-white border border-[#E4E7EC] rounded-lg p-6 h-48" />
-            <div className="bg-white border border-[#E4E7EC] rounded-lg p-6 h-48" />
+            <div className="bg-sb-surface border border-sb-border rounded-lg p-6 h-48" />
+            <div className="bg-sb-surface border border-sb-border rounded-lg p-6 h-48" />
           </div>
         </div>
       </div>
@@ -432,9 +432,9 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
   if (pageError || !profileData) {
     return (
       <div className="space-y-5 max-w-[960px]">
-        <h1 className="text-2xl font-bold text-[#172033]">My Profile</h1>
-        <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-lg p-6 text-center">
-          <p className="text-sm text-[#DC2626] font-medium">{pageError || 'Unable to load profile data.'}</p>
+        <h1 className="text-2xl font-bold text-sb-text">My Profile</h1>
+        <div className="bg-[#FEF2F2] dark:bg-[#3B0A0A] border border-[#FECACA] dark:border-[#7F1D1D] rounded-lg p-6 text-center">
+          <p className="text-sm text-[#DC2626] dark:text-[#F87171] font-medium">{pageError || 'Unable to load profile data.'}</p>
           <button
             onClick={loadProfile}
             className="mt-4 bg-[#2563EB] text-white px-4 py-2 rounded text-sm font-semibold hover:bg-[#1D4ED8] transition-colors"
@@ -476,20 +476,20 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#172033]">My Profile</h1>
-          <p className="text-sm text-[#667085] mt-0.5">Manage your personal details, skills, and resume</p>
+          <h1 className="text-2xl font-bold text-sb-text">My Profile</h1>
+          <p className="text-sm text-sb-text-2 mt-0.5">Manage your personal details, skills, and resume</p>
         </div>
         {saveSuccess && (
-          <div className="flex items-center gap-2 bg-[#E6F7F5] text-[#0F9D8A] px-3 py-2 rounded text-sm font-medium">
+          <div className="flex items-center gap-2 bg-[#E6F7F5] dark:bg-[#042F2E] text-[#0F9D8A] px-3 py-2 rounded text-sm font-medium">
             <CheckIcon size={15} /> {saveSuccess}
           </div>
         )}
       </div>
 
       {actionError && (
-        <div className="bg-[#FEF2F2] border border-[#FECACA] rounded p-3 text-sm text-[#DC2626] flex justify-between items-center">
+        <div className="bg-[#FEF2F2] dark:bg-[#3B0A0A] border border-[#FECACA] dark:border-[#7F1D1D] rounded p-3 text-sm text-[#DC2626] dark:text-[#F87171] flex justify-between items-center">
           <span>{actionError}</span>
-          <button onClick={() => setActionError(null)} className="text-xs text-[#DC2626] underline ml-2">Dismiss</button>
+          <button onClick={() => setActionError(null)} className="text-xs text-[#DC2626] dark:text-[#F87171] underline ml-2">Dismiss</button>
         </div>
       )}
 
@@ -497,7 +497,7 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
         {/* Left column */}
         <div className="space-y-4">
           {/* Avatar & identity */}
-          <div className="bg-white border border-[#E4E7EC] rounded-lg p-5 text-center relative group">
+          <div className="bg-sb-surface border border-sb-border rounded-lg p-5 text-center relative group">
             <input
               type="file"
               ref={imageInputRef}
@@ -510,7 +510,7 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
                 <img
                   src={user.profileImage}
                   alt={user.name}
-                  className="w-20 h-20 rounded-full object-cover border border-[#E4E7EC]"
+                  className="w-20 h-20 rounded-full object-cover border border-sb-border"
                 />
               ) : (
                 <div className="w-20 h-20 rounded-full bg-[#163A5F] flex items-center justify-center text-white text-2xl font-bold">
@@ -531,49 +531,49 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
               <button
                 disabled={uploadingImage}
                 onClick={handleDeleteImage}
-                className="text-xs text-[#DC2626] hover:underline mb-2 block mx-auto"
+                className="text-xs text-[#DC2626] dark:text-[#F87171] hover:underline mb-2 block mx-auto"
               >
                 Remove photo
               </button>
             )}
 
-            <h2 className="font-semibold text-[#172033] text-lg">{user.name}</h2>
-            <p className="text-sm text-[#667085] mt-0.5">{profile.major}</p>
-            <p className="text-sm text-[#667085]">{profile.university}</p>
+            <h2 className="font-semibold text-sb-text text-lg">{user.name}</h2>
+            <p className="text-sm text-sb-text-2 mt-0.5">{profile.major}</p>
+            <p className="text-sm text-sb-text-2">{profile.university}</p>
           </div>
 
           {/* Profile completion */}
-          <div className="bg-white border border-[#E4E7EC] rounded-lg p-4">
+          <div className="bg-sb-surface border border-sb-border rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold text-[#172033]">Profile strength</h3>
-              <span className="text-sm font-bold text-[#2563EB]">{completionPercentage}%</span>
+              <h3 className="text-sm font-semibold text-sb-text">Profile strength</h3>
+              <span className="text-sm font-bold text-[#2563EB] dark:text-[#3B82F6]">{completionPercentage}%</span>
             </div>
-            <div className="w-full h-1.5 bg-[#F2F4F7] rounded-full mb-4">
+            <div className="w-full h-1.5 bg-sb-surface-2 rounded-full mb-4">
               <div className="h-1.5 bg-[#2563EB] rounded-full transition-all" style={{ width: `${completionPercentage}%` }} />
             </div>
             <div className="space-y-1.5">
               {completionItems.map(item => (
                 <div key={item.label} className="flex items-center gap-2">
-                  <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${item.done ? 'bg-[#E6F7F5]' : 'bg-[#F2F4F7]'}`}>
-                    {item.done ? <CheckIcon size={10} className="text-[#0F9D8A]" /> : <div className="w-1.5 h-1.5 rounded-full bg-[#E4E7EC]" />}
+                  <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${item.done ? 'bg-[#E6F7F5] dark:bg-[#042F2E]' : 'bg-sb-surface-2'}`}>
+                    {item.done ? <CheckIcon size={10} className="text-[#0F9D8A]" /> : <div className="w-1.5 h-1.5 rounded-full bg-sb-border" />}
                   </div>
-                  <span className={`text-xs ${item.done ? 'text-[#172033]' : 'text-[#94A3B8]'}`}>{item.label}</span>
+                  <span className={`text-xs ${item.done ? 'text-sb-text' : 'text-sb-text-3'}`}>{item.label}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Contact */}
-          <div className="bg-white border border-[#E4E7EC] rounded-lg p-4 space-y-2.5">
-            <h3 className="text-sm font-semibold text-[#172033]">Contact</h3>
-            <div className="flex items-center gap-2 text-sm text-[#667085]">
+          <div className="bg-sb-surface border border-sb-border rounded-lg p-4 space-y-2.5">
+            <h3 className="text-sm font-semibold text-sb-text">Contact</h3>
+            <div className="flex items-center gap-2 text-sm text-sb-text-2">
               <MailIcon size={14} className="shrink-0" /> {user.email}
             </div>
-            <div className="flex items-center gap-2 text-sm text-[#667085]">
-              <PhoneIcon size={14} className="shrink-0" /> {user.phone || <span className="text-[#94A3B8] italic">No phone added</span>}
+            <div className="flex items-center gap-2 text-sm text-sb-text-2">
+              <PhoneIcon size={14} className="shrink-0" /> {user.phone || <span className="text-sb-text-3 italic">No phone added</span>}
             </div>
-            <div className="flex items-center gap-2 text-sm text-[#667085]">
-              <MapPinIcon size={14} className="shrink-0" /> {user.location || <span className="text-[#94A3B8] italic">No location added</span>}
+            <div className="flex items-center gap-2 text-sm text-sb-text-2">
+              <MapPinIcon size={14} className="shrink-0" /> {user.location || <span className="text-sb-text-3 italic">No location added</span>}
             </div>
           </div>
         </div>
@@ -581,15 +581,15 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
         {/* Right column */}
         <div className="lg:col-span-2 space-y-4">
           {/* Personal info */}
-          <div className="bg-white border border-[#E4E7EC] rounded-lg p-5">
+          <div className="bg-sb-surface border border-sb-border rounded-lg p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-[#172033]">Personal details</h2>
+              <h2 className="text-base font-semibold text-sb-text">Personal details</h2>
               <button
                 onClick={() => {
                   setActionError(null)
                   setEditingSection(editingSection === 'personal' ? null : 'personal')
                 }}
-                className="flex items-center gap-1.5 text-xs font-medium text-[#667085] hover:text-[#2563EB] transition-colors"
+                className="flex items-center gap-1.5 text-xs font-medium text-sb-text-2 hover:text-[#2563EB] dark:hover:text-[#3B82F6] transition-colors"
               >
                 <EditIcon size={13} /> {editingSection === 'personal' ? 'Cancel' : 'Edit'}
               </button>
@@ -599,40 +599,40 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
               <div className="space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-medium text-[#667085] block mb-1">Full name *</label>
+                    <label className="text-xs font-medium text-sb-text-2 block mb-1">Full name *</label>
                     <input
                       type="text"
                       value={name}
                       onChange={e => setName(e.target.value)}
-                      className="w-full border border-[#E4E7EC] rounded px-2.5 py-1.5 text-sm text-[#172033] outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]/20"
+                      className="w-full border border-sb-border bg-sb-surface rounded px-2.5 py-1.5 text-sm text-sb-text outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]/20"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#667085] block mb-1">Email address</label>
+                    <label className="text-xs font-medium text-sb-text-2 block mb-1">Email address</label>
                     <input
                       disabled
                       value={user.email}
-                      className="w-full border border-[#E4E7EC] rounded px-2.5 py-1.5 text-sm text-[#667085] bg-[#F7F8FA] outline-none cursor-not-allowed"
+                      className="w-full border border-sb-border rounded px-2.5 py-1.5 text-sm text-sb-text-2 bg-sb-surface-2 outline-none cursor-not-allowed"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#667085] block mb-1">Phone</label>
+                    <label className="text-xs font-medium text-sb-text-2 block mb-1">Phone</label>
                     <input
                       type="text"
                       value={phone}
                       onChange={e => setPhone(e.target.value)}
                       placeholder="+1 (555) 000-0000"
-                      className="w-full border border-[#E4E7EC] rounded px-2.5 py-1.5 text-sm text-[#172033] outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]/20"
+                      className="w-full border border-sb-border bg-sb-surface rounded px-2.5 py-1.5 text-sm text-sb-text outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]/20"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#667085] block mb-1">Location</label>
+                    <label className="text-xs font-medium text-sb-text-2 block mb-1">Location</label>
                     <input
                       type="text"
                       value={location}
                       onChange={e => setLocation(e.target.value)}
                       placeholder="e.g. San Francisco, CA"
-                      className="w-full border border-[#E4E7EC] rounded px-2.5 py-1.5 text-sm text-[#172033] outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]/20"
+                      className="w-full border border-sb-border bg-sb-surface rounded px-2.5 py-1.5 text-sm text-sb-text outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]/20"
                     />
                   </div>
                 </div>
@@ -646,7 +646,7 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
                   </button>
                   <button
                     onClick={() => setEditingSection(null)}
-                    className="border border-[#E4E7EC] text-[#667085] px-4 py-1.5 rounded text-sm hover:bg-[#F7F8FA] transition-colors"
+                    className="border border-sb-border text-sb-text-2 px-4 py-1.5 rounded text-sm hover:bg-sb-surface-2 transition-colors"
                   >
                     Cancel
                   </button>
@@ -661,8 +661,8 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
                   { label: 'Location', value: user.location },
                 ].map(({ label, value }) => (
                   <div key={label}>
-                    <p className="text-xs font-medium text-[#667085] mb-1">{label}</p>
-                    <p className="text-sm text-[#172033]">{value || <span className="text-[#94A3B8] italic">Not provided</span>}</p>
+                    <p className="text-xs font-medium text-sb-text-2 mb-1">{label}</p>
+                    <p className="text-sm text-sb-text">{value || <span className="text-sb-text-3 italic">Not provided</span>}</p>
                   </div>
                 ))}
               </div>
@@ -670,15 +670,15 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
           </div>
 
           {/* Education */}
-          <div className="bg-white border border-[#E4E7EC] rounded-lg p-5">
+          <div className="bg-sb-surface border border-sb-border rounded-lg p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-[#172033]">Education</h2>
+              <h2 className="text-base font-semibold text-sb-text">Education</h2>
               <button
                 onClick={() => {
                   setActionError(null)
                   setEditingSection(editingSection === 'edu' ? null : 'edu')
                 }}
-                className="flex items-center gap-1.5 text-xs font-medium text-[#667085] hover:text-[#2563EB] transition-colors"
+                className="flex items-center gap-1.5 text-xs font-medium text-sb-text-2 hover:text-[#2563EB] dark:hover:text-[#3B82F6] transition-colors"
               >
                 <EditIcon size={13} /> {editingSection === 'edu' ? 'Cancel' : 'Edit'}
               </button>
@@ -691,41 +691,41 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
                 {editingSection === 'edu' ? (
                   <div className="space-y-3">
                     <div>
-                      <label className="text-xs text-[#667085] block mb-1">University *</label>
+                      <label className="text-xs text-sb-text-2 block mb-1">University *</label>
                       <input
                         type="text"
                         value={university}
                         onChange={e => setUniversity(e.target.value)}
-                        className="w-full border border-[#E4E7EC] rounded px-2.5 py-1.5 text-sm outline-none focus:border-[#2563EB]"
+                        className="w-full border border-sb-border bg-sb-surface rounded px-2.5 py-1.5 text-sm text-sb-text outline-none focus:border-[#2563EB]"
                       />
                     </div>
                     <div>
-                      <label className="text-xs text-[#667085] block mb-1">Major *</label>
+                      <label className="text-xs text-sb-text-2 block mb-1">Major *</label>
                       <input
                         type="text"
                         value={major}
                         onChange={e => setMajor(e.target.value)}
-                        className="w-full border border-[#E4E7EC] rounded px-2.5 py-1.5 text-sm outline-none focus:border-[#2563EB]"
+                        className="w-full border border-sb-border bg-sb-surface rounded px-2.5 py-1.5 text-sm text-sb-text outline-none focus:border-[#2563EB]"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-xs text-[#667085] block mb-1">Graduation Year *</label>
+                        <label className="text-xs text-sb-text-2 block mb-1">Graduation Year *</label>
                         <input
                           type="number"
                           value={graduationYear}
                           onChange={e => setGraduationYear(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                          className="w-full border border-[#E4E7EC] rounded px-2.5 py-1.5 text-sm outline-none focus:border-[#2563EB]"
+                          className="w-full border border-sb-border bg-sb-surface rounded px-2.5 py-1.5 text-sm text-sb-text outline-none focus:border-[#2563EB]"
                         />
                       </div>
                       <div>
-                        <label className="text-xs text-[#667085] block mb-1">GPA (0.0 - 4.0)</label>
+                        <label className="text-xs text-sb-text-2 block mb-1">GPA (0.0 - 4.0)</label>
                         <input
                           type="text"
                           value={gpa}
                           placeholder="e.g. 3.85"
                           onChange={e => setGpa(e.target.value)}
-                          className="w-full border border-[#E4E7EC] rounded px-2.5 py-1.5 text-sm outline-none focus:border-[#2563EB]"
+                          className="w-full border border-sb-border bg-sb-surface rounded px-2.5 py-1.5 text-sm text-sb-text outline-none focus:border-[#2563EB]"
                         />
                       </div>
                     </div>
@@ -739,7 +739,7 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
                       </button>
                       <button
                         onClick={() => setEditingSection(null)}
-                        className="border border-[#E4E7EC] text-[#667085] px-4 py-1.5 rounded text-sm hover:bg-[#F7F8FA]"
+                        className="border border-sb-border text-sb-text-2 px-4 py-1.5 rounded text-sm hover:bg-sb-surface-2"
                       >
                         Cancel
                       </button>
@@ -747,12 +747,12 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
                   </div>
                 ) : (
                   <>
-                    <p className="font-semibold text-[#172033]">{profile.university}</p>
-                    <p className="text-sm text-[#667085]">{profile.major}</p>
-                    <p className="text-sm text-[#667085]">Expected: {profile.graduationYear}</p>
+                    <p className="font-semibold text-sb-text">{profile.university}</p>
+                    <p className="text-sm text-sb-text-2">{profile.major}</p>
+                    <p className="text-sm text-sb-text-2">Expected: {profile.graduationYear}</p>
                     <div className="flex items-center gap-3 mt-2">
                       {profile.gpa !== null && profile.gpa !== undefined && (
-                        <span className="text-xs bg-[#EFF6FF] text-[#2563EB] px-2 py-0.5 rounded-full font-medium">
+                        <span className="text-xs bg-sb-brand-bg text-[#2563EB] dark:text-[#3B82F6] px-2 py-0.5 rounded-full font-medium">
                           GPA: {profile.gpa}
                         </span>
                       )}
@@ -764,15 +764,15 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
           </div>
 
           {/* Bio */}
-          <div className="bg-white border border-[#E4E7EC] rounded-lg p-5">
+          <div className="bg-sb-surface border border-sb-border rounded-lg p-5">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-semibold text-[#172033]">Professional bio</h2>
+              <h2 className="text-base font-semibold text-sb-text">Professional bio</h2>
               <button
                 onClick={() => {
                   setActionError(null)
                   setEditingSection(editingSection === 'bio' ? null : 'bio')
                 }}
-                className="flex items-center gap-1.5 text-xs font-medium text-[#667085] hover:text-[#2563EB] transition-colors"
+                className="flex items-center gap-1.5 text-xs font-medium text-sb-text-2 hover:text-[#2563EB] dark:hover:text-[#3B82F6] transition-colors"
               >
                 <EditIcon size={13} /> {editingSection === 'bio' ? 'Cancel' : 'Edit'}
               </button>
@@ -784,7 +784,7 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
                   value={bio}
                   onChange={e => setBio(e.target.value)}
                   placeholder="Share a brief overview of your background, career interests, and passion projects..."
-                  className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm text-[#172033] outline-none focus:border-[#2563EB] resize-none"
+                  className="w-full border border-sb-border bg-sb-surface rounded px-3 py-2 text-sm text-sb-text outline-none focus:border-[#2563EB] resize-none"
                 />
                 <div className="flex gap-2 mt-2">
                   <button
@@ -796,26 +796,26 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
                   </button>
                   <button
                     onClick={() => setEditingSection(null)}
-                    className="border border-[#E4E7EC] text-[#667085] px-4 py-1.5 rounded text-sm hover:bg-[#F7F8FA]"
+                    className="border border-sb-border text-sb-text-2 px-4 py-1.5 rounded text-sm hover:bg-sb-surface-2"
                   >
                     Cancel
                   </button>
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-[#667085] leading-relaxed">
-                {profile.bio || <span className="text-[#94A3B8] italic">No professional bio added yet. Click edit to share your story with recruiters.</span>}
+              <p className="text-sm text-sb-text-2 leading-relaxed">
+                {profile.bio || <span className="text-sb-text-3 italic">No professional bio added yet. Click edit to share your story with recruiters.</span>}
               </p>
             )}
           </div>
 
           {/* Skills */}
-          <div className="bg-white border border-[#E4E7EC] rounded-lg p-5">
+          <div className="bg-sb-surface border border-sb-border rounded-lg p-5">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-semibold text-[#172033]">Skills</h2>
+              <h2 className="text-base font-semibold text-sb-text">Skills</h2>
               <button
                 onClick={() => setAddingSkill(!addingSkill)}
-                className="flex items-center gap-1.5 text-xs font-medium text-[#2563EB] hover:text-[#1D4ED8] transition-colors"
+                className="flex items-center gap-1.5 text-xs font-medium text-[#2563EB] dark:text-[#3B82F6] hover:text-[#1D4ED8] transition-colors"
               >
                 <PlusIcon size={13} /> {addingSkill ? 'Done' : 'Add skill'}
               </button>
@@ -825,7 +825,7 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
               {skills.map(s => (
                 <div
                   key={s.id}
-                  className="flex items-center gap-1.5 bg-[#EFF6FF] text-[#2563EB] px-3 py-1.5 rounded-full text-sm font-medium group"
+                  className="flex items-center gap-1.5 bg-sb-brand-bg text-[#2563EB] dark:text-[#3B82F6] px-3 py-1.5 rounded-full text-sm font-medium group"
                 >
                   {s.name}
                   <button
@@ -838,12 +838,12 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
                 </div>
               ))}
               {skills.length === 0 && (
-                <p className="text-sm text-[#94A3B8] italic">No skills added yet. Add relevant technical and soft skills to improve job matching.</p>
+                <p className="text-sm text-sb-text-3 italic">No skills added yet. Add relevant technical and soft skills to improve job matching.</p>
               )}
             </div>
 
             {addingSkill && (
-              <div className="space-y-3 pt-2 border-t border-[#F2F4F7]">
+              <div className="space-y-3 pt-2 border-t border-sb-border">
                 {/* Search & Custom input */}
                 <div className="flex gap-2">
                   <input
@@ -857,7 +857,7 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
                       }
                     }}
                     placeholder="Search or type a new skill..."
-                    className="flex-1 border border-[#E4E7EC] rounded px-3 py-1.5 text-sm outline-none focus:border-[#2563EB]"
+                    className="flex-1 border border-sb-border bg-sb-surface rounded px-3 py-1.5 text-sm text-sb-text outline-none focus:border-[#2563EB]"
                   />
                   <button
                     disabled={submittingSkill || !skillSearchQuery.trim()}
@@ -871,7 +871,7 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
                 {/* Autocomplete suggestions from backend */}
                 {skillSuggestions.length > 0 && (
                   <div>
-                    <p className="text-xs text-[#667085] mb-1">
+                    <p className="text-xs text-sb-text-2 mb-1">
                       {searchingSkills ? 'Searching skills…' : 'Matching skills:'}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
@@ -882,7 +882,7 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
                             key={s.id}
                             disabled={submittingSkill}
                             onClick={() => handleAddSkill(s.name)}
-                            className="text-xs bg-[#F7F8FA] border border-[#E4E7EC] text-[#172033] px-2.5 py-1 rounded-full hover:border-[#2563EB] hover:text-[#2563EB] transition-colors"
+                            className="text-xs bg-sb-surface-2 border border-sb-border text-sb-text px-2.5 py-1 rounded-full hover:border-[#2563EB] hover:text-[#2563EB] transition-colors"
                           >
                             + {s.name}
                           </button>
@@ -893,14 +893,14 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
 
                 {/* Suggested skills presets */}
                 <div>
-                  <p className="text-xs font-medium text-[#667085] mb-2">Suggested skills to add:</p>
+                  <p className="text-xs font-medium text-sb-text-2 mb-2">Suggested skills to add:</p>
                   <div className="flex flex-wrap gap-1.5">
                     {filteredPresetSuggestions.slice(0, 10).map(s => (
                       <button
                         key={s}
                         disabled={submittingSkill}
                         onClick={() => handleAddSkill(s)}
-                        className="text-xs border border-dashed border-[#E4E7EC] text-[#667085] px-2.5 py-1 rounded-full hover:border-[#2563EB] hover:text-[#2563EB] transition-colors"
+                        className="text-xs border border-dashed border-sb-border text-sb-text-2 px-2.5 py-1 rounded-full hover:border-[#2563EB] hover:text-[#2563EB] transition-colors"
                       >
                         + {s}
                       </button>
@@ -912,8 +912,8 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
           </div>
 
           {/* Resume */}
-          <div className="bg-white border border-[#E4E7EC] rounded-lg p-5">
-            <h2 className="text-base font-semibold text-[#172033] mb-3">Resume</h2>
+          <div className="bg-sb-surface border border-sb-border rounded-lg p-5">
+            <h2 className="text-base font-semibold text-sb-text mb-3">Resume</h2>
 
             <input
               type="file"
@@ -924,9 +924,9 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
             />
 
             {profile.resumeUrl ? (
-              <div className="border border-[#E4E7EC] rounded-lg p-4 flex items-center justify-between">
+              <div className="border border-sb-border rounded-lg p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded bg-[#EFF6FF] flex items-center justify-center text-[#2563EB]">
+                  <div className="w-10 h-10 rounded bg-sb-brand-bg flex items-center justify-center text-[#2563EB] dark:text-[#3B82F6]">
                     📄
                   </div>
                   <div>
@@ -934,7 +934,7 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
                       href={profile.resumeUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm font-semibold text-[#2563EB] hover:underline"
+                      className="text-sm font-semibold text-[#2563EB] dark:text-[#3B82F6] hover:underline"
                     >
                       View Student Resume (PDF) ↗
                     </a>
@@ -945,14 +945,14 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
                   <button
                     disabled={uploadingResume}
                     onClick={() => resumeInputRef.current?.click()}
-                    className="text-xs font-medium text-[#2563EB] border border-[#2563EB] px-3 py-1.5 rounded hover:bg-[#EFF6FF] transition-colors disabled:opacity-50"
+                    className="text-xs font-medium text-[#2563EB] dark:text-[#3B82F6] border border-[#2563EB] dark:border-[#3B82F6] px-3 py-1.5 rounded hover:bg-sb-brand-bg transition-colors disabled:opacity-50"
                   >
                     {uploadingResume ? 'Uploading…' : 'Replace'}
                   </button>
                   <button
                     disabled={uploadingResume}
                     onClick={handleDeleteResume}
-                    className="text-xs font-medium text-[#DC2626] border border-[#FECACA] hover:bg-[#FEF2F2] px-2.5 py-1.5 rounded transition-colors disabled:opacity-50"
+                    className="text-xs font-medium text-[#DC2626] dark:text-[#F87171] border border-[#FECACA] dark:border-[#7F1D1D] hover:bg-[#FEF2F2] dark:hover:bg-[#3B0A0A] px-2.5 py-1.5 rounded transition-colors disabled:opacity-50"
                     title="Delete resume"
                   >
                     <TrashIcon size={14} />
@@ -962,17 +962,17 @@ export default function StudentProfile({ navigate: _navigate }: Props) {
             ) : (
               <div
                 onClick={() => resumeInputRef.current?.click()}
-                className="border-2 border-dashed border-[#E4E7EC] rounded-lg p-6 text-center hover:border-[#2563EB] transition-colors cursor-pointer"
+                className="border-2 border-dashed border-sb-border rounded-lg p-6 text-center hover:border-[#2563EB] transition-colors cursor-pointer"
               >
-                <UploadIcon size={24} className="text-[#94A3B8] mx-auto mb-2" />
-                <p className="text-sm font-medium text-[#172033]">
+                <UploadIcon size={24} className="text-sb-text-3 mx-auto mb-2" />
+                <p className="text-sm font-medium text-sb-text">
                   {uploadingResume ? 'Uploading resume to Cloudinary…' : 'Upload your resume'}
                 </p>
-                <p className="text-xs text-[#667085] mt-1">PDF format only · max 5 MB</p>
+                <p className="text-xs text-sb-text-2 mt-1">PDF format only · max 5 MB</p>
                 <button
                   type="button"
                   disabled={uploadingResume}
-                  className="mt-3 text-xs font-medium text-[#2563EB] border border-[#2563EB] px-3 py-1.5 rounded hover:bg-[#EFF6FF] transition-colors"
+                  className="mt-3 text-xs font-medium text-[#2563EB] dark:text-[#3B82F6] border border-[#2563EB] dark:border-[#3B82F6] px-3 py-1.5 rounded hover:bg-sb-brand-bg transition-colors"
                 >
                   {uploadingResume ? 'Uploading…' : 'Choose file'}
                 </button>

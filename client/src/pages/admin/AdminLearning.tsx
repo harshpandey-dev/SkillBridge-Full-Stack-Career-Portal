@@ -256,8 +256,8 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
     <div className="space-y-5 max-w-[1200px]">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#172033]">Learning Resources</h1>
-          <p className="text-sm text-[#667085] mt-0.5">
+          <h1 className="text-2xl font-bold text-sb-text">Learning Resources</h1>
+          <p className="text-sm text-sb-text-2 mt-0.5">
             {total} {total === 1 ? 'resource' : 'resources'} · curate and manage the learning library
           </p>
         </div>
@@ -270,14 +270,14 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
       </div>
 
       {successBanner && (
-        <div className="bg-[#E6F7F5] border border-[#BFDBFE] text-[#0F9D8A] rounded-lg p-3 text-sm flex items-center justify-between">
+        <div className="bg-[#E6F7F5] dark:bg-teal-950/40 border border-[#BFDBFE] dark:border-teal-800 text-[#0F9D8A] dark:text-teal-400 rounded-lg p-3 text-sm flex items-center justify-between">
           <span>{successBanner}</span>
           <button onClick={() => setSuccessBanner(null)} className="text-xs underline">Dismiss</button>
         </div>
       )}
 
       {actionError && (
-        <div className="bg-[#FEF2F2] border border-[#FECACA] text-[#DC2626] rounded-lg p-3 text-sm flex items-center justify-between">
+        <div className="bg-[#FEF2F2] dark:bg-red-950/40 border border-[#FECACA] dark:border-red-900 text-[#DC2626] dark:text-red-400 rounded-lg p-3 text-sm flex items-center justify-between">
           <span>{actionError}</span>
           <button onClick={() => setActionError(null)} className="text-xs underline">Dismiss</button>
         </div>
@@ -291,23 +291,23 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
           { label: 'Average rating', value: statsLoading ? '…' : `${stats?.averageRating ?? 4.5} ★` },
           { label: 'Categories active', value: statsLoading ? '…' : String(Object.keys(stats?.totalResourcesByCategory ?? {}).length || 8) },
         ].map(({ label, value }) => (
-          <div key={label} className="bg-white border border-[#E4E7EC] rounded-lg p-4">
-            <div className="text-2xl font-bold text-[#172033]">{value}</div>
-            <div className="text-xs text-[#667085] mt-0.5">{label}</div>
+          <div key={label} className="bg-sb-surface border border-sb-border rounded-lg p-4">
+            <div className="text-2xl font-bold text-sb-text">{value}</div>
+            <div className="text-xs text-sb-text-2 mt-0.5">{label}</div>
           </div>
         ))}
       </div>
 
       {/* Add / Edit Form Modal */}
       {showAddForm && (
-        <div className="bg-white border border-[#E4E7EC] rounded-lg p-5 shadow-sm">
+        <div className="bg-sb-surface border border-sb-border rounded-lg p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold text-[#172033]">
+            <h2 className="text-base font-semibold text-sb-text">
               {editingResourceId ? 'Edit learning resource' : 'Add new learning resource'}
             </h2>
             <button
               onClick={() => setShowAddForm(false)}
-              className="text-[#667085] hover:text-[#172033]"
+              className="text-sb-text-2 hover:text-sb-text"
             >
               <XIcon size={16} />
             </button>
@@ -315,48 +315,48 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-[#172033] mb-1.5">Title *</label>
+              <label className="block text-sm font-medium text-sb-text mb-1.5">Title *</label>
               <input
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder="Course or tutorial name"
-                className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+                className="w-full border border-sb-border bg-sb-surface text-sb-text placeholder-sb-text-3 rounded px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#172033] mb-1.5">Provider *</label>
+              <label className="block text-sm font-medium text-sb-text mb-1.5">Provider *</label>
               <input
                 value={provider}
                 onChange={e => setProvider(e.target.value)}
                 placeholder="Coursera, Udemy, MIT, etc."
-                className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+                className="w-full border border-sb-border bg-sb-surface text-sb-text placeholder-sb-text-3 rounded px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#172033] mb-1.5">Category *</label>
+              <label className="block text-sm font-medium text-sb-text mb-1.5">Category *</label>
               <input
                 value={category}
                 onChange={e => setCategory(e.target.value)}
                 placeholder="e.g. Web Development"
-                className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+                className="w-full border border-sb-border bg-sb-surface text-sb-text placeholder-sb-text-3 rounded px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#172033] mb-1.5">Resource URL (Link) *</label>
+              <label className="block text-sm font-medium text-sb-text mb-1.5">Resource URL (Link) *</label>
               <input
                 value={resourceUrl}
                 onChange={e => setResourceUrl(e.target.value)}
                 placeholder="https://coursera.org/learn/..."
-                className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+                className="w-full border border-sb-border bg-sb-surface text-sb-text placeholder-sb-text-3 rounded px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-[#172033] mb-1.5">Type</label>
+                <label className="block text-sm font-medium text-sb-text mb-1.5">Type</label>
                 <select
                   value={type}
                   onChange={e => setType(e.target.value)}
-                  className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm text-[#172033] outline-none focus:border-[#2563EB]"
+                  className="w-full border border-sb-border rounded px-3 py-2 text-sm text-sb-text bg-sb-surface outline-none focus:border-[#2563EB]"
                 >
                   {TYPE_OPTIONS.map(t => (
                     <option key={t} value={t}>{t}</option>
@@ -364,11 +364,11 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#172033] mb-1.5">Difficulty</label>
+                <label className="block text-sm font-medium text-sb-text mb-1.5">Difficulty</label>
                 <select
                   value={difficulty}
                   onChange={e => setDifficulty(e.target.value as BackendDifficulty)}
-                  className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm text-[#172033] outline-none focus:border-[#2563EB]"
+                  className="w-full border border-sb-border rounded px-3 py-2 text-sm text-sb-text bg-sb-surface outline-none focus:border-[#2563EB]"
                 >
                   {DIFFICULTY_OPTIONS.map(d => (
                     <option key={d.value} value={d.value}>{d.label}</option>
@@ -378,33 +378,33 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-[#172033] mb-1.5">Duration</label>
+                <label className="block text-sm font-medium text-sb-text mb-1.5">Duration</label>
                 <input
                   value={duration}
                   onChange={e => setDuration(e.target.value)}
                   placeholder="e.g. 6 hours or 4 weeks"
-                  className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+                  className="w-full border border-sb-border bg-sb-surface text-sb-text placeholder-sb-text-3 rounded px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#172033] mb-1.5">Rating (0 - 5)</label>
+                <label className="block text-sm font-medium text-sb-text mb-1.5">Rating (0 - 5)</label>
                 <input
                   type="text"
                   value={rating}
                   onChange={e => setRating(e.target.value)}
                   placeholder="4.8"
-                  className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+                  className="w-full border border-sb-border bg-sb-surface text-sb-text placeholder-sb-text-3 rounded px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
                 />
               </div>
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-[#172033] mb-1.5">Description</label>
+              <label className="block text-sm font-medium text-sb-text mb-1.5">Description</label>
               <textarea
                 rows={2}
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 placeholder="Brief summary of skills taught and coursework..."
-                className="w-full border border-[#E4E7EC] rounded px-3 py-2 text-sm outline-none focus:border-[#2563EB] resize-none"
+                className="w-full border border-sb-border bg-sb-surface text-sb-text placeholder-sb-text-3 rounded px-3 py-2 text-sm outline-none focus:border-[#2563EB] resize-none"
               />
             </div>
             <div className="md:col-span-2 flex items-center gap-2">
@@ -415,17 +415,17 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
                 onChange={e => setFeatured(e.target.checked)}
                 className="w-4 h-4 rounded accent-[#2563EB]"
               />
-              <label htmlFor="featured" className="text-sm text-[#172033] font-medium cursor-pointer">
+              <label htmlFor="featured" className="text-sm text-sb-text font-medium cursor-pointer">
                 Mark as Featured resource on public catalog
               </label>
             </div>
           </div>
 
-          <div className="flex gap-3 justify-end pt-2 border-t border-[#F2F4F7]">
+          <div className="flex gap-3 justify-end pt-2 border-t border-sb-border">
             <button
               type="button"
               onClick={() => setShowAddForm(false)}
-              className="border border-[#E4E7EC] text-[#667085] px-4 py-2 rounded text-sm hover:bg-[#F7F8FA]"
+              className="border border-sb-border text-sb-text-2 px-4 py-2 rounded text-sm hover:bg-sb-surface-2 bg-sb-surface"
             >
               Cancel
             </button>
@@ -443,8 +443,8 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2 bg-white border border-[#E4E7EC] rounded px-3 py-2.5 flex-1 min-w-52 max-w-80">
-          <SearchIcon size={15} className="text-[#667085]" />
+        <div className="flex items-center gap-2 bg-sb-surface border border-sb-border rounded px-3 py-2.5 flex-1 min-w-52 max-w-80">
+          <SearchIcon size={15} className="text-sb-text-3" />
           <input
             type="text"
             placeholder="Search resources by title or provider..."
@@ -453,7 +453,7 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
               setSearch(e.target.value)
               setPage(1)
             }}
-            className="flex-1 text-sm text-[#172033] placeholder-[#94A3B8] outline-none"
+            className="flex-1 text-sm text-sb-text placeholder-sb-text-3 bg-transparent outline-none"
           />
         </div>
 
@@ -467,8 +467,8 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
               }}
               className={`px-3 py-2 text-xs font-medium rounded transition-colors whitespace-nowrap ${
                 catFilter === cat
-                  ? 'bg-[#163A5F] text-white'
-                  : 'bg-white border border-[#E4E7EC] text-[#667085] hover:border-[#94A3B8]'
+                  ? 'bg-[#163A5F] text-white dark:bg-sb-brand dark:text-white'
+                  : 'bg-sb-surface border border-sb-border text-sb-text-2 hover:border-sb-border-2 hover:text-sb-text'
               }`}
             >
               {cat}
@@ -478,32 +478,32 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
       </div>
 
       {error && (
-        <div className="bg-[#FEF2F2] border border-[#FECACA] text-[#DC2626] rounded-lg p-4 text-sm">
+        <div className="bg-[#FEF2F2] dark:bg-red-950/40 border border-[#FECACA] dark:border-red-900 text-[#DC2626] dark:text-red-400 rounded-lg p-4 text-sm">
           {error}
         </div>
       )}
 
       {/* Resources Table */}
-      <div className="bg-white border border-[#E4E7EC] rounded-lg overflow-hidden">
+      <div className="bg-sb-surface border border-sb-border rounded-lg overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-sm text-[#667085]">
+          <div className="p-8 text-center text-sm text-sb-text-2">
             Loading learning resources…
           </div>
         ) : resources.length === 0 ? (
-          <div className="p-12 text-center text-sm text-[#667085]">
+          <div className="p-12 text-center text-sm text-sb-text-2">
             No learning resources match the selected criteria.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#F2F4F7] bg-[#F7F8FA]">
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Resource</th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Category</th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Difficulty</th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Rating</th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Featured</th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Actions</th>
+                <tr className="border-b border-sb-border bg-sb-surface-2">
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-sb-text-2 uppercase tracking-wide">Resource</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-sb-text-2 uppercase tracking-wide">Category</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-sb-text-2 uppercase tracking-wide">Difficulty</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-sb-text-2 uppercase tracking-wide">Rating</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-sb-text-2 uppercase tracking-wide">Featured</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-sb-text-2 uppercase tracking-wide">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -512,8 +512,8 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
                   return (
                     <tr
                       key={r.id}
-                      className={`border-b border-[#F2F4F7] hover:bg-[#FAFBFC] transition-colors ${
-                        deleteConfirm === r.id ? 'bg-[#FEF2F2]' : ''
+                      className={`border-b border-sb-border hover:bg-sb-surface-2 transition-colors ${
+                        deleteConfirm === r.id ? 'bg-[#FEF2F2] dark:bg-red-950/20' : ''
                       }`}
                     >
                       <td className="px-5 py-4">
@@ -522,17 +522,17 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
                             href={r.resourceUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm font-semibold text-[#172033] max-w-[320px] truncate hover:text-[#2563EB] block transition-colors"
+                            className="text-sm font-semibold text-sb-text max-w-[320px] truncate hover:text-[#2563EB] dark:hover:text-blue-400 block transition-colors"
                           >
                             {r.title}
                           </a>
-                          <p className="text-xs text-[#667085]">
+                          <p className="text-xs text-sb-text-2">
                             {r.provider} · {r.type} · {r.duration || 'Self-paced'}
                           </p>
                         </div>
                       </td>
                       <td className="px-5 py-4">
-                        <span className="text-xs bg-[#EFF6FF] text-[#2563EB] px-2 py-0.5 rounded-full font-medium">
+                        <span className="text-xs bg-[#EFF6FF] text-[#2563EB] dark:bg-blue-950/40 dark:text-blue-400 px-2 py-0.5 rounded-full font-medium">
                           {r.category}
                         </span>
                       </td>
@@ -540,18 +540,18 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
                         <span
                           className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                             uiDiff === 'Beginner'
-                              ? 'bg-[#E6F7F5] text-[#0F9D8A]'
+                              ? 'bg-[#E6F7F5] text-[#0F9D8A] dark:bg-teal-950/40 dark:text-teal-400'
                               : uiDiff === 'Advanced'
-                              ? 'bg-[#FEF2F2] text-[#DC2626]'
-                              : 'bg-[#FFFBEB] text-[#D97706]'
+                              ? 'bg-[#FEF2F2] text-[#DC2626] dark:bg-red-950/40 dark:text-red-400'
+                              : 'bg-[#FFFBEB] text-[#D97706] dark:bg-amber-950/40 dark:text-amber-400'
                           }`}
                         >
                           {uiDiff}
                         </span>
                       </td>
                       <td className="px-5 py-4">
-                        <div className="flex items-center gap-1 text-sm font-medium text-[#172033]">
-                          <StarIcon size={13} className="text-[#D97706]" />
+                        <div className="flex items-center gap-1 text-sm font-medium text-sb-text">
+                          <StarIcon size={13} className="text-[#D97706] dark:text-amber-400" />
                           {r.rating !== null && r.rating !== undefined ? r.rating.toFixed(1) : '4.5'}
                         </div>
                       </td>
@@ -560,7 +560,7 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
                           type="button"
                           onClick={() => handleToggleFeatured(r.id, r.featured)}
                           className={`w-8 h-5 rounded-full transition-all relative ${
-                            r.featured ? 'bg-[#2563EB]' : 'bg-[#E4E7EC]'
+                            r.featured ? 'bg-[#2563EB]' : 'bg-[#E4E7EC] dark:bg-slate-700'
                           }`}
                           title={r.featured ? 'Remove from featured' : 'Mark as featured'}
                         >
@@ -574,16 +574,16 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
                       <td className="px-5 py-4">
                         {deleteConfirm === r.id ? (
                           <div className="flex items-center gap-2">
-                            <span className="text-xs text-[#DC2626] font-medium">Delete?</span>
+                            <span className="text-xs text-[#DC2626] dark:text-red-400 font-medium">Delete?</span>
                             <button
                               onClick={() => handleDeleteResource(r.id)}
-                              className="text-xs font-medium text-[#DC2626] hover:underline"
+                              className="text-xs font-medium text-[#DC2626] dark:text-red-400 hover:underline"
                             >
                               Yes
                             </button>
                             <button
                               onClick={() => setDeleteConfirm(null)}
-                              className="text-xs text-[#667085] hover:underline"
+                              className="text-xs text-sb-text-2 hover:underline"
                             >
                               No
                             </button>
@@ -592,14 +592,14 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => handleOpenEditModal(r)}
-                              className="p-1.5 rounded hover:bg-[#F2F4F7] text-[#667085] hover:text-[#172033] transition-colors"
+                              className="p-1.5 rounded hover:bg-sb-surface-2 text-sb-text-2 hover:text-sb-text transition-colors"
                               title="Edit resource"
                             >
                               <EditIcon size={13} />
                             </button>
                             <button
                               onClick={() => setDeleteConfirm(r.id)}
-                              className="p-1.5 rounded hover:bg-[#FEF2F2] text-[#94A3B8] hover:text-[#DC2626] transition-colors"
+                              className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-950/30 text-sb-text-3 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                               title="Delete resource"
                             >
                               <TrashIcon size={13} />
@@ -618,7 +618,7 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
 
       {/* Pagination Footer */}
       <div className="flex items-center justify-between pt-2">
-        <p className="text-xs text-[#94A3B8]">
+        <p className="text-xs text-sb-text-3">
           Showing {resources.length} of {total} resources
         </p>
         {totalPages > 1 && (
@@ -626,7 +626,7 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="w-8 h-8 flex items-center justify-center rounded border border-[#E4E7EC] bg-white text-[#667085] hover:bg-[#F7F8FA] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded border border-sb-border bg-sb-surface text-sb-text-2 hover:bg-sb-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeftIcon size={14} />
             </button>
@@ -637,7 +637,7 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
                 className={`w-8 h-8 flex items-center justify-center rounded text-xs font-medium transition-colors ${
                   page === i + 1
                     ? 'bg-[#2563EB] text-white border border-[#2563EB]'
-                    : 'border border-[#E4E7EC] bg-white text-[#667085] hover:bg-[#F7F8FA]'
+                    : 'border border-sb-border bg-sb-surface text-sb-text-2 hover:bg-sb-surface-2'
                 }`}
               >
                 {i + 1}
@@ -646,7 +646,7 @@ export default function AdminLearning({ navigate: _navigate }: Props) {
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="w-8 h-8 flex items-center justify-center rounded border border-[#E4E7EC] bg-white text-[#667085] hover:bg-[#F7F8FA] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded border border-sb-border bg-sb-surface text-sb-text-2 hover:bg-sb-surface-2 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronRightIcon size={14} />
             </button>

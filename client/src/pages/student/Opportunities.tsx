@@ -146,23 +146,23 @@ export default function Opportunities({ navigate }: Props) {
   return (
     <div className="space-y-5 max-w-[1200px]">
       <div>
-        <h1 className="text-2xl font-bold text-[#172033]">Opportunities</h1>
-        <p className="text-sm text-[#667085] mt-0.5">Discover roles matched to your profile and skills</p>
+        <h1 className="text-2xl font-bold text-sb-text">Opportunities</h1>
+        <p className="text-sm text-sb-text-2 mt-0.5">Discover roles matched to your profile and skills</p>
       </div>
 
       {applyError && (
-        <div className="bg-[#FEF2F2] border border-[#FECACA] rounded p-3 text-sm text-[#DC2626] flex justify-between items-center">
+        <div className="bg-[#FEF2F2] dark:bg-[#3B0A0A] border border-[#FECACA] dark:border-[#7F1D1D] rounded p-3 text-sm text-[#DC2626] dark:text-[#F87171] flex justify-between items-center">
           <span>{applyError}</span>
-          <button onClick={() => setApplyError(null)} className="text-xs text-[#DC2626] underline">Dismiss</button>
+          <button onClick={() => setApplyError(null)} className="text-xs text-[#DC2626] dark:text-[#F87171] underline">Dismiss</button>
         </div>
       )}
 
-      <div className="flex gap-5">
+      <div className="flex flex-col md:flex-row gap-5">
         {/* Filters */}
-        <aside className="w-52 shrink-0 space-y-5">
-          <div className="bg-white border border-[#E4E7EC] rounded-lg p-4 space-y-5">
+        <aside className="w-full md:w-52 shrink-0 space-y-5">
+          <div className="bg-sb-surface border border-sb-border rounded-lg p-4 space-y-5">
             <div>
-              <h3 className="text-xs font-semibold text-[#172033] uppercase tracking-wide mb-3">Job Type</h3>
+              <h3 className="text-xs font-semibold text-sb-text uppercase tracking-wide mb-3">Job Type</h3>
               <div className="space-y-2">
                 {JOB_TYPES.map(t => (
                   <label key={t} className="flex items-center gap-2.5 cursor-pointer">
@@ -173,14 +173,14 @@ export default function Opportunities({ navigate }: Props) {
                       onChange={() => { setType(t); setPage(1) }}
                       className="accent-[#2563EB]"
                     />
-                    <span className="text-sm text-[#667085] hover:text-[#172033] transition-colors">{t}</span>
+                    <span className="text-sm text-sb-text-2 hover:text-sb-text transition-colors">{t}</span>
                   </label>
                 ))}
               </div>
             </div>
 
-            <div className="border-t border-[#F2F4F7] pt-4">
-              <h3 className="text-xs font-semibold text-[#172033] uppercase tracking-wide mb-3">Skills</h3>
+            <div className="border-t border-sb-border pt-4">
+              <h3 className="text-xs font-semibold text-sb-text uppercase tracking-wide mb-3">Skills</h3>
               <div className="flex flex-wrap gap-1.5">
                 {SKILLS.map(s => (
                   <button
@@ -189,8 +189,8 @@ export default function Opportunities({ navigate }: Props) {
                     onClick={() => { toggleSkill(s); setPage(1) }}
                     className={`text-xs px-2 py-1 rounded-full border transition-colors ${
                       selectedSkills.includes(s)
-                        ? 'bg-[#163A5F] text-white border-[#163A5F]'
-                        : 'border-[#E4E7EC] text-[#667085] hover:border-[#94A3B8]'
+                        ? 'bg-[#163A5F] dark:bg-[#1E3A5F] text-white border-[#163A5F] dark:border-[#1E3A5F]'
+                        : 'border-sb-border text-sb-text-2 hover:border-sb-border-2'
                     }`}
                   >
                     {s}
@@ -199,10 +199,10 @@ export default function Opportunities({ navigate }: Props) {
               </div>
             </div>
 
-            <div className="border-t border-[#F2F4F7] pt-4">
+            <div className="border-t border-sb-border pt-4">
               <label className="flex items-center gap-2.5 cursor-pointer">
                 <input type="checkbox" checked={remoteOnly} onChange={() => { setRemoteOnly(!remoteOnly); setPage(1) }} className="w-4 h-4 rounded accent-[#2563EB]" />
-                <span className="text-sm font-medium text-[#172033]">Remote only</span>
+                <span className="text-sm font-medium text-sb-text">Remote only</span>
               </label>
             </div>
 
@@ -210,7 +210,7 @@ export default function Opportunities({ navigate }: Props) {
               <button
                 type="button"
                 onClick={() => { setSelectedSkills([]); setType('All'); setRemoteOnly(false); setSearch(''); setPage(1) }}
-                className="text-xs text-[#2563EB] hover:text-[#1D4ED8] font-medium"
+                className="text-xs text-[#2563EB] dark:text-[#3B82F6] hover:text-[#1D4ED8] font-medium"
               >
                 Clear all filters
               </button>
@@ -221,23 +221,23 @@ export default function Opportunities({ navigate }: Props) {
         {/* Job list */}
         <div className="flex-1 min-w-0 space-y-3">
           <div className="flex items-center gap-3">
-            <div className="flex-1 flex items-center gap-2 bg-white border border-[#E4E7EC] rounded px-3 py-2.5">
-              <SearchIcon size={15} className="text-[#667085]" />
+            <div className="flex-1 flex items-center gap-2 bg-sb-surface border border-sb-border rounded px-3 py-2.5">
+              <SearchIcon size={15} className="text-sb-text-2" />
               <input
                 type="text"
                 placeholder="Search jobs, companies, or skills..."
                 value={search}
                 onChange={e => { setSearch(e.target.value); setPage(1) }}
-                className="flex-1 text-sm text-[#172033] placeholder-[#94A3B8] outline-none"
+                className="flex-1 text-sm text-sb-text placeholder-sb-text-3 outline-none bg-transparent"
               />
             </div>
-            <p className="text-sm text-[#667085] shrink-0">
-              <span className="font-semibold text-[#172033]">{total}</span> jobs found
+            <p className="text-sm text-sb-text-2 shrink-0">
+              <span className="font-semibold text-sb-text">{total}</span> jobs found
             </p>
           </div>
 
           {error && (
-            <div className="bg-[#FEF2F2] border border-[#FECACA] rounded p-4 text-sm text-[#DC2626]">
+            <div className="bg-[#FEF2F2] dark:bg-[#3B0A0A] border border-[#FECACA] dark:border-[#7F1D1D] rounded p-4 text-sm text-[#DC2626] dark:text-[#F87171]">
               {error}
             </div>
           )}
@@ -245,13 +245,13 @@ export default function Opportunities({ navigate }: Props) {
           {loading ? (
             <div className="space-y-3">
               {[1, 2, 3].map(n => (
-                <div key={n} className="bg-white border border-[#E4E7EC] rounded-lg p-5 animate-pulse">
+                <div key={n} className="bg-sb-surface border border-sb-border rounded-lg p-5 animate-pulse">
                   <div className="flex items-start gap-4">
-                    <div className="w-11 h-11 bg-[#F2F4F7] rounded shrink-0" />
+                    <div className="w-11 h-11 bg-sb-surface-2 rounded shrink-0" />
                     <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-[#F2F4F7] rounded w-1/3" />
-                      <div className="h-3 bg-[#F2F4F7] rounded w-1/4" />
-                      <div className="h-3 bg-[#F2F4F7] rounded w-1/2 mt-2" />
+                      <div className="h-4 bg-sb-surface-2 rounded w-1/3" />
+                      <div className="h-3 bg-sb-surface-2 rounded w-1/4" />
+                      <div className="h-3 bg-sb-surface-2 rounded w-1/2 mt-2" />
                     </div>
                   </div>
                 </div>
@@ -262,7 +262,7 @@ export default function Opportunities({ navigate }: Props) {
               {jobs.map(job => (
                 <div
                   key={job.id}
-                  className="bg-white border border-[#E4E7EC] rounded-lg p-5 hover:border-[#94A3B8] transition-all"
+                  className="bg-sb-surface border border-sb-border rounded-lg p-5 hover:border-sb-border-2 hover:shadow-sm transition-all"
                 >
                   <div className="flex items-start gap-4">
                     <div
@@ -276,45 +276,45 @@ export default function Opportunities({ navigate }: Props) {
                         <div>
                           <button
                             onClick={() => navigate('job-details', job.id)}
-                            className="font-semibold text-[#172033] hover:text-[#2563EB] transition-colors text-[15px] text-left"
+                            className="font-semibold text-sb-text hover:text-[#2563EB] dark:hover:text-[#3B82F6] transition-colors text-[15px] text-left"
                           >
                             {job.title}
                           </button>
-                          <p className="text-sm text-[#667085] mt-0.5">{job.company} · {job.department}</p>
+                          <p className="text-sm text-sb-text-2 mt-0.5">{job.company} · {job.department}</p>
                         </div>
                         <button
                           onClick={() => handleToggleSave(job.id)}
-                          className={`p-1.5 rounded shrink-0 transition-colors ${saved.includes(job.id) ? 'text-[#2563EB]' : 'text-[#94A3B8] hover:text-[#667085]'}`}
+                          className={`p-1.5 rounded shrink-0 transition-colors ${saved.includes(job.id) ? 'text-[#2563EB] dark:text-[#3B82F6]' : 'text-sb-text-3 hover:text-sb-text-2'}`}
                           title={saved.includes(job.id) ? 'Remove bookmark' : 'Bookmark job'}
                         >
                           {saved.includes(job.id) ? <BookmarkFilledIcon size={16} /> : <BookmarkIcon size={16} />}
                         </button>
                       </div>
 
-                      <div className="flex flex-wrap gap-3 mt-2.5 text-xs text-[#667085]">
+                      <div className="flex flex-wrap gap-3 mt-2.5 text-xs text-sb-text-2">
                         <span className="flex items-center gap-1"><MapPinIcon size={12} />{job.location}</span>
-                        <span className={`font-medium px-2 py-0.5 rounded-full ${job.type === 'Internship' ? 'bg-[#E6F7F5] text-[#0F9D8A]' : 'bg-[#EFF6FF] text-[#2563EB]'}`}>
+                        <span className={`font-medium px-2 py-0.5 rounded-full ${job.type === 'Internship' ? 'bg-[#E6F7F5] dark:bg-[#042F2E] text-[#0F9D8A]' : 'bg-sb-brand-bg text-[#2563EB] dark:text-[#3B82F6]'}`}>
                           {job.type}
                         </span>
-                        {job.remote && <span className="bg-[#F2F4F7] px-2 py-0.5 rounded-full">Remote</span>}
+                        {job.remote && <span className="bg-sb-surface-2 text-sb-text-2 px-2 py-0.5 rounded-full">Remote</span>}
                         <span>{job.experience}</span>
                       </div>
 
                       <div className="flex flex-wrap gap-1.5 mt-2.5">
                         {job.skills.slice(0, 5).map(s => (
-                          <span key={s} className={`text-xs px-2 py-0.5 rounded ${selectedSkills.includes(s) ? 'bg-[#163A5F] text-white' : 'bg-[#F2F4F7] text-[#667085]'}`}>{s}</span>
+                          <span key={s} className={`text-xs px-2 py-0.5 rounded ${selectedSkills.includes(s) ? 'bg-[#163A5F] dark:bg-[#1E3A5F] text-white' : 'bg-sb-surface-2 text-sb-text-2'}`}>{s}</span>
                         ))}
                       </div>
 
-                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#F2F4F7]">
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-sb-border">
                         <div className="flex items-center gap-3">
-                          <span className="text-sm font-semibold text-[#172033]">{job.salary}</span>
-                          <span className="text-xs text-[#94A3B8]">{job.applicants} applicants</span>
-                          <span className="text-xs text-[#94A3B8]">Posted {job.postedDate}</span>
+                          <span className="text-sm font-semibold text-sb-text">{job.salary}</span>
+                          <span className="text-xs text-sb-text-3">{job.applicants} applicants</span>
+                          <span className="text-xs text-sb-text-3">Posted {job.postedDate}</span>
                         </div>
                         <div className="flex gap-2">
                           {applied.includes(job.id) ? (
-                            <span className="text-xs font-medium text-[#0F9D8A] bg-[#E6F7F5] px-3 py-1.5 rounded">Applied ✓</span>
+                            <span className="text-xs font-medium text-[#0F9D8A] bg-[#E6F7F5] dark:bg-[#042F2E] px-3 py-1.5 rounded">Applied ✓</span>
                           ) : (
                             <button
                               disabled={applyingId === job.id}
@@ -326,7 +326,7 @@ export default function Opportunities({ navigate }: Props) {
                           )}
                           <button
                             onClick={() => navigate('job-details', job.id)}
-                            className="text-xs font-medium text-[#667085] border border-[#E4E7EC] px-3 py-1.5 rounded hover:border-[#94A3B8] transition-colors"
+                            className="text-xs font-medium text-sb-text-2 border border-sb-border px-3 py-1.5 rounded hover:border-sb-border-2 transition-colors"
                           >
                             View details
                           </button>
@@ -338,11 +338,11 @@ export default function Opportunities({ navigate }: Props) {
               ))}
 
               {jobs.length === 0 && (
-                <div className="bg-white border border-[#E4E7EC] rounded-lg p-12 text-center">
-                  <p className="text-[#667085]">No jobs match your search or filters.</p>
+                <div className="bg-sb-surface border border-sb-border rounded-lg p-12 text-center">
+                  <p className="text-sb-text-2">No jobs match your search or filters.</p>
                   <button
                     onClick={() => { setSearch(''); setType('All'); setSelectedSkills([]); setRemoteOnly(false); setPage(1) }}
-                    className="text-sm text-[#2563EB] mt-2 hover:underline"
+                    className="text-sm text-[#2563EB] dark:text-[#3B82F6] mt-2 hover:underline"
                   >
                     Reset filters
                   </button>
@@ -358,7 +358,7 @@ export default function Opportunities({ navigate }: Props) {
                   key={i}
                   onClick={() => setPage(i + 1)}
                   className={`w-8 h-8 rounded text-sm font-medium transition-colors ${
-                    page === i + 1 ? 'bg-[#2563EB] text-white' : 'text-[#667085] hover:bg-[#F2F4F7]'
+                    page === i + 1 ? 'bg-[#2563EB] text-white' : 'text-sb-text-2 hover:bg-sb-surface-2'
                   }`}
                 >
                   {i + 1}

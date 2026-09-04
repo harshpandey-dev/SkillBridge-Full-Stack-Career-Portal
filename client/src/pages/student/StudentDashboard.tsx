@@ -104,8 +104,8 @@ export default function StudentDashboard({ user, navigate }: Props) {
       {/* Welcome */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#172033]">Good morning, {user.name.split(' ')[0]} 👋</h1>
-          <p className="text-sm text-[#667085] mt-0.5">{today}</p>
+          <h1 className="text-2xl font-bold text-sb-text">Good morning, {user.name.split(' ')[0]} 👋</h1>
+          <p className="text-sm text-sb-text-2 mt-0.5">{today}</p>
         </div>
         <button
           onClick={() => navigate('opportunities')}
@@ -115,8 +115,8 @@ export default function StudentDashboard({ user, navigate }: Props) {
         </button>
       </div>
 
-      {/* Profile completion */}
-      <div className="bg-[#EFF6FF] border border-[#BFDBFE] rounded-lg p-4 flex items-center justify-between gap-4">
+      {/* Profile completion — brand blue card */}
+      <div className="bg-sb-brand-bg border border-[#BFDBFE] dark:border-[#1E3A5F] rounded-lg p-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           {user.profileImage ? (
             <img src={user.profileImage} alt={user.name} className="w-10 h-10 rounded-full object-cover border border-[#BFDBFE]" />
@@ -126,14 +126,14 @@ export default function StudentDashboard({ user, navigate }: Props) {
             </div>
           )}
           <div>
-            <p className="text-sm font-semibold text-[#172033]">Complete your profile to increase visibility</p>
-            <p className="text-xs text-[#667085] mt-0.5">Recruiters with complete profiles get 3× more views</p>
+            <p className="text-sm font-semibold text-sb-text">Complete your profile to increase visibility</p>
+            <p className="text-xs text-sb-text-2 mt-0.5">Recruiters with complete profiles get 3× more views</p>
           </div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <div className="flex flex-col items-end">
             <span className="text-sm font-bold text-[#2563EB]">{completionPercentage}%</span>
-            <div className="w-28 h-1.5 bg-[#BFDBFE] rounded-full mt-1">
+            <div className="w-28 h-1.5 bg-[#BFDBFE] dark:bg-[#1E3A5F] rounded-full mt-1">
               <div
                 className="h-1.5 bg-[#2563EB] rounded-full transition-all duration-300"
                 style={{ width: `${completionPercentage}%` }}
@@ -152,35 +152,35 @@ export default function StudentDashboard({ user, navigate }: Props) {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total applications', value: stats.total, icon: BriefcaseIcon, color: 'bg-[#EFF6FF] text-[#2563EB]', trend: '+3 this week', action: () => navigate('applications') },
-          { label: 'Shortlisted', value: stats.shortlisted, icon: CheckIcon, color: 'bg-[#E6F7F5] text-[#0F9D8A]', trend: 'Active', action: () => navigate('applications') },
-          { label: 'Offers received', value: stats.selected, icon: TrendingUpIconLocal, color: 'bg-[#ECFDF5] text-[#059669]', trend: 'Congratulations!', action: () => navigate('applications') },
-          { label: 'Saved jobs', value: stats.saved, icon: EyeIcon, color: 'bg-[#F2F4F7] text-[#667085]', trend: 'View saved', action: () => navigate('saved-jobs') },
+          { label: 'Total applications', value: stats.total, icon: BriefcaseIcon, color: 'bg-sb-brand-bg text-[#2563EB] dark:text-[#3B82F6]', trend: '+3 this week', action: () => navigate('applications') },
+          { label: 'Shortlisted', value: stats.shortlisted, icon: CheckIcon, color: 'bg-[#E6F7F5] text-[#0F9D8A] dark:bg-[#042F2E]', trend: 'Active', action: () => navigate('applications') },
+          { label: 'Offers received', value: stats.selected, icon: TrendingUpIconLocal, color: 'bg-[#ECFDF5] text-[#059669] dark:bg-[#052E1C]', trend: 'Congratulations!', action: () => navigate('applications') },
+          { label: 'Saved jobs', value: stats.saved, icon: EyeIcon, color: 'bg-sb-surface-2 text-sb-text-2', trend: 'View saved', action: () => navigate('saved-jobs') },
         ].map(({ label, value, icon: Icon, color, trend, action }) => (
           <button
             key={label}
             onClick={action}
-            className="bg-white border border-[#E4E7EC] rounded-lg p-5 text-left hover:border-[#2563EB] hover:shadow-sm transition-all"
+            className="bg-sb-surface border border-sb-border rounded-lg p-5 text-left hover:border-[#2563EB] hover:shadow-sm transition-all"
           >
             <div className={`w-9 h-9 rounded flex items-center justify-center mb-3 ${color}`}>
               <Icon size={17} />
             </div>
-            <div className="text-2xl font-bold text-[#172033]">{value}</div>
-            <div className="text-sm text-[#667085] mt-0.5">{label}</div>
-            <div className="text-xs text-[#94A3B8] mt-2">{trend}</div>
+            <div className="text-2xl font-bold text-sb-text">{value}</div>
+            <div className="text-sm text-sb-text-2 mt-0.5">{label}</div>
+            <div className="text-xs text-sb-text-3 mt-2">{trend}</div>
           </button>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Chart */}
-        <div className="lg:col-span-2 bg-white border border-[#E4E7EC] rounded-lg p-5">
+        <div className="lg:col-span-2 bg-sb-surface border border-sb-border rounded-lg p-5">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-base font-semibold text-[#172033]">Application activity</h2>
-              <p className="text-xs text-[#667085] mt-0.5">Last 6 months</p>
+              <h2 className="text-base font-semibold text-sb-text">Application activity</h2>
+              <p className="text-xs text-sb-text-2 mt-0.5">Last 6 months</p>
             </div>
-            <select className="text-xs text-[#667085] border border-[#E4E7EC] rounded px-2 py-1 bg-white outline-none">
+            <select className="text-xs text-sb-text-2 border border-sb-border rounded px-2 py-1 bg-sb-surface outline-none">
               <option>Last 6 months</option>
               <option>Last 3 months</option>
             </select>
@@ -209,22 +209,23 @@ export default function StudentDashboard({ user, navigate }: Props) {
         </div>
 
         {/* Quick stats */}
-        <div className="bg-white border border-[#E4E7EC] rounded-lg p-5">
-          <h2 className="text-base font-semibold text-[#172033] mb-4">Application breakdown</h2>
+        <div className="bg-sb-surface border border-sb-border rounded-lg p-5">
+          <h2 className="text-base font-semibold text-sb-text mb-4">Application breakdown</h2>
           {breakdown.map(({ label, count, pct, color }) => (
             <div key={label} className="mb-3">
               <div className="flex items-center justify-between text-sm mb-1">
-                <span className="text-[#667085]">{label}</span>
-                <span className="font-semibold text-[#172033]">{count}</span>
+                <span className="text-sb-text-2">{label}</span>
+                <span className="font-semibold text-sb-text">{count}</span>
               </div>
-              <div className="h-1.5 bg-[#F2F4F7] rounded-full">
+              <div className="h-1.5 bg-sb-surface-2 rounded-full">
                 <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: color }} />
               </div>
             </div>
           ))}
-          <div className="border-t border-[#F2F4F7] pt-3 mt-4">
-            <p className="text-xs text-[#667085]">Response rate</p>
-            <p className="text-xl font-bold text-[#172033] mt-0.5">{responseRate}%</p>
+          <div className="border-t border-sb-border pt-3 mt-4">
+            <p className="text-xs text-sb-text-2">Response rate</p>
+            <p className="text-xl font-bold text-sb-text mt-0.5">{responseRate}%</p>
+            {/* Positive trend — semantic teal/green kept */}
             <p className="text-xs text-[#0F9D8A]">↑ Above average for your field</p>
           </div>
         </div>
@@ -232,17 +233,17 @@ export default function StudentDashboard({ user, navigate }: Props) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Recent applications */}
-        <div className="bg-white border border-[#E4E7EC] rounded-lg overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#F2F4F7]">
-            <h2 className="text-base font-semibold text-[#172033]">Recent applications</h2>
-            <button onClick={() => navigate('applications')} className="text-xs text-[#2563EB] hover:underline flex items-center gap-1">
+        <div className="bg-sb-surface border border-sb-border rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-sb-border">
+            <h2 className="text-base font-semibold text-sb-text">Recent applications</h2>
+            <button onClick={() => navigate('applications')} className="text-xs text-[#2563EB] dark:text-[#3B82F6] hover:underline flex items-center gap-1">
               View all <ChevronRightIcon size={13} />
             </button>
           </div>
           <div>
             {recent.length > 0 ? (
               recent.map((app, i) => (
-                <div key={app.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < recent.length - 1 ? 'border-b border-[#F2F4F7]' : ''}`}>
+                <div key={app.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < recent.length - 1 ? 'border-b border-sb-border' : ''}`}>
                   <div
                     className="w-9 h-9 rounded flex items-center justify-center text-white font-bold text-sm shrink-0"
                     style={{ backgroundColor: app.companyColor }}
@@ -250,16 +251,17 @@ export default function StudentDashboard({ user, navigate }: Props) {
                     {app.company[0]}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[#172033] truncate">{app.jobTitle}</p>
-                    <p className="text-xs text-[#667085]">{app.company} · {app.appliedDate}</p>
+                    <p className="text-sm font-medium text-sb-text truncate">{app.jobTitle}</p>
+                    <p className="text-xs text-sb-text-2">{app.company} · {app.appliedDate}</p>
                   </div>
+                  {/* Application status badge — STATUS_COLORS semantic values preserved */}
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${STATUS_COLORS[app.status] || STATUS_COLORS.Applied}`}>
                     {app.status}
                   </span>
                 </div>
               ))
             ) : (
-              <div className="px-5 py-8 text-center text-sm text-[#667085]">
+              <div className="px-5 py-8 text-center text-sm text-sb-text-2">
                 No applications submitted yet.
               </div>
             )}
@@ -267,17 +269,17 @@ export default function StudentDashboard({ user, navigate }: Props) {
         </div>
 
         {/* Latest jobs */}
-        <div className="bg-white border border-[#E4E7EC] rounded-lg overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#F2F4F7]">
-            <h2 className="text-base font-semibold text-[#172033]">Jobs for you</h2>
-            <button onClick={() => navigate('opportunities')} className="text-xs text-[#2563EB] hover:underline flex items-center gap-1">
+        <div className="bg-sb-surface border border-sb-border rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-sb-border">
+            <h2 className="text-base font-semibold text-sb-text">Jobs for you</h2>
+            <button onClick={() => navigate('opportunities')} className="text-xs text-[#2563EB] dark:text-[#3B82F6] hover:underline flex items-center gap-1">
               View all <ChevronRightIcon size={13} />
             </button>
           </div>
           <div>
             {latestJobs.length > 0 ? (
               latestJobs.map((job, i) => (
-                <div key={job.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < latestJobs.length - 1 ? 'border-b border-[#F2F4F7]' : ''}`}>
+                <div key={job.id} className={`flex items-center gap-3 px-5 py-3.5 ${i < latestJobs.length - 1 ? 'border-b border-sb-border' : ''}`}>
                   <div
                     className="w-9 h-9 rounded flex items-center justify-center text-white font-bold text-sm shrink-0"
                     style={{ backgroundColor: job.companyColor }}
@@ -285,19 +287,19 @@ export default function StudentDashboard({ user, navigate }: Props) {
                     {job.company[0]}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[#172033] truncate">{job.title}</p>
-                    <p className="text-xs text-[#667085]">{job.company} · {job.salary}</p>
+                    <p className="text-sm font-medium text-sb-text truncate">{job.title}</p>
+                    <p className="text-xs text-sb-text-2">{job.company} · {job.salary}</p>
                   </div>
                   <button
                     onClick={() => navigate('job-details', job.id)}
-                    className="text-xs font-medium text-[#2563EB] hover:text-[#1D4ED8] shrink-0 transition-colors"
+                    className="text-xs font-medium text-[#2563EB] dark:text-[#3B82F6] hover:text-[#1D4ED8] shrink-0 transition-colors"
                   >
                     View →
                   </button>
                 </div>
               ))
             ) : (
-              <div className="px-5 py-8 text-center text-sm text-[#667085]">
+              <div className="px-5 py-8 text-center text-sm text-sb-text-2">
                 No jobs available.
               </div>
             )}

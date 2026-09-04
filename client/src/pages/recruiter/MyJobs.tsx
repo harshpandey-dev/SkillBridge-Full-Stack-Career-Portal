@@ -81,17 +81,17 @@ export default function MyJobs({ navigate }: Props) {
   }
 
   const statusStyles = {
-    Open: 'bg-[#E6F7F5] text-[#0F9D8A]',
-    Closed: 'bg-[#F2F4F7] text-[#667085]',
-    Draft: 'bg-[#FFFBEB] text-[#D97706]',
+    Open: 'bg-[#E6F7F5] dark:bg-[#042F2E] text-[#0F9D8A]',
+    Closed: 'bg-sb-surface-2 text-sb-text-2',
+    Draft: 'bg-[#FFFBEB] dark:bg-[#2D1B00] text-[#D97706]',
   }
 
   return (
     <div className="space-y-5 max-w-[1200px]">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#172033]">My Jobs</h1>
-          <p className="text-sm text-[#667085] mt-0.5">
+          <h1 className="text-2xl font-bold text-sb-text">My Jobs</h1>
+          <p className="text-sm text-sb-text-2 mt-0.5">
             {jobs.filter(j => j.status === 'Open').length} active · {jobs.length} total
           </p>
         </div>
@@ -104,21 +104,21 @@ export default function MyJobs({ navigate }: Props) {
       </div>
 
       {error && (
-        <div className="bg-[#FEF2F2] border border-[#FECACA] rounded p-4 text-sm text-[#DC2626]">
+        <div className="bg-[#FEF2F2] dark:bg-[#3B0A0A] border border-[#FECACA] dark:border-[#7F1D1D] rounded p-4 text-sm text-[#DC2626] dark:text-[#F87171]">
           {error}
         </div>
       )}
 
       {/* Controls */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex items-center gap-2 bg-white border border-[#E4E7EC] rounded px-3 py-2.5 flex-1 min-w-48 max-w-xs">
-          <SearchIcon size={15} className="text-[#667085]" />
+        <div className="flex items-center gap-2 bg-sb-surface border border-sb-border rounded px-3 py-2.5 flex-1 min-w-48 max-w-xs">
+          <SearchIcon size={15} className="text-sb-text-2" />
           <input
             type="text"
             placeholder="Search jobs..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="flex-1 text-sm text-[#172033] placeholder-[#94A3B8] outline-none"
+            className="flex-1 text-sm text-sb-text placeholder-sb-text-3 outline-none bg-transparent"
           />
         </div>
         <div className="flex gap-1">
@@ -127,7 +127,7 @@ export default function MyJobs({ navigate }: Props) {
               key={s}
               onClick={() => setFilter(s)}
               className={`px-3 py-2 text-sm font-medium rounded transition-colors ${
-                filter === s ? 'bg-[#163A5F] text-white' : 'bg-white border border-[#E4E7EC] text-[#667085] hover:border-[#94A3B8]'
+                filter === s ? 'bg-[#163A5F] dark:bg-[#1E3A5F] text-white' : 'bg-sb-surface border border-sb-border text-sb-text-2 hover:border-sb-border-2'
               }`}
             >
               {s}
@@ -137,22 +137,22 @@ export default function MyJobs({ navigate }: Props) {
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-[#E4E7EC] rounded-lg overflow-hidden">
+      <div className="bg-sb-surface border border-sb-border rounded-lg overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-[#F2F4F7] bg-[#F7F8FA]">
-              <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Job Title</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Type</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Posted</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Applicants</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Status</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-[#667085] uppercase tracking-wide">Actions</th>
+            <tr className="border-b border-sb-border bg-sb-surface-2">
+              <th className="px-5 py-3 text-left text-xs font-semibold text-sb-text-2 uppercase tracking-wide">Job Title</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-sb-text-2 uppercase tracking-wide">Type</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-sb-text-2 uppercase tracking-wide">Posted</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-sb-text-2 uppercase tracking-wide">Applicants</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-sb-text-2 uppercase tracking-wide">Status</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-sb-text-2 uppercase tracking-wide">Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} className="px-5 py-8 text-center text-sm text-[#667085]">
+                <td colSpan={6} className="px-5 py-8 text-center text-sm text-sb-text-2">
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-4 h-4 border-2 border-[#2563EB] border-t-transparent rounded-full animate-spin" />
                     <span>Loading jobs...</span>
@@ -160,22 +160,22 @@ export default function MyJobs({ navigate }: Props) {
                 </td>
               </tr>
             ) : filtered.map(job => (
-              <tr key={job.id} className={`border-b border-[#F2F4F7] hover:bg-[#FAFBFC] transition-colors ${deleteConfirm === job.id ? 'bg-[#FEF2F2]' : ''}`}>
+              <tr key={job.id} className={`border-b border-sb-border hover:bg-sb-surface-2 transition-colors ${deleteConfirm === job.id ? 'bg-[#FEF2F2] dark:bg-[#3B0A0A]' : ''}`}>
                 <td className="px-5 py-4">
                   <div>
-                    <p className="text-sm font-semibold text-[#172033]">{job.title}</p>
-                    <p className="text-xs text-[#667085]">{job.department} · {job.location}</p>
+                    <p className="text-sm font-semibold text-sb-text">{job.title}</p>
+                    <p className="text-xs text-sb-text-2">{job.department} · {job.location}</p>
                   </div>
                 </td>
                 <td className="px-5 py-4">
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${job.type === 'Internship' ? 'bg-[#E6F7F5] text-[#0F9D8A]' : 'bg-[#EFF6FF] text-[#2563EB]'}`}>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${job.type === 'Internship' ? 'bg-[#E6F7F5] dark:bg-[#042F2E] text-[#0F9D8A]' : 'bg-sb-brand-bg text-[#2563EB] dark:text-[#3B82F6]'}`}>
                     {job.type}
                   </span>
                 </td>
-                <td className="px-5 py-4 text-sm text-[#667085]">{job.postedDate}</td>
+                <td className="px-5 py-4 text-sm text-sb-text-2">{job.postedDate}</td>
                 <td className="px-5 py-4">
-                  <button onClick={() => navigate('applicants')} className="flex items-center gap-1.5 text-sm font-medium text-[#172033] hover:text-[#2563EB] transition-colors">
-                    <UsersIcon size={14} className="text-[#667085]" />
+                  <button onClick={() => navigate('applicants')} className="flex items-center gap-1.5 text-sm font-medium text-sb-text hover:text-[#2563EB] dark:hover:text-[#3B82F6] transition-colors">
+                    <UsersIcon size={14} className="text-sb-text-2" />
                     {job.applicants}
                   </button>
                 </td>
@@ -187,17 +187,17 @@ export default function MyJobs({ navigate }: Props) {
                 <td className="px-5 py-4">
                   {deleteConfirm === job.id ? (
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-[#DC2626]">Delete this job?</span>
+                      <span className="text-xs text-[#DC2626] dark:text-[#F87171]">Delete this job?</span>
                       <button
                         onClick={() => handleDelete(job.id)}
                         disabled={actionLoading === job.id}
-                        className="text-xs font-medium text-[#DC2626] hover:underline"
+                        className="text-xs font-medium text-[#DC2626] dark:text-[#F87171] hover:underline"
                       >
                         Yes
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(null)}
-                        className="text-xs text-[#667085] hover:underline"
+                        className="text-xs text-sb-text-2 hover:underline"
                       >
                         No
                       </button>
@@ -207,14 +207,14 @@ export default function MyJobs({ navigate }: Props) {
                       <button
                         onClick={() => navigate('job-details', job.id)}
                         title="View job details"
-                        className="p-1.5 rounded hover:bg-[#F2F4F7] text-[#667085] hover:text-[#172033] transition-colors"
+                        className="p-1.5 rounded hover:bg-sb-surface-2 text-sb-text-2 hover:text-sb-text transition-colors"
                       >
                         <EyeIcon size={14} />
                       </button>
                       <button
                         onClick={() => navigate('post-job', job.id)}
                         title="Edit job"
-                        className="p-1.5 rounded hover:bg-[#F2F4F7] text-[#667085] hover:text-[#172033] transition-colors"
+                        className="p-1.5 rounded hover:bg-sb-surface-2 text-sb-text-2 hover:text-sb-text transition-colors"
                       >
                         <EditIcon size={14} />
                       </button>
@@ -223,7 +223,7 @@ export default function MyJobs({ navigate }: Props) {
                           onClick={() => handleClose(job.id)}
                           disabled={actionLoading === job.id}
                           title="Close listing"
-                          className="text-xs px-2 py-1 border border-[#E4E7EC] rounded text-[#667085] hover:bg-[#F7F8FA] transition-colors"
+                          className="text-xs px-2 py-1 border border-sb-border rounded text-sb-text-2 hover:bg-sb-surface-2 transition-colors"
                         >
                           Close
                         </button>
@@ -233,7 +233,7 @@ export default function MyJobs({ navigate }: Props) {
                           onClick={() => handleReopen(job.id)}
                           disabled={actionLoading === job.id}
                           title="Reopen listing"
-                          className="text-xs px-2 py-1 border border-[#BFDBFE] rounded text-[#2563EB] bg-[#EFF6FF] hover:bg-[#DBEAFE] transition-colors"
+                          className="text-xs px-2 py-1 border border-[#BFDBFE] dark:border-[#1E3A5F] rounded text-[#2563EB] dark:text-[#3B82F6] bg-sb-brand-bg hover:bg-[#DBEAFE] dark:hover:bg-[#1E3A5F] transition-colors"
                         >
                           Reopen
                         </button>
@@ -241,7 +241,7 @@ export default function MyJobs({ navigate }: Props) {
                       <button
                         onClick={() => setDeleteConfirm(job.id)}
                         title="Delete"
-                        className="p-1.5 rounded hover:bg-[#FEF2F2] text-[#94A3B8] hover:text-[#DC2626] transition-colors"
+                        className="p-1.5 rounded hover:bg-[#FEF2F2] dark:hover:bg-[#3B0A0A] text-sb-text-3 hover:text-[#DC2626] dark:hover:text-[#F87171] transition-colors"
                       >
                         <TrashIcon size={14} />
                       </button>
@@ -252,9 +252,9 @@ export default function MyJobs({ navigate }: Props) {
             ))}
             {!loading && filtered.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-5 py-12 text-center text-sm text-[#667085]">
+                <td colSpan={6} className="px-5 py-12 text-center text-sm text-sb-text-2">
                   No jobs found.
-                  <button onClick={() => navigate('post-job')} className="ml-1 text-[#2563EB] hover:underline">Post your first job</button>
+                  <button onClick={() => navigate('post-job')} className="ml-1 text-[#2563EB] dark:text-[#3B82F6] hover:underline">Post your first job</button>
                 </td>
               </tr>
             )}
@@ -263,15 +263,15 @@ export default function MyJobs({ navigate }: Props) {
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { label: 'Total applicants across all jobs', value: jobs.reduce((sum, j) => sum + j.applicants, 0), color: 'text-[#2563EB]' },
+          { label: 'Total applicants across all jobs', value: jobs.reduce((sum, j) => sum + j.applicants, 0), color: 'text-[#2563EB] dark:text-[#3B82F6]' },
           { label: 'Average applicants per job', value: Math.round(jobs.reduce((sum, j) => sum + j.applicants, 0) / Math.max(jobs.length, 1)), color: 'text-[#0F9D8A]' },
-          { label: 'Open positions', value: jobs.filter(j => j.status === 'Open').length, color: 'text-[#172033]' },
+          { label: 'Open positions', value: jobs.filter(j => j.status === 'Open').length, color: 'text-sb-text' },
         ].map(({ label, value, color }) => (
-          <div key={label} className="bg-white border border-[#E4E7EC] rounded-lg p-4">
+          <div key={label} className="bg-sb-surface border border-sb-border rounded-lg p-4">
             <div className={`text-2xl font-bold ${color}`}>{value}</div>
-            <div className="text-xs text-[#667085] mt-1">{label}</div>
+            <div className="text-xs text-sb-text-2 mt-1">{label}</div>
           </div>
         ))}
       </div>

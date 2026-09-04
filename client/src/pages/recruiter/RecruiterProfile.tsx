@@ -331,17 +331,17 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
   if (loading) {
     return (
       <div className="space-y-5 max-w-[960px] animate-pulse">
-        <div className="h-8 bg-[#E4E7EC] rounded w-48" />
+        <div className="h-8 bg-sb-surface-2 rounded w-48" />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           <div className="space-y-4">
-            <div className="bg-white border border-[#E4E7EC] rounded-lg p-6 h-56" />
-            <div className="bg-white border border-[#E4E7EC] rounded-lg p-4 h-40" />
-            <div className="bg-white border border-[#E4E7EC] rounded-lg p-4 h-48" />
+            <div className="bg-sb-surface border border-sb-border rounded-lg p-6 h-56" />
+            <div className="bg-sb-surface border border-sb-border rounded-lg p-4 h-40" />
+            <div className="bg-sb-surface border border-sb-border rounded-lg p-4 h-48" />
           </div>
           <div className="lg:col-span-2 space-y-4">
-            <div className="bg-white border border-[#E4E7EC] rounded-lg p-6 h-48" />
-            <div className="bg-white border border-[#E4E7EC] rounded-lg p-6 h-48" />
-            <div className="bg-white border border-[#E4E7EC] rounded-lg p-6 h-56" />
+            <div className="bg-sb-surface border border-sb-border rounded-lg p-6 h-48" />
+            <div className="bg-sb-surface border border-sb-border rounded-lg p-6 h-48" />
+            <div className="bg-sb-surface border border-sb-border rounded-lg p-6 h-56" />
           </div>
         </div>
       </div>
@@ -351,9 +351,9 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
   if (pageError || !profileData) {
     return (
       <div className="space-y-5 max-w-[960px]">
-        <h1 className="text-2xl font-bold text-[#172033]">Recruiter Profile</h1>
-        <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-lg p-6 text-center">
-          <p className="text-sm text-[#DC2626] font-medium">{pageError || 'Unable to load profile data.'}</p>
+        <h1 className="text-2xl font-bold text-sb-text">Recruiter Profile</h1>
+        <div className="bg-[#FEF2F2] dark:bg-[#3B0A0A] border border-[#FECACA] dark:border-[#7F1D1D] rounded-lg p-6 text-center">
+          <p className="text-sm text-[#DC2626] dark:text-[#F87171] font-medium">{pageError || 'Unable to load profile data.'}</p>
           <button
             onClick={loadAllData}
             className="mt-4 bg-[#2563EB] text-white px-4 py-2 rounded text-sm font-semibold hover:bg-[#1D4ED8] transition-colors"
@@ -379,20 +379,20 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#172033]">Recruiter Profile</h1>
-          <p className="text-sm text-[#667085] mt-0.5">Manage your professional information visible to students</p>
+          <h1 className="text-2xl font-bold text-sb-text">Recruiter Profile</h1>
+          <p className="text-sm text-sb-text-2 mt-0.5">Manage your professional information visible to students</p>
         </div>
         {savedSuccess && (
-          <div className="flex items-center gap-2 bg-[#E6F7F5] text-[#0F9D8A] px-3 py-2 rounded text-sm font-medium">
+          <div className="flex items-center gap-2 bg-[#E6F7F5] dark:bg-[#042F2E] text-[#0F9D8A] px-3 py-2 rounded text-sm font-medium">
             <CheckIcon size={15} /> {savedSuccess}
           </div>
         )}
       </div>
 
       {actionError && (
-        <div className="bg-[#FEF2F2] border border-[#FECACA] rounded p-3 text-sm text-[#DC2626] flex justify-between items-center">
+        <div className="bg-[#FEF2F2] dark:bg-[#3B0A0A] border border-[#FECACA] dark:border-[#7F1D1D] rounded p-3 text-sm text-[#DC2626] dark:text-[#F87171] flex justify-between items-center">
           <span>{actionError}</span>
-          <button onClick={() => setActionError(null)} className="text-xs text-[#DC2626] underline ml-2">Dismiss</button>
+          <button onClick={() => setActionError(null)} className="text-xs text-[#DC2626] dark:text-[#F87171] underline ml-2">Dismiss</button>
         </div>
       )}
 
@@ -400,7 +400,7 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
         {/* Left Column */}
         <div className="space-y-4">
           {/* Identity card */}
-          <div className="bg-white border border-[#E4E7EC] rounded-lg p-5 text-center relative group">
+          <div className="bg-sb-surface border border-sb-border rounded-lg p-5 text-center relative group">
             <input
               type="file"
               ref={imageInputRef}
@@ -413,7 +413,7 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
                 <img
                   src={user.profileImage}
                   alt={user.name}
-                  className="w-20 h-20 rounded-full object-cover border border-[#E4E7EC]"
+                  className="w-20 h-20 rounded-full object-cover border border-sb-border"
                 />
               ) : (
                 <div className="w-20 h-20 rounded-full bg-[#163A5F] flex items-center justify-center text-white text-2xl font-bold">
@@ -434,45 +434,45 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
               <button
                 disabled={uploadingImage}
                 onClick={handleDeleteProfileImage}
-                className="text-xs text-[#DC2626] hover:underline mb-2 block mx-auto"
+                className="text-xs text-[#DC2626] dark:text-[#F87171] hover:underline mb-2 block mx-auto"
               >
                 Remove photo
               </button>
             )}
 
-            <h2 className="font-bold text-[#172033] text-lg">{user.name}</h2>
-            <p className="text-sm text-[#667085] mt-0.5">{recruiterProfile.position || 'Recruiter'}</p>
-            <p className="text-sm font-medium text-[#163A5F] mt-1">{company?.name || 'SkillBridge Partner'}</p>
+            <h2 className="font-bold text-sb-text text-lg">{user.name}</h2>
+            <p className="text-sm text-sb-text-2 mt-0.5">{recruiterProfile.position || 'Recruiter'}</p>
+            <p className="text-sm font-medium text-[#163A5F] dark:text-[#60A5FA] mt-1">{company?.name || 'SkillBridge Partner'}</p>
             <div className="mt-3 flex items-center justify-center gap-1.5">
-              <span className="text-xs bg-[#EFF6FF] text-[#2563EB] px-2.5 py-1 rounded-full font-medium">
+              <span className="text-xs bg-sb-brand-bg text-[#2563EB] dark:text-[#3B82F6] px-2.5 py-1 rounded-full font-medium">
                 Verified Recruiter
               </span>
             </div>
           </div>
 
           {/* Contact card */}
-          <div className="bg-white border border-[#E4E7EC] rounded-lg p-4 space-y-2.5">
-            <h3 className="text-sm font-semibold text-[#172033]">Contact</h3>
-            <div className="flex items-center gap-2 text-sm text-[#667085]">
+          <div className="bg-sb-surface border border-sb-border rounded-lg p-4 space-y-2.5">
+            <h3 className="text-sm font-semibold text-sb-text">Contact</h3>
+            <div className="flex items-center gap-2 text-sm text-sb-text-2">
               <MailIcon size={14} className="shrink-0" /> {user.email}
             </div>
-            <div className="flex items-center gap-2 text-sm text-[#667085]">
-              <PhoneIcon size={14} className="shrink-0" /> {user.phone || <span className="text-[#94A3B8] italic">No phone added</span>}
+            <div className="flex items-center gap-2 text-sm text-sb-text-2">
+              <PhoneIcon size={14} className="shrink-0" /> {user.phone || <span className="text-sb-text-3 italic">No phone added</span>}
             </div>
-            <div className="flex items-center gap-2 text-sm text-[#667085]">
-              <MapPinIcon size={14} className="shrink-0" /> {user.location || <span className="text-[#94A3B8] italic">No location added</span>}
+            <div className="flex items-center gap-2 text-sm text-sb-text-2">
+              <MapPinIcon size={14} className="shrink-0" /> {user.location || <span className="text-sb-text-3 italic">No location added</span>}
             </div>
-            <div className="flex items-center gap-2 text-sm text-[#667085]">
+            <div className="flex items-center gap-2 text-sm text-sb-text-2">
               <BuildingIcon size={14} className="shrink-0" /> {company?.name || 'Company not set'}
             </div>
             {company?.website && (
-              <div className="flex items-center gap-2 text-sm text-[#667085]">
+              <div className="flex items-center gap-2 text-sm text-sb-text-2">
                 <GlobeIcon size={14} className="shrink-0" />{' '}
                 <a
                   href={company.website.startsWith('http') ? company.website : `https://${company.website}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#2563EB] hover:underline truncate"
+                  className="text-[#2563EB] dark:text-[#3B82F6] hover:underline truncate"
                 >
                   {company.website}
                 </a>
@@ -481,8 +481,8 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
           </div>
 
           {/* Recruiting activity card (Real metrics) */}
-          <div className="bg-white border border-[#E4E7EC] rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-[#172033] mb-3">Recruiting activity</h3>
+          <div className="bg-sb-surface border border-sb-border rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-sb-text mb-3">Recruiting activity</h3>
             <div className="space-y-3">
               {[
                 { label: 'Active jobs', value: String(stats?.activeJobs ?? 0) },
@@ -492,8 +492,8 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
                 { label: 'Offers / Selected', value: String(stats?.selectedCandidates ?? 0) },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between items-center">
-                  <span className="text-sm text-[#667085]">{label}</span>
-                  <span className="text-sm font-semibold text-[#172033]">{value}</span>
+                  <span className="text-sm text-sb-text-2">{label}</span>
+                  <span className="text-sm font-semibold text-sb-text">{value}</span>
                 </div>
               ))}
             </div>
@@ -503,15 +503,15 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
         {/* Right Column */}
         <div className="lg:col-span-2 space-y-4">
           {/* Personal information */}
-          <div className="bg-white border border-[#E4E7EC] rounded-lg p-5">
+          <div className="bg-sb-surface border border-sb-border rounded-lg p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-[#172033]">Personal information</h2>
+              <h2 className="text-base font-semibold text-sb-text">Personal information</h2>
               <button
                 onClick={() => {
                   setActionError(null)
                   setEditing(editing === 'personal' ? null : 'personal')
                 }}
-                className="flex items-center gap-1.5 text-xs font-medium text-[#667085] hover:text-[#2563EB]"
+                className="flex items-center gap-1.5 text-xs font-medium text-sb-text-2 hover:text-[#2563EB] dark:hover:text-[#3B82F6]"
               >
                 <EditIcon size={13} /> {editing === 'personal' ? 'Cancel' : 'Edit'}
               </button>
@@ -521,50 +521,50 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
               <div className="space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-medium text-[#667085] block mb-1">Full name *</label>
+                    <label className="text-xs font-medium text-sb-text-2 block mb-1">Full name *</label>
                     <input
                       type="text"
                       value={name}
                       onChange={e => setName(e.target.value)}
-                      className="w-full border border-[#E4E7EC] rounded px-2.5 py-1.5 text-sm outline-none focus:border-[#2563EB]"
+                      className="w-full border border-sb-border bg-sb-surface rounded px-2.5 py-1.5 text-sm text-sb-text outline-none focus:border-[#2563EB]"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#667085] block mb-1">Email address</label>
+                    <label className="text-xs font-medium text-sb-text-2 block mb-1">Email address</label>
                     <input
                       disabled
                       value={user.email}
-                      className="w-full border border-[#E4E7EC] rounded px-2.5 py-1.5 text-sm text-[#667085] bg-[#F7F8FA] outline-none cursor-not-allowed"
+                      className="w-full border border-sb-border rounded px-2.5 py-1.5 text-sm text-sb-text-2 bg-sb-surface-2 outline-none cursor-not-allowed"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#667085] block mb-1">Phone</label>
+                    <label className="text-xs font-medium text-sb-text-2 block mb-1">Phone</label>
                     <input
                       type="text"
                       value={phone}
                       onChange={e => setPhone(e.target.value)}
                       placeholder="+1 (555) 000-0000"
-                      className="w-full border border-[#E4E7EC] rounded px-2.5 py-1.5 text-sm outline-none focus:border-[#2563EB]"
+                      className="w-full border border-sb-border bg-sb-surface rounded px-2.5 py-1.5 text-sm text-sb-text outline-none focus:border-[#2563EB]"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#667085] block mb-1">Position / Title</label>
+                    <label className="text-xs font-medium text-sb-text-2 block mb-1">Position / Title</label>
                     <input
                       type="text"
                       value={position}
                       onChange={e => setPosition(e.target.value)}
                       placeholder="e.g. Lead Talent Acquisition"
-                      className="w-full border border-[#E4E7EC] rounded px-2.5 py-1.5 text-sm outline-none focus:border-[#2563EB]"
+                      className="w-full border border-sb-border bg-sb-surface rounded px-2.5 py-1.5 text-sm text-sb-text outline-none focus:border-[#2563EB]"
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="text-xs font-medium text-[#667085] block mb-1">Location</label>
+                    <label className="text-xs font-medium text-sb-text-2 block mb-1">Location</label>
                     <input
                       type="text"
                       value={location}
                       onChange={e => setLocation(e.target.value)}
                       placeholder="e.g. San Francisco, CA"
-                      className="w-full border border-[#E4E7EC] rounded px-2.5 py-1.5 text-sm outline-none focus:border-[#2563EB]"
+                      className="w-full border border-sb-border bg-sb-surface rounded px-2.5 py-1.5 text-sm text-sb-text outline-none focus:border-[#2563EB]"
                     />
                   </div>
                 </div>
@@ -578,7 +578,7 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
                   </button>
                   <button
                     onClick={() => setEditing(null)}
-                    className="border border-[#E4E7EC] text-[#667085] px-4 py-1.5 rounded text-sm hover:bg-[#F7F8FA]"
+                    className="border border-sb-border text-sb-text-2 px-4 py-1.5 rounded text-sm hover:bg-sb-surface-2"
                   >
                     Cancel
                   </button>
@@ -594,8 +594,8 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
                   { label: 'Location', value: user.location },
                 ].map(({ label, value }) => (
                   <div key={label}>
-                    <p className="text-xs text-[#667085] mb-1">{label}</p>
-                    <p className="text-sm font-medium text-[#172033]">{value || <span className="text-[#94A3B8] italic">Not provided</span>}</p>
+                    <p className="text-xs text-sb-text-2 mb-1">{label}</p>
+                    <p className="text-sm font-medium text-sb-text">{value || <span className="text-sb-text-3 italic">Not provided</span>}</p>
                   </div>
                 ))}
               </div>
@@ -603,22 +603,22 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
           </div>
 
           {/* Company info */}
-          <div className="bg-white border border-[#E4E7EC] rounded-lg p-5">
+          <div className="bg-sb-surface border border-sb-border rounded-lg p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-[#172033]">Company information</h2>
+              <h2 className="text-base font-semibold text-sb-text">Company information</h2>
               <button
                 onClick={() => {
                   setActionError(null)
                   setEditing(editing === 'company' ? null : 'company')
                 }}
-                className="flex items-center gap-1.5 text-xs font-medium text-[#667085] hover:text-[#2563EB]"
+                className="flex items-center gap-1.5 text-xs font-medium text-sb-text-2 hover:text-[#2563EB] dark:hover:text-[#3B82F6]"
               >
                 <EditIcon size={13} /> {editing === 'company' ? 'Cancel' : 'Edit'}
               </button>
             </div>
 
             {/* Company Logo Section */}
-            <div className="mb-4 pb-4 border-b border-[#F2F4F7] flex items-center gap-4">
+            <div className="mb-4 pb-4 border-b border-sb-border flex items-center gap-4">
               <input
                 type="file"
                 ref={logoInputRef}
@@ -626,7 +626,7 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
                 accept="image/jpeg,image/jpg,image/png,image/webp"
                 className="hidden"
               />
-              <div className="relative w-14 h-14 rounded-lg bg-[#163A5F] flex items-center justify-center text-white font-bold text-xl overflow-hidden border border-[#E4E7EC] shrink-0">
+              <div className="relative w-14 h-14 rounded-lg bg-[#163A5F] flex items-center justify-center text-white font-bold text-xl overflow-hidden border border-sb-border shrink-0">
                 {company?.logo ? (
                   <img src={company.logo} alt={company.name} className="w-full h-full object-cover" />
                 ) : (
@@ -634,24 +634,24 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
                 )}
               </div>
               <div>
-                <p className="text-sm font-semibold text-[#172033]">{company?.name || 'Company Logo'}</p>
+                <p className="text-sm font-semibold text-sb-text">{company?.name || 'Company Logo'}</p>
                 <div className="flex items-center gap-2 mt-1">
                   <button
                     type="button"
                     disabled={uploadingLogo}
                     onClick={() => logoInputRef.current?.click()}
-                    className="text-xs font-medium text-[#2563EB] hover:underline disabled:opacity-50"
+                    className="text-xs font-medium text-[#2563EB] dark:text-[#3B82F6] hover:underline disabled:opacity-50"
                   >
                     {uploadingLogo ? 'Uploading logo…' : company?.logo ? 'Replace logo' : 'Upload logo'}
                   </button>
                   {company?.logo && (
                     <>
-                      <span className="text-xs text-[#CBD5E1]">·</span>
+                      <span className="text-xs text-sb-text-3">·</span>
                       <button
                         type="button"
                         disabled={uploadingLogo}
                         onClick={handleDeleteCompanyLogo}
-                        className="text-xs text-[#DC2626] hover:underline flex items-center gap-1 disabled:opacity-50"
+                        className="text-xs text-[#DC2626] dark:text-[#F87171] hover:underline flex items-center gap-1 disabled:opacity-50"
                       >
                         <TrashIcon size={11} /> Remove
                       </button>
@@ -665,52 +665,52 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
               <div className="space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-medium text-[#667085] block mb-1">Company name *</label>
+                    <label className="text-xs font-medium text-sb-text-2 block mb-1">Company name *</label>
                     <input
                       type="text"
                       value={companyName}
                       onChange={e => setCompanyName(e.target.value)}
-                      className="w-full border border-[#E4E7EC] rounded px-2.5 py-1.5 text-sm outline-none focus:border-[#2563EB]"
+                      className="w-full border border-sb-border bg-sb-surface rounded px-2.5 py-1.5 text-sm text-sb-text outline-none focus:border-[#2563EB]"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#667085] block mb-1">Website</label>
+                    <label className="text-xs font-medium text-sb-text-2 block mb-1">Website</label>
                     <input
                       type="text"
                       value={companyWebsite}
                       placeholder="https://example.com"
                       onChange={e => setCompanyWebsite(e.target.value)}
-                      className="w-full border border-[#E4E7EC] rounded px-2.5 py-1.5 text-sm outline-none focus:border-[#2563EB]"
+                      className="w-full border border-sb-border bg-sb-surface rounded px-2.5 py-1.5 text-sm text-sb-text outline-none focus:border-[#2563EB]"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#667085] block mb-1">Company size</label>
+                    <label className="text-xs font-medium text-sb-text-2 block mb-1">Company size</label>
                     <input
                       type="text"
                       value={companySize}
                       placeholder="e.g. 50-200 employees"
                       onChange={e => setCompanySize(e.target.value)}
-                      className="w-full border border-[#E4E7EC] rounded px-2.5 py-1.5 text-sm outline-none focus:border-[#2563EB]"
+                      className="w-full border border-sb-border bg-sb-surface rounded px-2.5 py-1.5 text-sm text-sb-text outline-none focus:border-[#2563EB]"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#667085] block mb-1">Headquarters Location</label>
+                    <label className="text-xs font-medium text-sb-text-2 block mb-1">Headquarters Location</label>
                     <input
                       type="text"
                       value={companyLocation}
                       placeholder="e.g. San Francisco, CA"
                       onChange={e => setCompanyLocation(e.target.value)}
-                      className="w-full border border-[#E4E7EC] rounded px-2.5 py-1.5 text-sm outline-none focus:border-[#2563EB]"
+                      className="w-full border border-sb-border bg-sb-surface rounded px-2.5 py-1.5 text-sm text-sb-text outline-none focus:border-[#2563EB]"
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="text-xs font-medium text-[#667085] block mb-1">Description</label>
+                    <label className="text-xs font-medium text-sb-text-2 block mb-1">Description</label>
                     <textarea
                       rows={3}
                       value={companyDescription}
                       placeholder="Brief overview of your company mission and culture..."
                       onChange={e => setCompanyDescription(e.target.value)}
-                      className="w-full border border-[#E4E7EC] rounded px-2.5 py-1.5 text-sm outline-none focus:border-[#2563EB] resize-none"
+                      className="w-full border border-sb-border bg-sb-surface rounded px-2.5 py-1.5 text-sm text-sb-text outline-none focus:border-[#2563EB] resize-none"
                     />
                   </div>
                 </div>
@@ -724,7 +724,7 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
                   </button>
                   <button
                     onClick={() => setEditing(null)}
-                    className="border border-[#E4E7EC] text-[#667085] px-4 py-1.5 rounded text-sm hover:bg-[#F7F8FA]"
+                    className="border border-sb-border text-sb-text-2 px-4 py-1.5 rounded text-sm hover:bg-sb-surface-2"
                   >
                     Cancel
                   </button>
@@ -739,14 +739,14 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
                   { label: 'Location', value: company?.location },
                 ].map(({ label, value }) => (
                   <div key={label}>
-                    <p className="text-xs text-[#667085] mb-1">{label}</p>
-                    <p className="text-sm font-medium text-[#172033]">{value || <span className="text-[#94A3B8] italic">Not provided</span>}</p>
+                    <p className="text-xs text-sb-text-2 mb-1">{label}</p>
+                    <p className="text-sm font-medium text-sb-text">{value || <span className="text-sb-text-3 italic">Not provided</span>}</p>
                   </div>
                 ))}
                 {company?.description && (
                   <div className="col-span-2 mt-1">
-                    <p className="text-xs text-[#667085] mb-1">About company</p>
-                    <p className="text-sm text-[#667085] leading-relaxed">{company.description}</p>
+                    <p className="text-xs text-sb-text-2 mb-1">About company</p>
+                    <p className="text-sm text-sb-text-2 leading-relaxed">{company.description}</p>
                   </div>
                 )}
               </div>
@@ -754,8 +754,8 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
           </div>
 
           {/* Notification preferences */}
-          <div className="bg-white border border-[#E4E7EC] rounded-lg p-5">
-            <h2 className="text-base font-semibold text-[#172033] mb-4">Notification preferences</h2>
+          <div className="bg-sb-surface border border-sb-border rounded-lg p-5">
+            <h2 className="text-base font-semibold text-sb-text mb-4">Notification preferences</h2>
             <div className="space-y-3">
               {[
                 {
@@ -783,10 +783,10 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
                   checked: preferences?.platformAnnouncements ?? false,
                 },
               ].map(({ key, label, desc, checked }) => (
-                <div key={key} className="flex items-start justify-between gap-4 py-2 border-b border-[#F2F4F7] last:border-0 last:pb-0">
+                <div key={key} className="flex items-start justify-between gap-4 py-2 border-b border-sb-border last:border-0 last:pb-0">
                   <div>
-                    <p className="text-sm font-medium text-[#172033]">{label}</p>
-                    <p className="text-xs text-[#667085] mt-0.5">{desc}</p>
+                    <p className="text-sm font-medium text-sb-text">{label}</p>
+                    <p className="text-xs text-sb-text-2 mt-0.5">{desc}</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer shrink-0">
                     <input
@@ -796,7 +796,7 @@ export default function RecruiterProfile({ navigate: _navigate }: Props) {
                       onChange={() => handleTogglePreference(key)}
                       className="sr-only peer"
                     />
-                    <div className="w-9 h-5 bg-[#E4E7EC] rounded-full peer peer-checked:bg-[#2563EB] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4 peer-disabled:opacity-50" />
+                    <div className="w-9 h-5 bg-sb-surface-2 border border-sb-border rounded-full peer peer-checked:bg-[#2563EB] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4 peer-disabled:opacity-50" />
                   </label>
                 </div>
               ))}

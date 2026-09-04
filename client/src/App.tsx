@@ -86,14 +86,14 @@ export default function App() {
   // Prevent UI flashing before initial authentication resolution
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F7F8FA] flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-sb-bg flex flex-col items-center justify-center p-6">
         <div className="flex items-center gap-2 mb-4">
           <div className="w-9 h-9 bg-[#2563EB] rounded flex items-center justify-center shadow-sm">
             <span className="text-white font-bold text-sm">SB</span>
           </div>
-          <span className="font-bold text-[#163A5F] text-xl tracking-tight">SkillBridge</span>
+          <span className="font-bold text-[#163A5F] dark:text-white text-xl tracking-tight">SkillBridge</span>
         </div>
-        <div className="w-8 h-8 border-3 border-[#BFDBFE] border-t-[#2563EB] rounded-full animate-spin" />
+        <div className="w-8 h-8 border-3 border-sb-border border-t-[#2563EB] rounded-full animate-spin" />
       </div>
     )
   }
