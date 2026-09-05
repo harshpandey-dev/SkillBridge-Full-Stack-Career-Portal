@@ -3,6 +3,7 @@ import type { UserRole } from '../../types'
 import { ShieldIcon } from '../../components/icons'
 import { useAuth } from '../../context/AuthContext'
 import { getApiErrorMessage } from '../../lib/api'
+import SkillBridgeLogo from '../../components/SkillBridgeLogo'
 
 interface Props {
   onLogin: (email: string, role: UserRole) => void
@@ -53,8 +54,9 @@ export default function Login({ onLogin, navigate }: Props) {
       {/* Left panel — navy brand panel, stays as-is */}
       <div className="hidden lg:flex w-2/5 bg-[#163A5F] flex-col justify-between p-12">
         <div>
-          <div className="w-8 h-8 bg-[#2563EB] rounded flex items-center justify-center mb-8">
-            <span className="text-white font-bold text-xs">SB</span>
+          {/* Logo — panel is permanently dark navy, forceTheme="dark" */}
+          <div className="mb-8">
+            <SkillBridgeLogo variant="wordmark" iconSize={36} forceTheme="dark" />
           </div>
           <h2 className="text-3xl font-bold text-white leading-tight mb-4">
             Your career journey starts here

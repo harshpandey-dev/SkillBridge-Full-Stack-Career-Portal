@@ -3,6 +3,7 @@ import type { UserRole } from './types'
 import { useAuth } from './context/AuthContext'
 import PublicLayout from './components/PublicLayout'
 import AppLayout from './components/AppLayout'
+import SkillBridgeLogo from './components/SkillBridgeLogo'
 import Landing from './pages/public/Landing'
 import Jobs from './pages/public/Jobs'
 import JobDetails from './pages/public/JobDetails'
@@ -87,13 +88,9 @@ export default function App() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-sb-bg flex flex-col items-center justify-center p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-9 h-9 bg-[#2563EB] rounded flex items-center justify-center shadow-sm">
-            <span className="text-white font-bold text-sm">SB</span>
-          </div>
-          <span className="font-bold text-[#163A5F] dark:text-white text-xl tracking-tight">SkillBridge</span>
-        </div>
-        <div className="w-8 h-8 border-3 border-sb-border border-t-[#2563EB] rounded-full animate-spin" />
+        {/* Full logo on loading screen — premium branding moment */}
+        <SkillBridgeLogo variant="full" iconSize={56} className="mb-8" />
+        <div className="w-7 h-7 border-[3px] border-sb-border border-t-[#2563EB] rounded-full animate-spin" />
       </div>
     )
   }

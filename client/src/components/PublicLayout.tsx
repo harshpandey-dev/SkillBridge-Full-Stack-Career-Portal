@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import type { NavUser } from '../types'
 import { MenuIcon, XIcon, SunIcon, MoonIcon } from './icons'
 import { useTheme } from '../context/ThemeContext'
+import SkillBridgeLogo from './SkillBridgeLogo'
 
 interface Props {
   user: NavUser | null
@@ -55,15 +56,13 @@ export default function PublicLayout({ user, currentPage, navigate, onLogout, ch
       <header className="bg-sb-surface border-b border-sb-border sticky top-0 z-40" ref={menuRef}>
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
 
-          {/* Logo */}
+          {/* Logo — auto-adapts to document theme */}
           <button
             onClick={() => handleNav('landing')}
-            className="flex items-center gap-2 shrink-0"
+            className="flex items-center shrink-0"
+            aria-label="Go to homepage"
           >
-            <div className="w-8 h-8 bg-[#163A5F] rounded flex items-center justify-center">
-              <span className="text-white font-bold text-sm tracking-tight">SB</span>
-            </div>
-            <span className="font-bold text-[#163A5F] dark:text-white text-lg tracking-tight">SkillBridge</span>
+            <SkillBridgeLogo variant="wordmark" iconSize={32} />
           </button>
 
           {/* Desktop Nav Links */}
@@ -222,11 +221,9 @@ export default function PublicLayout({ user, currentPage, navigate, onLogout, ch
         <div className="max-w-[1280px] mx-auto px-6 py-12">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-10">
             <div className="col-span-2">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 bg-[#2563EB] rounded flex items-center justify-center">
-                  <span className="text-white font-bold text-xs">SB</span>
-                </div>
-                <span className="font-bold text-white text-base">SkillBridge</span>
+              {/* Footer logo — footer is always dark, forceTheme="dark" */}
+              <div className="mb-3">
+                <SkillBridgeLogo variant="wordmark" iconSize={28} forceTheme="dark" />
               </div>
               <p className="text-sm text-[#94A3B8] leading-relaxed max-w-xs">
                 Connecting ambitious students with top employers. Your career journey starts here.

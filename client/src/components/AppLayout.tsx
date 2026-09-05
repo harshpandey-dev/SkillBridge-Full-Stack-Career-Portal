@@ -7,6 +7,7 @@ import {
 } from './icons'
 import { useNotifications } from '../context/NotificationContext'
 import { useTheme } from '../context/ThemeContext'
+import SkillBridgeLogo from './SkillBridgeLogo'
 
 interface Props {
   user: NavUser
@@ -164,13 +165,10 @@ export default function AppLayout({ user, currentPage, navigate, onLogout, child
   // Sidebar content — shared between desktop fixed and mobile drawer
   const SidebarContent = (
     <>
-      {/* Logo */}
+      {/* Logo — always on dark navy sidebar, forceTheme="dark" */}
       <div className="h-16 flex items-center px-5 border-b border-[rgba(255,255,255,0.08)]">
-        <button onClick={() => handleNavClick('landing')} className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-[#2563EB] rounded flex items-center justify-center">
-            <span className="text-white font-bold text-xs">SB</span>
-          </div>
-          <span className="font-bold text-white text-base tracking-tight">SkillBridge</span>
+        <button onClick={() => handleNavClick('landing')} className="flex items-center">
+          <SkillBridgeLogo variant="wordmark" iconSize={28} forceTheme="dark" />
         </button>
       </div>
 
