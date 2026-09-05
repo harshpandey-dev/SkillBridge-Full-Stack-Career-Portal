@@ -89,7 +89,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-sb-bg flex flex-col items-center justify-center p-6">
         {/* Full logo on loading screen — premium branding moment */}
-        <SkillBridgeLogo variant="full" iconSize={56} className="mb-8" />
+        <SkillBridgeLogo variant="full" className="mb-8" />
         <div className="w-7 h-7 border-[3px] border-sb-border border-t-[#2563EB] rounded-full animate-spin" />
       </div>
     )
